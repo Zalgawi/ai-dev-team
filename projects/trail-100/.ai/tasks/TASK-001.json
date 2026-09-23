@@ -1,0 +1,17 @@
+{
+  "id": "TASK-001",
+  "title": "Build the Trail 100 peak tracker",
+  "description": "Create the initial Trail 100 web application that allows users to view the 100 peaks and track which peaks they have completed.",
+  "status": "in_progress",
+  "assignedTo": "developer",
+  "priority": "high",
+  "acceptanceCriteria": [
+    "The application can be started locally",
+    "The Trail 100 peak dataset is loaded from data/peaks.json",
+    "All 100 peaks are displayed",
+    "Each peak shows its name, region, and height",
+    "A user can mark a peak as completed",
+    "Completed peaks are visually distinguishable",
+    "The application passes the relevant tests"
+  ]
+}

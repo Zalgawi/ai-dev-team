@@ -1,0 +1,16 @@
+{
+  "project": "trail-100",
+  "phase": "planning",
+  "iteration": 0,
+  "status": "completed",
+  "currentTask": null,
+  "agents": {
+    "manager": "idle",
+    "developer": "idle",
+    "qa": "idle"
+  },
+  "qa": {
+    "status": "not_started",
+    "issues": []
+  }
+}

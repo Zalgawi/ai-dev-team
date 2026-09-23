@@ -1,0 +1,271 @@
+:root {
+    --primary-color: #2c5f2d;
+    --secondary-color: #97bc62;
+    --background-color: #f4f1ea;
+    --card-background: #ffffff;
+    --text-color: #2b2b2b;
+    --muted-color: #666666;
+    --border-color: #d8d2c4;
+    --completed-color: #4a7c59;
+    --completed-bg: #e8f0e8;
+    --remaining-color: #8b6f47;
+    --shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: var(--background-color);
+    color: var(--text-color);
+    line-height: 1.6;
+}
+
+header {
+    background-color: var(--primary-color);
+    color: white;
+    padding: 2rem 1rem;
+    text-align: center;
+}
+
+header h1 {
+    font-size: 2.2rem;
+    margin-bottom: 0.5rem;
+}
+
+header p {
+    font-size: 1.1rem;
+    opacity: 0.9;
+}
+
+main {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 2rem 1rem;
+}
+
+section {
+    margin-bottom: 2rem;
+}
+
+h2 {
+    color: var(--primary-color);
+    margin-bottom: 1rem;
+    font-size: 1.5rem;
+}
+
+.progress-container {
+    background-color: var(--card-background);
+    border-radius: 10px;
+    padding: 1.5rem;
+    box-shadow: var(--shadow);
+}
+
+.progress-bar {
+    background-color: var(--border-color);
+    border-radius: 20px;
+    height: 24px;
+    overflow: hidden;
+    margin: 1rem 0;
+}
+
+.progress-fill {
+    background-color: var(--secondary-color);
+    height: 100%;
+    width: 0%;
+    transition: width 0.3s ease;
+}
+
+#progress-text {
+    font-weight: bold;
+    color: var(--primary-color);
+}
+
+#filters {
+    background-color: var(--card-background);
+    border-radius: 10px;
+    padding: 1.5rem;
+    box-shadow: var(--shadow);
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    align-items: center;
+}
+
+#filters h2 {
+    width: 100%;
+}
+
+.filter-group {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+label {
+    font-weight: bold;
+}
+
+select,
+button {
+    padding: 0.5rem 1rem;
+    border: 1px solid var(--border-color);
+    border-radius: 5px;
+    background-color: white;
+    color: var(--text-color);
+    font-size: 1rem;
+}
+
+button {
+    cursor: pointer;
+    background-color: var(--primary-color);
+    color: white;
+    border: none;
+    transition: background-color 0.2s ease;
+}
+
+button:hover {
+    background-color: #1e421f;
+}
+
+button:focus,
+select:focus {
+    outline: 2px solid var(--secondary-color);
+    outline-offset: 2px;
+}
+
+.peaks-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 1rem;
+}
+
+.peak-card {
+    background-color: var(--card-background);
+    border-radius: 10px;
+    padding: 1.25rem;
+    box-shadow: var(--shadow);
+    border-left: 5px solid var(--remaining-color);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.peak-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.peak-card.completed {
+    border-left-color: var(--completed-color);
+    background-color: var(--completed-bg);
+}
+
+.peak-number {
+    color: var(--muted-color);
+    font-size: 0.9rem;
+    font-weight: bold;
+}
+
+.peak-name {
+    font-size: 1.25rem;
+    margin: 0.25rem 0;
+    color: var(--primary-color);
+}
+
+.peak-region {
+    color: var(--muted-color);
+    margin-bottom: 0.75rem;
+}
+
+.peak-height {
+    font-weight: bold;
+    margin-bottom: 1rem;
+}
+
+.peak-status {
+    font-size: 0.9rem;
+    font-weight: bold;
+    margin-bottom: 0.75rem;
+}
+
+.peak-status.completed {
+    color: var(--completed-color);
+}
+
+.peak-status.remaining {
+    color: var(--remaining-color);
+}
+
+.toggle-button {
+    width: 100%;
+}
+
+.toggle-button.mark-complete {
+    background-color: var(--primary-color);
+}
+
+.toggle-button.mark-complete:hover {
+    background-color: #1e421f;
+}
+
+.toggle-button.mark-remaining {
+    background-color: var(--remaining-color);
+}
+
+.toggle-button.mark-remaining:hover {
+    background-color: #6b5433;
+}
+
+.loading {
+    grid-column: 1 / -1;
+    text-align: center;
+    padding: 2rem;
+    color: var(--muted-color);
+    font-size: 1.1rem;
+}
+
+.empty-state {
+    grid-column: 1 / -1;
+    text-align: center;
+    padding: 2rem;
+    color: var(--muted-color);
+}
+
+footer {
+    text-align: center;
+    padding: 1.5rem;
+    color: var(--muted-color);
+    font-size: 0.9rem;
+}
+
+@media (max-width: 600px) {
+    header h1 {
+        font-size: 1.8rem;
+    }
+
+    main {
+        padding: 1rem;
+    }
+
+    .peaks-grid {
+        grid-template-columns: 1fr;
+    }
+
+    #filters {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .filter-group {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    select,
+    button {
+        width: 100%;
+    }
+}

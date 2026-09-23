@@ -13,7 +13,7 @@ Peak data should be stored separately from UI components.
 
 Do not hard-code the peak list throughout the application.
 
-Refer to the list of 100 in trail-100-list.txt (https://www.livefortheoutdoors.com/trail-100/)
+Refer to data/peaks.json
 
 ## User data
 
