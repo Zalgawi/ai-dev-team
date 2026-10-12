@@ -5,6 +5,11 @@ export type AgentStatus =
   | "failed"
   | "blocked";
 
+export type QAOutcome =
+  | "not_run"
+  | "passed"
+  | "failed";
+
 export interface AgentContext {
   projectPath: string;
   taskId?: string;
@@ -17,6 +22,7 @@ export interface AgentResult {
   summary: string;
   filesChanged?: string[];
   issues?: string[];
+  qaOutcome?: QAOutcome;
   nextAction?: string;
 }
 

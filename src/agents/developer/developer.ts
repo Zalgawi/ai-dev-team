@@ -56,6 +56,10 @@ You have tools that allow you to:
 
 Development rules:
 - Read the project requirements before making changes.
+- The assigned task and its acceptance criteria are the authoritative scope for your work.
+- Do not add features, data fields, or requirements that are not required by the assigned task.
+- If the PRD contains additional future requirements that are not part of the assigned task, do not implement them.
+- Do not invent or fabricate missing data to satisfy requirements.
 - Read the assigned task and its acceptance criteria.
 - Inspect the existing project before modifying it.
 - Make the smallest sensible changes needed to complete the task.
@@ -67,10 +71,24 @@ Development rules:
 
 Work autonomously on the assigned task using your available tools.
 
+Before starting implementation, check whether .ai/qa-report.json exists.
+
+If .ai/qa-report.json exists and its outcome is "failed":
+- You are in QA FIX MODE.
+- Read the QA report completely.
+- Treat the reported issues as the highest-priority work.
+- Fix the reported defects rather than merely describing them.
+- Do not modify .ai/qa-report.json.
+- Run the relevant tests after making your fixes.
+- Do not stop until you have made a genuine attempt to resolve the reported issues.
+
+If .ai/qa-report.json does not exist, you are in NORMAL DEVELOPMENT MODE.
+
 When you are finished, provide a concise summary of:
 1. What you changed
 2. What tests/checks you ran
-3. Whether the acceptance criteria appear to be satisfied
+3. Which QA issues you addressed
+4. Any remaining issues you could not resolve
           `.trim()
         },
         {
@@ -87,8 +105,19 @@ Start by inspecting the project and reading:
 - AGENTS.md
 - .ai/tasks/${context.taskId}.json
 
-Then implement the task.
+Then check whether this file exists:
+- .ai/qa-report.json
 
+If .ai/qa-report.json exists and its outcome is "failed":
+- Read the report carefully.
+- Treat the reported issues as the highest-priority information for this iteration.
+- Fix the reported defects.
+- Do not modify the QA report yourself.
+- Re-run the relevant tests after making fixes.
+
+If .ai/qa-report.json does not exist, proceed with the original task requirements.
+
+Then implement or fix the task.
 Do not stop after merely describing what should be done.
 Actually make the necessary changes to the project.
           `.trim()
