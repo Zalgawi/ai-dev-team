@@ -12,12 +12,11 @@ export async function runCommand(
   exitCode: number;
 }> {
   try {
-    const {
-      stdout,
-      stderr
-    } = await execAsync(command, {
+    const { stdout, stderr } = await execAsync(command, {
       cwd,
-      maxBuffer: 10 * 1024 * 1024
+      maxBuffer: 10 * 1024 * 1024,
+      timeout: 60_000,
+      killSignal: "SIGTERM"
     });
 
     return {
@@ -28,8 +27,14 @@ export async function runCommand(
   } catch (error: any) {
     return {
       stdout: error.stdout ?? "",
-      stderr: error.stderr ?? "",
-      exitCode: error.code ?? 1
+      stderr:
+        error.stderr ??
+        error.message ??
+        "Command timed out or failed.",
+      exitCode:
+        error.code === "ETIMEDOUT"
+          ? 124
+          : error.code ?? 1
     };
   }
 }

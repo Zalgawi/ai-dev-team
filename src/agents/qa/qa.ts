@@ -4,168 +4,195 @@ import type {
   AgentResult
 } from "../types.js";
 
-import { readProjectFile } from "../../tools/filesystem.js";
-
-interface Peak {
-  id: string;
-  number: number;
-  name: string;
-  region: string;
-  heightM: number;
-}
+import { runAgent } from "../../llm/client.js";
+import { qaTools } from "../../llm/tools.js";
+import { writeProjectFile } from "../../tools/filesystem.js";
 
 export class QAAgent implements Agent {
   name = "QA";
 
-  async run(context: AgentContext): Promise<AgentResult> {
-    console.log(`🧪 QA is starting...`);
+  async run(
+    context: AgentContext
+  ): Promise<AgentResult> {
+    console.log("🧪 QA agent is starting...");
 
     if (!context.taskId) {
       return {
         agent: this.name,
         status: "failed",
-        summary: "QA could not find a task ID."
+        summary: "QA could not find a task ID.",
+        qaOutcome: "failed"
       };
     }
 
-    const task = await readProjectFile(
+    const response = await runAgent(
       context.projectPath,
-      `.ai/tasks/${context.taskId}.json`
-    );
+      [
+        {
+          role: "system",
+          content: `
+You are the QA agent in an AI software development team.
 
-    const taskData = JSON.parse(task);
+Your job is to independently verify the developer's work.
 
-    console.log(`   Checking task: ${taskData.id}`);
-    console.log(`   Title: ${taskData.title}`);
-    console.log(
-      `   Acceptance criteria: ${taskData.acceptanceCriteria.length}`
-    );
+You are READ-ONLY:
+- You may read files.
+- You may list files.
+- You may run tests and safe verification commands.
+- You MUST NOT use write_file.
+- You MUST NOT modify any project files.
+- You MUST NOT fix bugs yourself.
 
-    const peaksFile = await readProjectFile(
-      context.projectPath,
-      "data/peaks.json"
-    );
+Follow this verification process EXACTLY and do not repeat steps:
 
-    const cleanPeaksFile = peaksFile.replace(/^\uFEFF/, "");
+STEP 1 — Read requirements:
+- PRD.md
+- AGENTS.md
+- .ai/tasks/${context.taskId}.json
 
-    let peaks: Peak[];
+STEP 2 — Inspect implementation:
+Read only the files directly relevant to the task.
+For TASK-001, inspect:
+- package.json
+- src/index.html
+- src/app.js
+- src/style.css
+- src/server.js
+- data/peaks.json
+- tests/run-tests.js
 
-    try {
-      peaks = JSON.parse(cleanPeaksFile);
-    } catch (error) {
-      console.error("❌ QA failed to parse peaks.json");
-      console.error(error);
+Do NOT repeatedly list the project directory.
 
-      return {
-        agent: this.name,
-        status: "failed",
-        summary: "QA could not parse data/peaks.json.",
-        issues: ["data/peaks.json contains invalid JSON."]
-      };
-    }
+STEP 3 — Run the test suite:
+Run:
+npm test
 
-    console.log(`🔍 QA inspected Trail 100 data.`);
-    console.log(`   Peak count: ${peaks.length}`);
+If the command reports zero tests, that is a QA FAILURE.
+Do not assume zero tests means success.
 
-    if (!Array.isArray(peaks)) {
-      return {
-        agent: this.name,
-        status: "failed",
-        summary: "QA found that peaks.json does not contain an array.",
-        issues: ["Trail 100 dataset is not an array."]
-      };
-    }
+STEP 4 — Verify acceptance criteria:
+Compare the implementation and test results against every acceptance criterion in the task.
 
-    if (peaks.length !== 100) {
-      return {
-        agent: this.name,
-        status: "failed",
-        summary: `QA found ${peaks.length} peaks instead of 100.`,
-        issues: [`Expected 100 peaks but found ${peaks.length}.`]
-      };
-    }
+STEP 5 — Stop and report.
+Do not perform additional exploratory tool calls once you have enough evidence.
 
-    console.log("   ✓ Dataset contains exactly 100 peaks.");
+Your final response MUST use exactly this structure:
 
-    const requiredFields = [
-      "id",
-      "number",
-      "name",
-      "region",
-      "heightM"
-    ];
+Your final response MUST use exactly this structure.
 
-    const issues: string[] = [];
+Do NOT use Markdown headings.
+Do NOT add text before or after this structure.
+Do NOT change the spelling of any labels.
 
-    for (const peak of peaks) {
-      for (const field of requiredFields) {
-        if (!(field in peak)) {
-          issues.push(
-            `Peak ${peak.number ?? "unknown"} is missing "${field}".`
-          );
+Summary:
+<concise summary>
+
+Issues:
+- <issue>
+- <issue>
+
+Tests:
+- <test/check>
+- <test/check>
+
+QA OUTCOME: PASSED
+
+OR
+
+QA OUTCOME: FAILED
+
+The QA OUTCOME line MUST be the final line of your response.
+
+If there are no issues, write:
+Issues:
+- None
+
+If any acceptance criterion cannot be verified, or any test fails, use:
+QA OUTCOME: FAILED
+
+You are an independent QA gate.
+You must not modify the project.
+`.trim()
         }
-      }
-    }
-
-    if (issues.length > 0) {
-      console.log("❌ QA found missing fields.");
-
-      return {
-        agent: this.name,
-        status: "failed",
-        summary: `QA found ${issues.length} data validation issue(s).`,
-        issues
-      };
-    }
-
-    console.log("   ✓ Every peak contains all required fields.");
-
-    const ids = peaks.map((peak) => peak.id);
-    const numbers = peaks.map((peak) => peak.number);
-
-    const duplicateIds = ids.filter(
-      (id, index) => ids.indexOf(id) !== index
+      ],
+      7,
+      qaTools
     );
 
-    const duplicateNumbers = numbers.filter(
-      (number, index) => numbers.indexOf(number) !== index
-    );
+    console.log("\n🤖 QA final response:");
+    console.log(response);
 
-    if (duplicateIds.length > 0) {
-      issues.push(
-        `Duplicate peak IDs found: ${[
-          ...new Set(duplicateIds)
-        ].join(", ")}`
-      );
-    }
+const outcomeMatch = response.match(
+  /QA OUTCOME:\s*(PASSED|FAILED)\s*$/im
+);
 
-    if (duplicateNumbers.length > 0) {
-      issues.push(
-        `Duplicate peak numbers found: ${[
-          ...new Set(duplicateNumbers)
-        ].join(", ")}`
-      );
-    }
+const outcome =
+  outcomeMatch?.[1]?.toLowerCase() ?? "failed";
 
-    if (issues.length > 0) {
-      console.log("❌ QA found duplicate identifiers.");
+const issuesSection =
+  response.match(
+    /Issues:\s*([\s\S]*?)(?=\n\s*Tests:|\s*$)/i
+  )?.[1] ?? "";
 
-      return {
-        agent: this.name,
-        status: "failed",
-        summary: `QA found ${issues.length} data integrity issue(s).`,
-        issues
-      };
-    }
+const testsSection =
+  response.match(
+    /Tests:\s*([\s\S]*?)(?=\n\s*QA OUTCOME:|\s*$)/i
+  )?.[1] ?? "";
 
-    console.log("   ✓ All peak IDs are unique.");
-    console.log("   ✓ All peak numbers are unique.");
+const issues = issuesSection
+  .split("\n")
+  .map(line => line.trim())
+  .filter(line => line.startsWith("- "))
+  .map(line => line.slice(2).trim());
 
-    return {
-      agent: this.name,
-      status: "completed",
-      summary:
-        "QA verified all 100 peaks and confirmed the dataset structure and identifiers are valid."
-    };
+const tests = testsSection
+  .split("\n")
+  .map(line => line.trim())
+  .filter(line => line.startsWith("- "))
+  .map(line => line.slice(2).trim());
+
+await writeProjectFile(
+  context.projectPath,
+  ".ai/qa-report.json",
+  JSON.stringify(
+    {
+      taskId: context.taskId,
+      outcome,
+      summary: response,
+      issues,
+      tests
+    },
+    null,
+    2
+  )
+);
+
+if (!outcomeMatch) {
+  return {
+    agent: this.name,
+    status: "failed",
+    summary: response,
+    qaOutcome: "failed",
+    issues: [
+      "QA report did not contain a valid final QA OUTCOME."
+    ]
+  };
+}
+
+if (outcome === "passed") {
+  return {
+    agent: this.name,
+    status: "completed",
+    summary: response,
+    qaOutcome: "passed"
+  };
+}
+
+return {
+  agent: this.name,
+  status: "failed",
+  summary: response,
+  qaOutcome: "failed"
+};
   }
 }

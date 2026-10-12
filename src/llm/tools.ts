@@ -44,8 +44,8 @@ export const llmTools = [
     type: "function" as const,
     function: {
       name: "write_file",
-      description:
-        "Write text content to a file in the current project.",
+description:
+  "Write the complete contents of a text file. Do not use edit_file or patch operations. When modifying an existing file, first read it, then use this tool with the complete replacement content.",
       parameters: {
         type: "object",
         properties: {
@@ -56,8 +56,8 @@ export const llmTools = [
           },
           content: {
             type: "string",
-            description:
-              "The complete text content to write to the file."
+description:
+  "The COMPLETE replacement contents of the file. Never provide a partial edit, patch, or diff.",
           }
         },
         required: ["filePath", "content"],
@@ -86,6 +86,12 @@ export const llmTools = [
     }
   }
 ];
+
+export const qaTools = llmTools.filter(
+  (tool) =>
+    tool.function.name === "read_file" ||
+    tool.function.name === "run_command"
+);
 
 export async function executeTool(
   name: string,
@@ -132,8 +138,19 @@ export async function executeTool(
       });
     }
 
-    return `Unknown tool: ${name}`;
-  } catch (error) {
+return JSON.stringify({
+  error: true,
+  tool: name,
+  message: `Unknown tool: ${name}`,
+  availableTools: [
+    "read_file",
+    "list_files",
+    "write_file",
+    "run_command"
+  ],
+  instruction:
+    "Use only the available tools. To modify a file, use write_file with the complete file contents."
+});  } catch (error) {
     const message =
       error instanceof Error
         ? error.message
