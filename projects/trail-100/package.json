@@ -1,10 +1,11 @@
 {
   "name": "trail-100-tracker",
   "version": "1.0.0",
+  "type": "module",
   "description": "A personal web application for tracking progress through the Live for the Outdoors Trail 100 challenge",
-  "main": "src/app.js",
+  "main": "src/server.js",
   "scripts": {
-    "start": "node src/app.js",
+    "start": "node src/server.js",
     "build": "tsc",
     "test": "node tests/run-tests.js"
   },

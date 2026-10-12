@@ -1,7 +1,11 @@
-const http = require('http');
-const fs = require('fs');
-const path = require('path');
+import http from 'http';
+import fs from 'fs';
+import path from 'path';
+import { fileURLToPath } from 'url';
 
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+const ROOT_DIR = path.join(__dirname, '..');
 const PORT = process.env.PORT || 3000;
 
 const MIME_TYPES = {
@@ -15,7 +19,12 @@ const MIME_TYPES = {
 };
 
 const server = http.createServer((req, res) => {
-  let filePath = path.join(__dirname, req.url === '/' ? 'index.html' : req.url);
+  let filePath;
+  if (req.url === '/' || req.url === '') {
+    filePath = path.join(ROOT_DIR, 'src', 'index.html');
+  } else {
+    filePath = path.join(ROOT_DIR, req.url);
+  }
 
   const extname = path.extname(filePath);
   const contentType = MIME_TYPES[extname] || 'application/octet-stream';
