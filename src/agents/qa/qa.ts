@@ -49,15 +49,8 @@ STEP 1 — Read requirements:
 - .ai/tasks/${context.taskId}.json
 
 STEP 2 — Inspect implementation:
-Read only the files directly relevant to the task.
-For TASK-001, inspect:
-- package.json
-- src/index.html
-- src/app.js
-- src/style.css
-- src/server.js
-- data/peaks.json
-- tests/run-tests.js
+List the project directory once, then read only the files directly
+relevant to the task (source, data, and tests it touches).
 
 Do NOT repeatedly list the project directory.
 
