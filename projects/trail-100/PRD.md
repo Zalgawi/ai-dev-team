@@ -7,7 +7,7 @@ Live for the Outdoors Trail 100 challenge.
 
 The challenge consists of 100 UK peaks.
 
-Refer to the list of 100 in trail-100-list.txt (https://www.livefortheoutdoors.com/trail-100/)
+Refer to data/peaks.json
 
 ## Primary goal
 

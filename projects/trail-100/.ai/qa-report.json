@@ -1,0 +1,14 @@
+{
+  "taskId": "TASK-001",
+  "outcome": "failed",
+  "summary": "\n\nSummary:\nThe implementation provides a functional Trail 100 tracker with peak data, completion tracking, and responsive UI. However, the automated test suite is broken and reports zero tests, which is a critical QA failure. Additionally, the PRD requirement to display grid references is not met.\n\nIssues:\n- The test runner (tests/run-tests.js) does not execute any tests because the `describe` callbacks are never invoked, resulting in zero tests being run. This violates the acceptance criterion \"The application passes the relevant tests.\"\n- The application does not display grid references for peaks, which is an acceptance criterion in PRD.md (though not explicitly in TASK-001).\n- The test file also uses `beforeAll` before it is defined, although this does not currently cause an error due to the runner bug.\n\nTests:\n- npm test executed; output shows Total: 0, Passed: 0, Failed: 0.\n- No individual test results are available because the test framework is non-functional.\n\nQA OUTCOME: FAILED",
+  "issues": [
+    "The test runner (tests/run-tests.js) does not execute any tests because the `describe` callbacks are never invoked, resulting in zero tests being run. This violates the acceptance criterion \"The application passes the relevant tests.\"",
+    "The application does not display grid references for peaks, which is an acceptance criterion in PRD.md (though not explicitly in TASK-001).",
+    "The test file also uses `beforeAll` before it is defined, although this does not currently cause an error due to the runner bug."
+  ],
+  "tests": [
+    "npm test executed; output shows Total: 0, Passed: 0, Failed: 0.",
+    "No individual test results are available because the test framework is non-functional."
+  ]
+}

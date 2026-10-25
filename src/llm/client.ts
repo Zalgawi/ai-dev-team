@@ -1,0 +1,132 @@
+import {
+  query,
+  type Options,
+  type SDKResultMessage
+} from "@anthropic-ai/claude-agent-sdk";
+
+import {
+  llmTools,
+  createToolServer,
+  qualifiedToolName,
+  TOOL_SERVER_NAME,
+  type ToolName
+} from "./tools.js";
+
+// Runs on the Claude Code installation's login (claude.ai subscription or
+// whatever `claude auth status` reports), so no API key is needed.
+// Set CLAUDE_MODEL to override the Claude Code default model.
+const model = process.env.CLAUDE_MODEL;
+
+export interface AgentPrompt {
+  system: string;
+  prompt: string;
+}
+
+function baseOptions(
+  projectPath: string,
+  system: string
+): Options {
+  return {
+    cwd: projectPath,
+    systemPrompt: system,
+    // Don't load the user's Claude Code settings, hooks, or CLAUDE.md files;
+    // agents only get what is configured here.
+    settingSources: [],
+    // Anything not explicitly allowed is denied rather than prompting.
+    permissionMode: "dontAsk",
+    ...(model ? { model } : {})
+  };
+}
+
+async function collectResult(
+  run: ReturnType<typeof query>
+): Promise<{ result: SDKResultMessage; sessionId: string }> {
+  // One model response can arrive as several assistant messages sharing an id.
+  const seenResponses = new Set<string>();
+
+  for await (const message of run) {
+    if (message.type === "assistant") {
+      if (!seenResponses.has(message.message.id)) {
+        seenResponses.add(message.message.id);
+
+        console.log(`🧠 LLM iteration ${seenResponses.size}`);
+      }
+
+      for (const block of message.message.content) {
+        if (block.type === "tool_use") {
+          console.log(
+            `🔧 Tool requested: ${block.name.replace(`mcp__${TOOL_SERVER_NAME}__`, "")}`
+          );
+        }
+      }
+    }
+
+    if (message.type === "result") {
+      return {
+        result: message,
+        sessionId: message.session_id
+      };
+    }
+  }
+
+  throw new Error("Claude session ended without a result.");
+}
+
+export async function runAgent(
+  projectPath: string,
+  { system, prompt }: AgentPrompt,
+  maxIterations = 12,
+  tools: ToolName[] = llmTools
+): Promise<string> {
+  const { result, sessionId } = await collectResult(
+    query({
+      prompt,
+      options: {
+        ...baseOptions(projectPath, system),
+        // Disable Claude Code's built-in tools; only the project tools are available.
+        tools: [],
+        mcpServers: {
+          [TOOL_SERVER_NAME]: createToolServer(projectPath, tools)
+        },
+        allowedTools: tools.map(qualifiedToolName),
+        maxTurns: maxIterations
+      }
+    })
+  );
+
+  if (result.subtype === "success") {
+    if (result.is_error) {
+      throw new Error(`Claude returned an error: ${result.result}`);
+    }
+
+    return result.result;
+  }
+
+  if (result.subtype !== "error_max_turns") {
+    throw new Error(
+      `Claude run failed (${result.subtype}): ${result.errors.join("; ")}`
+    );
+  }
+
+  console.log(
+    "⚠️ LLM reached the tool iteration limit. Requesting final report..."
+  );
+
+  // Resume the same session with no tools so it must answer from what it has gathered.
+  const { result: finalResult } = await collectResult(
+    query({
+      prompt:
+        "You have reached your tool-use limit. Do not call any more tools. Based only on the evidence gathered so far, provide your final response now. Be explicit about any uncertainty or unverified acceptance criteria.",
+      options: {
+        ...baseOptions(projectPath, system),
+        resume: sessionId,
+        tools: [],
+        maxTurns: 1
+      }
+    })
+  );
+
+  return finalResult.subtype === "success"
+    ? finalResult.result
+    : "";
+}

@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trail 100 Tracker</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header>
+        <h1>Trail 100 Tracker</h1>
+        <p>Tracking progress through the Live for the Outdoors Trail 100 challenge</p>
+    </header>
+
+    <main>
+        <section id="progress-summary">
+            <div class="progress-container">
+                <h2>Overall Progress</h2>
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progress-fill"></div>
+                </div>
+                <p id="progress-text">0% complete (0/100 peaks)</p>
+            </div>
+        </section>
+
+        <section id="filters">
+            <h2>Filter Peaks</h2>
+            <div class="filter-group">
+                <label for="region-filter">Region:</label>
+                <select id="region-filter">
+                    <option value="all">All Regions</option>
+                </select>
+            </div>
+            <div class="filter-group">
+                <label for="status-filter">Status:</label>
+                <select id="status-filter">
+                    <option value="all">All Peaks</option>
+                    <option value="completed">Completed</option>
+                    <option value="remaining">Remaining</option>
+                </select>
+            </div>
+            <button id="reset-filters">Reset Filters</button>
+        </section>
+
+        <section id="peaks-grid">
+            <h2>Peaks</h2>
+            <div id="peaks-container" class="peaks-grid">
+                <!-- Peaks will be loaded here dynamically -->
+                <div class="loading">Loading peaks...</div>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <p>&copy; 2026 Trail 100 Tracker. Data sourced from Live for the Outdoors Trail 100 challenge.</p>
+    </footer>
+
+    <script type="module" src="app.js"></script>
+</body>
+</html>
