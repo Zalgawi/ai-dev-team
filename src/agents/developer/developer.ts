@@ -27,10 +27,8 @@ export class DeveloperAgent implements Agent {
 
     const response = await runAgent(
       context.projectPath,
-      [
-        {
-          role: "system",
-          content: `
+      {
+        system: `
 You are the Developer agent in an AI software development team.
 
 You are working INSIDE the assigned project directory.
@@ -89,11 +87,8 @@ When you are finished, provide a concise summary of:
 2. What tests/checks you ran
 3. Which QA issues you addressed
 4. Any remaining issues you could not resolve
-          `.trim()
-        },
-        {
-          role: "user",
-          content: `
+          `.trim(),
+        prompt: `
 You have been assigned task ${context.taskId}.
 
 You are already inside the project root.
@@ -121,8 +116,7 @@ Then implement or fix the task.
 Do not stop after merely describing what should be done.
 Actually make the necessary changes to the project.
           `.trim()
-        }
-      ]
+      }
     );
 
     console.log(

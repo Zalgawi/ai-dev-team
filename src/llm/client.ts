@@ -1,99 +1,132 @@
-import OpenAI from "openai";
+import {
+  query,
+  type Options,
+  type SDKResultMessage
+} from "@anthropic-ai/claude-agent-sdk";
 
-import { openrouter } from "./openrouter.js";
 import {
   llmTools,
-  executeTool
+  createToolServer,
+  qualifiedToolName,
+  TOOL_SERVER_NAME,
+  type ToolName
 } from "./tools.js";
 
-type LLMMessage =
-  OpenAI.Chat.Completions.ChatCompletionMessageParam;
+// Runs on the Claude Code installation's login (claude.ai subscription or
+// whatever `claude auth status` reports), so no API key is needed.
+// Set CLAUDE_MODEL to override the Claude Code default model.
+const model = process.env.CLAUDE_MODEL;
 
-export async function runAgent(
-  projectPath: string,
-  messages: LLMMessage[],
-  maxIterations = 12,
-  tools = llmTools
-): Promise<string> {
-  const conversation: LLMMessage[] = [...messages];
-
-for (let iteration = 0; iteration < maxIterations; iteration++) {
-      console.log(
-      `🧠 LLM iteration ${iteration + 1}`
-    );
-
-    const response =
-      await openrouter.chat.completions.create({
-        model: "openrouter/free",
-        messages: conversation,
-        tools,
-        tool_choice: "auto",
-        max_tokens: 4000
-      });
-
-const message =
-  response.choices?.[0]?.message;
-
-if (!message) {
-  throw new Error(
-    `LLM returned no message. Response: ${JSON.stringify(response)}`
-  );
+export interface AgentPrompt {
+  system: string;
+  prompt: string;
 }
-    conversation.push(message);
 
-    if (!message.tool_calls?.length) {
-      return message.content ?? "";
-    }
+function baseOptions(
+  projectPath: string,
+  system: string
+): Options {
+  return {
+    cwd: projectPath,
+    systemPrompt: system,
+    // Don't load the user's Claude Code settings, hooks, or CLAUDE.md files;
+    // agents only get what is configured here.
+    settingSources: [],
+    // Anything not explicitly allowed is denied rather than prompting.
+    permissionMode: "dontAsk",
+    ...(model ? { model } : {})
+  };
+}
 
-    for (const toolCall of message.tool_calls) {
-      if (toolCall.type !== "function") {
-        throw new Error(
-          `Unsupported tool call type: ${toolCall.type}`
-        );
+async function collectResult(
+  run: ReturnType<typeof query>
+): Promise<{ result: SDKResultMessage; sessionId: string }> {
+  // One model response can arrive as several assistant messages sharing an id.
+  const seenResponses = new Set<string>();
+
+  for await (const message of run) {
+    if (message.type === "assistant") {
+      if (!seenResponses.has(message.message.id)) {
+        seenResponses.add(message.message.id);
+
+        console.log(`🧠 LLM iteration ${seenResponses.size}`);
       }
 
-      console.log(
-        `🔧 Tool requested: ${toolCall.function.name}`
-      );
+      for (const block of message.message.content) {
+        if (block.type === "tool_use") {
+          console.log(
+            `🔧 Tool requested: ${block.name.replace(`mcp__${TOOL_SERVER_NAME}__`, "")}`
+          );
+        }
+      }
+    }
 
-      const result = await executeTool(
-        toolCall.function.name,
-        toolCall.function.arguments,
-        projectPath
-      );
-
-if (result.startsWith('{"error":true')) {
-  console.log(`   ⚠️ Tool failed`);
-} else {
-  console.log(`   ✓ Tool completed`);
-}
-
-      conversation.push({
-        role: "tool",
-        tool_call_id: toolCall.id,
-        content: result
-      });
+    if (message.type === "result") {
+      return {
+        result: message,
+        sessionId: message.session_id
+      };
     }
   }
 
-console.log(
-  "⚠️ LLM reached the tool iteration limit. Requesting final report..."
-);
+  throw new Error("Claude session ended without a result.");
+}
 
-const finalResponse =
-  await openrouter.chat.completions.create({
-    model: "openrouter/free",
-    messages: [
-      ...conversation,
-      {
-        role: "user",
-        content:
-          "You have reached your tool-use limit. Do not call any more tools. Based only on the evidence gathered so far, provide your final response now. Be explicit about any uncertainty or unverified acceptance criteria."
+export async function runAgent(
+  projectPath: string,
+  { system, prompt }: AgentPrompt,
+  maxIterations = 12,
+  tools: ToolName[] = llmTools
+): Promise<string> {
+  const { result, sessionId } = await collectResult(
+    query({
+      prompt,
+      options: {
+        ...baseOptions(projectPath, system),
+        // Disable Claude Code's built-in tools; only the project tools are available.
+        tools: [],
+        mcpServers: {
+          [TOOL_SERVER_NAME]: createToolServer(projectPath, tools)
+        },
+        allowedTools: tools.map(qualifiedToolName),
+        maxTurns: maxIterations
       }
-    ],
-    tool_choice: "none",
-    max_tokens: 4000
-  });
+    })
+  );
 
-return finalResponse.choices[0]?.message.content ?? "";
+  if (result.subtype === "success") {
+    if (result.is_error) {
+      throw new Error(`Claude returned an error: ${result.result}`);
+    }
+
+    return result.result;
+  }
+
+  if (result.subtype !== "error_max_turns") {
+    throw new Error(
+      `Claude run failed (${result.subtype}): ${result.errors.join("; ")}`
+    );
+  }
+
+  console.log(
+    "⚠️ LLM reached the tool iteration limit. Requesting final report..."
+  );
+
+  // Resume the same session with no tools so it must answer from what it has gathered.
+  const { result: finalResult } = await collectResult(
+    query({
+      prompt:
+        "You have reached your tool-use limit. Do not call any more tools. Based only on the evidence gathered so far, provide your final response now. Be explicit about any uncertainty or unverified acceptance criteria.",
+      options: {
+        ...baseOptions(projectPath, system),
+        resume: sessionId,
+        tools: [],
+        maxTurns: 1
+      }
+    })
+  );
+
+  return finalResult.subtype === "success"
+    ? finalResult.result
+    : "";
 }

@@ -1,4 +1,10 @@
 import {
+  createSdkMcpServer,
+  tool
+} from "@anthropic-ai/claude-agent-sdk";
+import { z } from "zod";
+
+import {
   readProjectFile,
   listProjectFiles,
   writeProjectFile
@@ -6,166 +12,166 @@ import {
 
 import { runCommand } from "../tools/terminal.js";
 
-export const llmTools = [
-  {
-    type: "function" as const,
-    function: {
-      name: "read_file",
-      description:
-        "Read a text file from the current project.",
-      parameters: {
-        type: "object",
-        properties: {
-          filePath: {
-            type: "string",
-            description:
-              "Path to the file relative to the project root."
-          }
-        },
-        required: ["filePath"],
-        additionalProperties: false
-      }
-    }
-  },
-  {
-    type: "function" as const,
-    function: {
-      name: "list_files",
-      description:
-        "List files and folders in the current project directory.",
-      parameters: {
-        type: "object",
-        properties: {},
-        additionalProperties: false
-      }
-    }
-  },
-  {
-    type: "function" as const,
-    function: {
-      name: "write_file",
-description:
-  "Write the complete contents of a text file. Do not use edit_file or patch operations. When modifying an existing file, first read it, then use this tool with the complete replacement content.",
-      parameters: {
-        type: "object",
-        properties: {
-          filePath: {
-            type: "string",
-            description:
-              "Path to the file relative to the project root."
-          },
-          content: {
-            type: "string",
-description:
-  "The COMPLETE replacement contents of the file. Never provide a partial edit, patch, or diff.",
-          }
-        },
-        required: ["filePath", "content"],
-        additionalProperties: false
-      }
-    }
-  },
-  {
-    type: "function" as const,
-    function: {
-      name: "run_command",
-      description:
-        "Run a terminal command from the current project directory.",
-      parameters: {
-        type: "object",
-        properties: {
-          command: {
-            type: "string",
-            description:
-              "The terminal command to execute."
-          }
-        },
-        required: ["command"],
-        additionalProperties: false
-      }
-    }
-  }
+// Name of the in-process MCP server that exposes the project tools.
+// Claude sees each tool as `mcp__<server>__<tool>`.
+export const TOOL_SERVER_NAME = "project";
+
+export type ToolName =
+  | "read_file"
+  | "list_files"
+  | "write_file"
+  | "run_command";
+
+export const llmTools: ToolName[] = [
+  "read_file",
+  "list_files",
+  "write_file",
+  "run_command"
 ];
 
-export const qaTools = llmTools.filter(
-  (tool) =>
-    tool.function.name === "read_file" ||
-    tool.function.name === "run_command"
-);
+export const qaTools: ToolName[] = [
+  "read_file",
+  "run_command"
+];
 
-export async function executeTool(
-  name: string,
-  argumentsJson: string,
-  projectPath: string
-): Promise<string> {
+function textResult(text: string, isError = false) {
+  return {
+    content: [{ type: "text" as const, text }],
+    isError
+  };
+}
+
+async function safely(
+  name: ToolName,
+  fn: () => Promise<string>
+) {
   try {
-    const args = JSON.parse(argumentsJson);
+    const result = await fn();
 
-    if (name === "read_file") {
-      return await readProjectFile(
-        projectPath,
-        args.filePath
-      );
-    }
+    console.log(`   ✓ Tool completed`);
 
-    if (name === "list_files") {
-      const files =
-        await listProjectFiles(projectPath);
-
-      return JSON.stringify(files, null, 2);
-    }
-
-    if (name === "write_file") {
-      await writeProjectFile(
-        projectPath,
-        args.filePath,
-        args.content
-      );
-
-      return `Successfully wrote ${args.filePath}`;
-    }
-
-    if (name === "run_command") {
-      const result = await runCommand(
-        args.command,
-        projectPath
-      );
-
-      return JSON.stringify({
-        exitCode: result.exitCode,
-        stdout: result.stdout,
-        stderr: result.stderr
-      });
-    }
-
-return JSON.stringify({
-  error: true,
-  tool: name,
-  message: `Unknown tool: ${name}`,
-  availableTools: [
-    "read_file",
-    "list_files",
-    "write_file",
-    "run_command"
-  ],
-  instruction:
-    "Use only the available tools. To modify a file, use write_file with the complete file contents."
-});  } catch (error) {
+    return textResult(result);
+  } catch (error) {
     const message =
       error instanceof Error
         ? error.message
         : String(error);
 
     console.error(
-      `⚠️ Tool execution failed: ${message}`
+      `   ⚠️ Tool execution failed: ${message}`
     );
 
-    return JSON.stringify({
-      error: true,
-      tool: name,
-      message,
-      instruction:
-        "The tool call failed. Correct the arguments and try again."
-    });
+    return textResult(
+      JSON.stringify({
+        error: true,
+        tool: name,
+        message,
+        instruction:
+          "The tool call failed. Correct the arguments and try again."
+      }),
+      true
+    );
   }
+}
+
+function buildToolDefinitions(projectPath: string) {
+  return {
+    read_file: tool(
+      "read_file",
+      "Read a text file from the current project.",
+      {
+        filePath: z
+          .string()
+          .describe(
+            "Path to the file relative to the project root."
+          )
+      },
+      async (args) =>
+        safely("read_file", () =>
+          readProjectFile(projectPath, args.filePath)
+        )
+    ),
+
+    list_files: tool(
+      "list_files",
+      "List files and folders in the current project directory.",
+      {},
+      async () =>
+        safely("list_files", async () =>
+          JSON.stringify(
+            await listProjectFiles(projectPath),
+            null,
+            2
+          )
+        )
+    ),
+
+    write_file: tool(
+      "write_file",
+      "Write the complete contents of a text file. Do not use edit_file or patch operations. When modifying an existing file, first read it, then use this tool with the complete replacement content.",
+      {
+        filePath: z
+          .string()
+          .describe(
+            "Path to the file relative to the project root."
+          ),
+        content: z
+          .string()
+          .describe(
+            "The COMPLETE replacement contents of the file. Never provide a partial edit, patch, or diff."
+          )
+      },
+      async (args) =>
+        safely("write_file", async () => {
+          await writeProjectFile(
+            projectPath,
+            args.filePath,
+            args.content
+          );
+
+          return `Successfully wrote ${args.filePath}`;
+        })
+    ),
+
+    run_command: tool(
+      "run_command",
+      "Run a terminal command from the current project directory.",
+      {
+        command: z
+          .string()
+          .describe("The terminal command to execute.")
+      },
+      async (args) =>
+        safely("run_command", async () => {
+          const result = await runCommand(
+            args.command,
+            projectPath
+          );
+
+          return JSON.stringify({
+            exitCode: result.exitCode,
+            stdout: result.stdout,
+            stderr: result.stderr
+          });
+        })
+    )
+  };
+}
+
+// Builds an MCP server exposing only the requested tools, bound to one project.
+export function createToolServer(
+  projectPath: string,
+  tools: ToolName[]
+) {
+  const definitions = buildToolDefinitions(projectPath);
+
+  return createSdkMcpServer({
+    name: TOOL_SERVER_NAME,
+    version: "1.0.0",
+    tools: tools.map((name) => definitions[name])
+  });
+}
+
+export function qualifiedToolName(name: ToolName): string {
+  return `mcp__${TOOL_SERVER_NAME}__${name}`;
 }

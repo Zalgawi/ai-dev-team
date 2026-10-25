@@ -27,10 +27,8 @@ export class QAAgent implements Agent {
 
     const response = await runAgent(
       context.projectPath,
-      [
-        {
-          role: "system",
-          content: `
+      {
+        system: `
 You are the QA agent in an AI software development team.
 
 Your job is to independently verify the developer's work.
@@ -112,9 +110,9 @@ QA OUTCOME: FAILED
 
 You are an independent QA gate.
 You must not modify the project.
-`.trim()
-        }
-      ],
+`.trim(),
+        prompt: `Verify task ${context.taskId} following the process above.`
+      },
       7,
       qaTools
     );
