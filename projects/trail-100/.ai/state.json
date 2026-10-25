@@ -1,13 +1,13 @@
 {
   "project": "trail-100",
-  "phase": "development",
-  "iteration": 4,
-  "status": "running",
+  "phase": "completed",
+  "iteration": 2,
+  "status": "completed",
   "currentTask": "TASK-001",
   "agents": {
     "manager": "idle",
-    "developer": "idle",
-    "qa": "running"
+    "developer": "completed",
+    "qa": "completed"
   },
   "qa": {
     "status": "failed",

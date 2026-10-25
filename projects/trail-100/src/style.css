@@ -185,6 +185,12 @@ select:focus {
     margin-bottom: 1rem;
 }
 
+.peak-gridref {
+    color: var(--muted-color);
+    font-size: 0.9rem;
+    margin-bottom: 0.75rem;
+}
+
 .peak-status {
     font-size: 0.9rem;
     font-weight: bold;
