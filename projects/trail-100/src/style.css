@@ -1,4 +1,9 @@
-:root {
+/* Colours: every colour used by the page is a custom property defined once for
+   the light (day) theme and once for the dark (night) theme. The theme is set
+   on <html data-theme="light|dark"> by the inline script in index.html. */
+:root,
+:root[data-theme="light"] {
+    color-scheme: light;
     /* Palette: forest, moss, heather, granite and sand. */
     --primary-color: #1f4d33;
     --primary-dark: #143523;
@@ -9,19 +14,113 @@
     --text-color: #1f2a24;
     --muted-color: #5b665f;
     --border-color: #ddd6c6;
+    --control-border: #857b69;
+    --control-background: #ffffff;
     --completed-color: #2f7a4a;
     --completed-bg: #eaf3ec;
     --remaining-color: #8b5e34;
-    --radius: 14px;
-    --radius-small: 8px;
+    --heading-color: var(--primary-color);
+    --heading-hover: var(--primary-dark);
+    --link-color: var(--primary-color);
+    --button-bg: var(--primary-color);
+    --button-hover-bg: var(--primary-dark);
+    --button-text: #ffffff;
+    --button-border: transparent;
+    --button-remaining-bg: #8b5e34;
+    --button-remaining-hover-bg: #6b4626;
+    --outline-button-color: var(--primary-color);
+    --outline-button-hover-bg: var(--completed-bg);
+    --focus-color: #b25a0c;
+    --focus-on-dark: #ffd08a;
+    --error-color: #b00020;
+    --track-color: #e7e1d3;
+    --route-background: #f3efe4;
+    --photo-placeholder: linear-gradient(160deg, #c9d6c3, #9fb59a);
+    --badge-background: rgba(15, 30, 20, 0.78);
+    --badge-text: #ffffff;
+    --caption-background: #1c2b22;
+    --caption-text: #dfe7e1;
+    --caption-link: #ffffff;
+    --backdrop-color: rgba(12, 28, 18, 0.7);
+    --hero-text: #ffffff;
+    --hero-background:
+        radial-gradient(ellipse at 80% 10%, rgba(255, 214, 153, 0.35), transparent 55%),
+        linear-gradient(170deg, #2d6a4f 0%, #1f4d33 45%, #12301f 100%);
+    --hero-ridge-back: #3f7a5a;
+    --hero-cta-bg: #d9822b;
+    --hero-cta-hover-bg: #e8994a;
+    --hero-cta-text: #1b1206;
+    --hero-control-bg: rgba(255, 255, 255, 0.12);
+    --hero-control-hover-bg: rgba(255, 255, 255, 0.22);
+    --hero-control-border: rgba(255, 255, 255, 0.7);
     --shadow: 0 1px 2px rgba(20, 35, 25, 0.06), 0 4px 14px rgba(20, 35, 25, 0.08);
     --shadow-raised: 0 2px 4px rgba(20, 35, 25, 0.08), 0 12px 28px rgba(20, 35, 25, 0.16);
+    --dialog-shadow: 0 16px 40px rgba(0, 0, 0, 0.35);
+
+    --radius: 14px;
+    --radius-small: 8px;
     --space-1: 0.5rem;
     --space-2: 1rem;
     --space-3: 1.5rem;
     --space-4: 2.5rem;
     --font-body: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
     --font-heading: 'Trebuchet MS', 'Segoe UI', system-ui, sans-serif;
+}
+
+/* Night: the same forest palette under a moonlit sky. */
+:root[data-theme="dark"] {
+    color-scheme: dark;
+    --primary-color: #9dd6a7;
+    --primary-dark: #c3ebc9;
+    --secondary-color: #4f8f62;
+    --accent-color: #f2a65a;
+    --background-color: #0e1813;
+    --card-background: #17251d;
+    --text-color: #e4ece6;
+    --muted-color: #a8b8ad;
+    --border-color: #2e4236;
+    --control-border: #7d9886;
+    --control-background: #1d2d24;
+    --completed-color: #7fcf95;
+    --completed-bg: #1c3426;
+    --remaining-color: #e2ab76;
+    --heading-color: #9dd6a7;
+    --heading-hover: #c3ebc9;
+    --link-color: #9dd6a7;
+    --button-bg: #2f6b47;
+    --button-hover-bg: #3a7d55;
+    --button-text: #ffffff;
+    --button-border: #7fcf95;
+    --button-remaining-bg: #8b5e34;
+    --button-remaining-hover-bg: #9c6a3c;
+    --outline-button-color: #9dd6a7;
+    --outline-button-hover-bg: #1c3426;
+    --focus-color: #f2a65a;
+    --focus-on-dark: #ffd08a;
+    --error-color: #ff8a80;
+    --track-color: #2a3b31;
+    --route-background: #1d2d24;
+    --photo-placeholder: linear-gradient(160deg, #2b3d32, #1d2b23);
+    --badge-background: rgba(5, 12, 8, 0.82);
+    --badge-text: #ffffff;
+    --caption-background: #0b140f;
+    --caption-text: #dfe7e1;
+    --caption-link: #ffffff;
+    --backdrop-color: rgba(3, 8, 5, 0.8);
+    --hero-text: #ffffff;
+    --hero-background:
+        radial-gradient(ellipse at 80% 10%, rgba(200, 215, 255, 0.18), transparent 50%),
+        linear-gradient(170deg, #1d3d2e 0%, #12301f 45%, #08140d 100%);
+    --hero-ridge-back: #24493a;
+    --hero-cta-bg: #d9822b;
+    --hero-cta-hover-bg: #e8994a;
+    --hero-cta-text: #1b1206;
+    --hero-control-bg: rgba(255, 255, 255, 0.08);
+    --hero-control-hover-bg: rgba(255, 255, 255, 0.18);
+    --hero-control-border: rgba(255, 255, 255, 0.6);
+    --shadow: 0 1px 2px rgba(0, 0, 0, 0.4), 0 4px 14px rgba(0, 0, 0, 0.35);
+    --shadow-raised: 0 2px 4px rgba(0, 0, 0, 0.45), 0 12px 28px rgba(0, 0, 0, 0.5);
+    --dialog-shadow: 0 16px 40px rgba(0, 0, 0, 0.6);
 }
 
 * {
@@ -32,6 +131,7 @@
 
 html {
     scroll-behavior: smooth;
+    background-color: var(--background-color);
 }
 
 body {
@@ -50,15 +150,22 @@ h4 {
 }
 
 a {
-    color: var(--primary-color);
+    color: var(--link-color);
 }
 
 a:focus-visible,
 button:focus-visible,
 select:focus-visible,
 [tabindex="-1"]:focus-visible {
-    outline: 3px solid var(--accent-color);
+    outline: 3px solid var(--focus-color);
     outline-offset: 2px;
+}
+
+/* The hero and photo captions are dark in both themes. */
+.hero a:focus-visible,
+.hero button:focus-visible,
+.peak-details-caption a:focus-visible {
+    outline-color: var(--focus-on-dark);
 }
 
 .visually-hidden {
@@ -77,12 +184,57 @@ select:focus-visible,
 .hero {
     position: relative;
     overflow: hidden;
-    color: #ffffff;
-    background:
-        radial-gradient(ellipse at 80% 10%, rgba(255, 214, 153, 0.35), transparent 55%),
-        linear-gradient(170deg, #2d6a4f 0%, #1f4d33 45%, #12301f 100%);
-    padding: 4rem 1.25rem 7rem;
+    color: var(--hero-text);
+    background: var(--hero-background);
+    padding: 1rem 1.25rem 7rem;
     text-align: center;
+}
+
+.hero-bar {
+    position: relative;
+    z-index: 2;
+    display: flex;
+    justify-content: flex-end;
+    max-width: 1200px;
+    margin: 0 auto 2rem;
+}
+
+.theme-toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    width: auto;
+    min-height: 44px;
+    padding: 0.4rem 1rem;
+    border: 1px solid var(--hero-control-border);
+    border-radius: 999px;
+    background-color: var(--hero-control-bg);
+    color: var(--hero-text);
+    font-weight: 600;
+}
+
+.theme-toggle:hover {
+    background-color: var(--hero-control-hover-bg);
+}
+
+.theme-icon {
+    width: 1.15rem;
+    height: 1.15rem;
+    fill: currentColor;
+    stroke: currentColor;
+    stroke-width: 0;
+}
+
+.theme-icon-sun path {
+    fill: none;
+    stroke-width: 2;
+    stroke-linecap: round;
+}
+
+/* The icon shows the theme the button switches to. */
+:root[data-theme="dark"] .theme-icon-moon,
+:root:not([data-theme="dark"]) .theme-icon-sun {
+    display: none;
 }
 
 .hero-inner {
@@ -121,15 +273,15 @@ select:focus-visible,
     min-height: 44px;
     padding: 0.6rem 1.4rem;
     border-radius: 999px;
-    background-color: var(--accent-color);
-    color: #1b1206;
+    background-color: var(--hero-cta-bg);
+    color: var(--hero-cta-text);
     font-weight: 700;
     text-decoration: none;
     box-shadow: 0 6px 18px rgba(0, 0, 0, 0.25);
 }
 
 .hero-link:hover {
-    background-color: #e8994a;
+    background-color: var(--hero-cta-hover-bg);
 }
 
 .hero-ridge {
@@ -142,7 +294,7 @@ select:focus-visible,
 }
 
 .ridge-back {
-    fill: #3f7a5a;
+    fill: var(--hero-ridge-back);
     opacity: 0.55;
 }
 
@@ -179,7 +331,7 @@ section {
 }
 
 h2 {
-    color: var(--primary-color);
+    color: var(--heading-color);
     margin-bottom: var(--space-2);
     font-size: 1.45rem;
 }
@@ -192,7 +344,7 @@ h2 {
 }
 
 .progress-bar {
-    background-color: #e7e1d3;
+    background-color: var(--track-color);
     border-radius: 999px;
     height: 22px;
     overflow: hidden;
@@ -208,7 +360,7 @@ h2 {
 
 #progress-text {
     font-weight: bold;
-    color: var(--primary-color);
+    color: var(--heading-color);
 }
 
 /* Filters toolbar */
@@ -243,24 +395,24 @@ select,
 button {
     min-height: 44px;
     padding: 0.5rem 1rem;
-    border: 1px solid var(--border-color);
+    border: 1px solid var(--control-border);
     border-radius: var(--radius-small);
-    background-color: white;
+    background-color: var(--control-background);
     color: var(--text-color);
     font: inherit;
 }
 
 button {
     cursor: pointer;
-    background-color: var(--primary-color);
-    color: white;
-    border: 1px solid transparent;
+    background-color: var(--button-bg);
+    color: var(--button-text);
+    border: 1px solid var(--button-border);
     font-weight: 600;
     transition: background-color 0.2s ease, color 0.2s ease;
 }
 
 button:hover {
-    background-color: var(--primary-dark);
+    background-color: var(--button-hover-bg);
 }
 
 /* Gallery */
@@ -325,7 +477,7 @@ button:hover {
     aspect-ratio: 4 / 3;
     width: 100%;
     overflow: hidden;
-    background: linear-gradient(160deg, #c9d6c3, #9fb59a);
+    background: var(--photo-placeholder);
 }
 
 .peak-photo img {
@@ -346,8 +498,8 @@ button:hover {
     left: 0.75rem;
     padding: 0.15rem 0.6rem;
     border-radius: 999px;
-    background-color: rgba(15, 30, 20, 0.78);
-    color: #ffffff;
+    background-color: var(--badge-background);
+    color: var(--badge-text);
     font-size: 0.85rem;
     font-weight: bold;
 }
@@ -362,7 +514,7 @@ button:hover {
 .peak-name {
     font-size: 1.25rem;
     margin-bottom: 0.25rem;
-    color: var(--primary-color);
+    color: var(--heading-color);
     overflow-wrap: anywhere;
 }
 
@@ -413,30 +565,30 @@ button:hover {
 }
 
 .toggle-button.mark-complete {
-    background-color: var(--primary-color);
+    background-color: var(--button-bg);
 }
 
 .toggle-button.mark-complete:hover {
-    background-color: var(--primary-dark);
+    background-color: var(--button-hover-bg);
 }
 
 .toggle-button.mark-remaining {
-    background-color: var(--remaining-color);
+    background-color: var(--button-remaining-bg);
 }
 
 .toggle-button.mark-remaining:hover {
-    background-color: #6b4626;
+    background-color: var(--button-remaining-hover-bg);
 }
 
 .details-button {
     width: 100%;
     background-color: transparent;
-    color: var(--primary-color);
-    border: 2px solid var(--primary-color);
+    color: var(--outline-button-color);
+    border: 2px solid var(--outline-button-color);
 }
 
 .details-button:hover {
-    background-color: var(--completed-bg);
+    background-color: var(--outline-button-hover-bg);
 }
 
 .loading {
@@ -454,6 +606,10 @@ button:hover {
     color: var(--muted-color);
     background-color: var(--card-background);
     border-radius: var(--radius);
+}
+
+.empty-state.error-state {
+    color: var(--error-color);
 }
 
 /* Pagination */
@@ -477,18 +633,22 @@ button:hover {
 .page-button {
     min-width: 44px;
     background-color: var(--card-background);
-    color: var(--primary-color);
-    border: 1px solid var(--border-color);
+    color: var(--link-color);
+    border: 1px solid var(--control-border);
 }
 
 .page-button:hover:not(:disabled) {
-    background-color: var(--completed-bg);
+    background-color: var(--outline-button-hover-bg);
 }
 
 .page-button[aria-current="page"] {
-    background-color: var(--primary-color);
-    border-color: var(--primary-color);
-    color: #ffffff;
+    background-color: var(--button-bg);
+    border-color: var(--button-bg);
+    color: var(--button-text);
+}
+
+:root[data-theme="dark"] .page-button[aria-current="page"] {
+    border-color: var(--button-border);
 }
 
 .page-button:disabled {
@@ -532,14 +692,14 @@ footer {
     padding: 0;
     border: none;
     background-color: transparent;
-    color: var(--primary-color);
+    color: var(--heading-color);
     font: inherit;
     text-align: left;
 }
 
 .region-progress-toggle:hover {
     background-color: transparent;
-    color: var(--primary-dark);
+    color: var(--heading-hover);
 }
 
 .region-progress-toggle-icon {
@@ -611,11 +771,11 @@ html:has(.peak-details-dialog[open]) {
     border-radius: var(--radius);
     background-color: var(--card-background);
     color: var(--text-color);
-    box-shadow: 0 16px 40px rgba(0, 0, 0, 0.35);
+    box-shadow: var(--dialog-shadow);
 }
 
 .peak-details-dialog::backdrop {
-    background-color: rgba(12, 28, 18, 0.7);
+    background-color: var(--backdrop-color);
 }
 
 .peak-details {
@@ -627,7 +787,7 @@ html:has(.peak-details-dialog[open]) {
 }
 
 .peak-details-photo {
-    background-color: #1c2b22;
+    background-color: var(--caption-background);
 }
 
 .peak-details-photo img {
@@ -642,12 +802,12 @@ html:has(.peak-details-dialog[open]) {
     flex-wrap: wrap;
     gap: 0.15rem 0.9rem;
     padding: 0.5rem var(--space-3);
-    color: #dfe7e1;
+    color: var(--caption-text);
     font-size: 0.8rem;
 }
 
 .peak-details-caption a {
-    color: #ffffff;
+    color: var(--caption-link);
 }
 
 .peak-details-caption span {
@@ -677,12 +837,12 @@ html:has(.peak-details-dialog[open]) {
     flex-shrink: 0;
     min-height: 44px;
     background-color: transparent;
-    color: var(--primary-color);
-    border: 2px solid var(--primary-color);
+    color: var(--outline-button-color);
+    border: 2px solid var(--outline-button-color);
 }
 
 .details-close-button:hover {
-    background-color: var(--completed-bg);
+    background-color: var(--outline-button-hover-bg);
 }
 
 .peak-details-list {
@@ -722,7 +882,7 @@ html:has(.peak-details-dialog[open]) {
     margin: var(--space-3) 0 0;
     padding: var(--space-2) 1.25rem;
     border-radius: var(--radius-small);
-    background-color: #f3efe4;
+    background-color: var(--route-background);
     border-left: 4px solid var(--accent-color);
 }
 
@@ -732,7 +892,7 @@ html:has(.peak-details-dialog[open]) {
 
 .route-heading {
     font-size: 1.1rem;
-    color: var(--primary-color);
+    color: var(--heading-color);
     margin-bottom: 0.35rem;
 }
 
@@ -774,18 +934,19 @@ html:has(.peak-details-dialog[open]) {
 }
 
 .route-link {
-    border: 2px solid var(--primary-color);
-    color: var(--primary-color);
-    background-color: #ffffff;
+    border: 2px solid var(--outline-button-color);
+    color: var(--outline-button-color);
+    background-color: var(--card-background);
 }
 
 .gpx-link {
-    background-color: var(--primary-color);
-    color: #ffffff;
+    background-color: var(--button-bg);
+    color: var(--button-text);
+    border: 1px solid var(--button-border);
 }
 
 .gpx-link:hover {
-    background-color: var(--primary-dark);
+    background-color: var(--button-hover-bg);
 }
 
 .garmin-heading {
@@ -819,7 +980,11 @@ html:has(.peak-details-dialog[open]) {
 
 @media (max-width: 600px) {
     .hero {
-        padding: 2.5rem 1rem 5rem;
+        padding: 0.75rem 1rem 5rem;
+    }
+
+    .hero-bar {
+        margin-bottom: 1rem;
     }
 
     .hero-tagline {
@@ -861,6 +1026,10 @@ html:has(.peak-details-dialog[open]) {
     select,
     button {
         width: 100%;
+    }
+
+    .theme-toggle {
+        width: auto;
     }
 
     .page-button {

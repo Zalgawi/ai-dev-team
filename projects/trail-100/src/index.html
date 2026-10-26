@@ -3,12 +3,37 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="color-scheme" content="light dark">
     <meta name="theme-color" content="#1f3d2b">
     <title>Trail 100 Tracker</title>
+    <!-- Apply the saved theme (or the device preference) before first paint.
+         Same rules as resolveTheme() in src/theme.js. -->
+    <script id="theme-init">
+        (function () {
+            var theme = null;
+            try { theme = window.localStorage.getItem('trail100_theme'); } catch (e) { theme = null; }
+            if (theme !== 'light' && theme !== 'dark') {
+                theme = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+            }
+            document.documentElement.setAttribute('data-theme', theme);
+        })();
+    </script>
     <link rel="stylesheet" href="/src/style.css">
 </head>
 <body>
     <header class="hero">
+        <div class="hero-bar">
+            <button type="button" id="theme-toggle" class="theme-toggle" aria-label="Switch to dark theme">
+                <svg class="theme-icon theme-icon-moon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                    <path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z"/>
+                </svg>
+                <svg class="theme-icon theme-icon-sun" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                    <circle cx="12" cy="12" r="4.5"/>
+                    <path d="M12 1.5v3M12 19.5v3M1.5 12h3M19.5 12h3M4.6 4.6l2.1 2.1M17.3 17.3l2.1 2.1M4.6 19.4l2.1-2.1M17.3 6.7l2.1-2.1"/>
+                </svg>
+                <span class="theme-toggle-text">Dark theme</span>
+            </button>
+        </div>
         <div class="hero-inner">
             <p class="hero-eyebrow">Live for the Outdoors · Trail 100 challenge</p>
             <h1>Trail 100 Tracker</h1>

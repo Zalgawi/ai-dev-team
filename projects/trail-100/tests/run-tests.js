@@ -34,6 +34,21 @@ import {
 } from '../src/peak-utils.js';
 import { createPeakDetailsController } from '../src/peak-details-controller.js';
 import { createServer } from '../src/server.js';
+import {
+    THEME_STORAGE_KEY,
+    THEME_ATTRIBUTE,
+    THEME_COLORS,
+    DARK_SCHEME_QUERY,
+    isTheme,
+    parseStoredTheme,
+    resolveTheme,
+    nextTheme,
+    themeToggleLabel,
+    themeToggleText,
+    readSavedTheme,
+    saveTheme,
+} from '../src/theme.js';
+import vm from 'vm';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.join(__dirname, '..');
@@ -1512,6 +1527,306 @@ describe('Dashboard layout and region disclosure', () => {
         assertTrue(dash && /align-items:\s*start/.test(dash[1]));
         const container = css.match(/\.progress-container\s*\{([^}]*)\}/);
         assertFalse(/height:\s*100%/.test(container[1]), 'Progress cards use their natural height');
+    });
+});
+
+
+// ---------------------------------------------------------------------------
+// TASK-006: night mode (light / dark theme)
+// ---------------------------------------------------------------------------
+describe('Theme logic (src/theme.js)', () => {
+    const fakeStorage = (initial = {}) => {
+        const data = { ...initial };
+        return {
+            data,
+            getItem: key => (Object.prototype.hasOwnProperty.call(data, key) ? data[key] : null),
+            setItem: (key, value) => { data[key] = String(value); },
+        };
+    };
+    const throwingStorage = {
+        getItem() { throw new Error('SecurityError'); },
+        setItem() { throw new Error('QuotaExceededError'); },
+    };
+
+    it('isTheme / parseStoredTheme accept only "light" and "dark"', () => {
+        assertTrue(isTheme('light'));
+        assertTrue(isTheme('dark'));
+        for (const bad of [null, undefined, '', 'Dark', 'night', 'auto', 1]) {
+            assertFalse(isTheme(bad), `isTheme(${JSON.stringify(bad)})`);
+            assertEqual(parseStoredTheme(bad), null);
+        }
+        assertEqual(parseStoredTheme('dark'), 'dark');
+    });
+
+    it('resolveTheme follows the system preference when nothing is saved', () => {
+        assertEqual(resolveTheme(null, false), 'light');
+        assertEqual(resolveTheme(null, true), 'dark');
+        assertEqual(resolveTheme('bogus', true), 'dark');
+        assertEqual(resolveTheme(undefined, false), 'light');
+    });
+
+    it('resolveTheme lets a saved choice override the system preference', () => {
+        assertEqual(resolveTheme('light', true), 'light');
+        assertEqual(resolveTheme('dark', false), 'dark');
+        assertEqual(resolveTheme('dark', true), 'dark');
+        assertEqual(resolveTheme('light', false), 'light');
+    });
+
+    it('nextTheme flips between light and dark', () => {
+        assertEqual(nextTheme('light'), 'dark');
+        assertEqual(nextTheme('dark'), 'light');
+        assertEqual(nextTheme(null), 'dark', 'Unknown current theme is treated as light');
+    });
+
+    it('toggle label says what the button will do and contains the visible text', () => {
+        assertEqual(themeToggleLabel('light'), 'Switch to dark theme');
+        assertEqual(themeToggleLabel('dark'), 'Switch to light theme');
+        assertEqual(themeToggleText('light'), 'Dark theme');
+        assertEqual(themeToggleText('dark'), 'Light theme');
+        for (const t of ['light', 'dark']) {
+            assertTrue(themeToggleLabel(t).toLowerCase().includes(themeToggleText(t).toLowerCase()), 'Label in name');
+        }
+    });
+
+    it('readSavedTheme / saveTheme use the trail100_theme key', () => {
+        assertEqual(THEME_STORAGE_KEY, 'trail100_theme');
+        const storage = fakeStorage();
+        assertEqual(readSavedTheme(storage), null);
+        assertTrue(saveTheme(storage, 'dark'));
+        assertEqual(storage.data.trail100_theme, 'dark');
+        assertEqual(readSavedTheme(storage), 'dark');
+        assertFalse(saveTheme(storage, 'purple'), 'Unknown themes are not saved');
+        assertEqual(readSavedTheme(fakeStorage({ trail100_theme: 'nonsense' })), null);
+    });
+
+    it('readSavedTheme / saveTheme never throw when storage is missing or throws', () => {
+        assertEqual(readSavedTheme(null), null);
+        assertEqual(readSavedTheme(throwingStorage), null);
+        assertFalse(saveTheme(null, 'dark'));
+        assertFalse(saveTheme(throwingStorage, 'dark'));
+    });
+
+    it('theme colours for the browser UI exist for both themes', () => {
+        assertTrue(/^#[0-9a-f]{6}$/i.test(THEME_COLORS.light));
+        assertTrue(/^#[0-9a-f]{6}$/i.test(THEME_COLORS.dark));
+    });
+});
+
+describe('Theme applied before first paint (inline script)', () => {
+    let html;
+    let script;
+    beforeAll(() => {
+        html = readSource('src/index.html');
+        const match = html.match(/<script id="theme-init">([\s\S]*?)<\/script>/);
+        script = match ? match[1] : '';
+    });
+
+    // Run the inline script with a fake window/document.
+    function runInline({ stored, prefersDark, storageThrows = false, noMatchMedia = false }) {
+        const attrs = {};
+        const localStorage = {
+            getItem: key => {
+                if (storageThrows) throw new Error('SecurityError');
+                return key === THEME_STORAGE_KEY && stored !== undefined ? stored : null;
+            },
+        };
+        const window = {
+            get localStorage() {
+                if (storageThrows === 'access') throw new Error('SecurityError');
+                return localStorage;
+            },
+            matchMedia: noMatchMedia ? undefined : query => ({ matches: query === DARK_SCHEME_QUERY && prefersDark }),
+        };
+        const document = { documentElement: { setAttribute: (name, value) => { attrs[name] = value; } } };
+        vm.runInNewContext(script, { window, document });
+        return attrs[THEME_ATTRIBUTE];
+    }
+
+    it('is an inline (not external) script in <head>, before the stylesheet and body', () => {
+        assertTrue(script.length > 0, 'Inline theme script exists');
+        const head = html.slice(0, html.indexOf('</head>'));
+        assertTrue(head.includes('<script id="theme-init">'), 'Inside <head>');
+        assertTrue(html.indexOf('<script id="theme-init">') < html.indexOf('<link rel="stylesheet"'), 'Before the stylesheet');
+        assertFalse(/<script id="theme-init"[^>]*(src|type="module"|defer|async)/.test(html), 'Runs synchronously');
+        assertTrue(script.includes(`'${THEME_STORAGE_KEY}'`), 'Uses the same storage key as theme.js');
+        assertTrue(script.includes(`'${THEME_ATTRIBUTE}'`), 'Sets the same attribute as theme.js');
+    });
+
+    it('matches resolveTheme for every saved value and system preference', () => {
+        for (const stored of [undefined, null, 'light', 'dark', 'bogus']) {
+            for (const prefersDark of [false, true]) {
+                assertEqual(runInline({ stored, prefersDark }), resolveTheme(stored, prefersDark),
+                    `stored=${stored}, prefersDark=${prefersDark}`);
+            }
+        }
+    });
+
+    it('does not throw when localStorage throws or matchMedia is missing', () => {
+        assertEqual(runInline({ stored: 'light', prefersDark: true, storageThrows: true }), 'dark');
+        assertEqual(runInline({ stored: 'dark', prefersDark: false, storageThrows: 'access' }), 'light');
+        assertEqual(runInline({ stored: undefined, prefersDark: true, noMatchMedia: true }), 'light');
+    });
+
+    it('header has a theme toggle button with an accessible name', () => {
+        const header = html.match(/<header class="hero">([\s\S]*?)<\/header>/)[1];
+        assertTrue(/<button type="button" id="theme-toggle"[^>]*aria-label="Switch to dark theme"/.test(header));
+        assertTrue(header.includes('class="theme-toggle-text"'));
+    });
+
+    it('app.js wires the toggle with the pure helpers and tolerates storage errors', () => {
+        const js = readSource('src/app.js');
+        const fn = js.match(/function setupThemeToggle\(\)\s*\{([\s\S]*?)\n\}/);
+        assertTrue(fn, 'setupThemeToggle exists');
+        for (const name of ['resolveTheme(', 'nextTheme(', 'themeToggleLabel(', 'saveTheme(', 'readSavedTheme(']) {
+            assertTrue(fn[1].includes(name), `uses ${name}`);
+        }
+        assertTrue(/\nsetupThemeToggle\(\);/.test(js), 'Toggle is set up even if the peaks fail to load');
+        assertFalse(/localStorage\.(getItem|setItem)/.test(js), 'All storage access goes through the safe helpers');
+        assertFalse(/style="color/.test(js), 'No hard-coded inline colours');
+    });
+});
+
+describe('Theme colours and contrast (style.css)', () => {
+    let css;
+    let light;
+    let dark;
+
+    const parseVars = block => {
+        const vars = {};
+        for (const m of block.matchAll(/(--[\w-]+)\s*:\s*([^;]+);/g)) vars[m[1]] = m[2].trim().replace(/\s+/g, ' ');
+        return vars;
+    };
+    // Resolve var(--x) references the way the browser would for that theme.
+    const resolve = (vars, name, depth = 0) => {
+        const value = vars[name];
+        if (value === undefined) throw new Error(`${name} is not defined`);
+        const ref = value.match(/^var\((--[\w-]+)\)$/);
+        if (ref && depth < 10) return resolve(vars, ref[1], depth + 1);
+        return value;
+    };
+    const luminance = hex => {
+        const n = hex.replace('#', '');
+        const full = n.length === 3 ? n.split('').map(c => c + c).join('') : n;
+        const [r, g, b] = [0, 2, 4].map(i => parseInt(full.slice(i, i + 2), 16) / 255)
+            .map(v => (v <= 0.03928 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4));
+        return 0.2126 * r + 0.7152 * g + 0.0722 * b;
+    };
+    const contrast = (a, b) => {
+        const [x, y] = [luminance(a), luminance(b)].sort((p, q) => q - p);
+        return (x + 0.05) / (y + 0.05);
+    };
+
+    beforeAll(() => {
+        css = readSource('src/style.css');
+        const lightBlock = css.match(/:root,\s*:root\[data-theme="light"\]\s*\{([^}]*)\}/);
+        const darkBlock = css.match(/:root\[data-theme="dark"\]\s*\{([^}]*)\}/);
+        if (!lightBlock || !darkBlock) throw new Error('Light and dark variable blocks are required');
+        light = parseVars(lightBlock[1]);
+        dark = { ...light, ...parseVars(darkBlock[1]) };
+        dark.__own = parseVars(darkBlock[1]);
+    });
+
+    it('every colour variable in the light set is redefined in the dark set', () => {
+        const colourVars = Object.keys(light).filter(name => /#|rgba?\(|gradient|^var\(/.test(light[name]));
+        assertTrue(colourVars.length > 20, 'Light theme defines the colour variables');
+        const missing = colourVars.filter(name => !(name in dark.__own));
+        assertEqual(missing.join(', '), '', 'Colour variables missing from the dark theme');
+    });
+
+    it('sets color-scheme for native controls and scrollbars in both themes', () => {
+        assertTrue(/:root\[data-theme="light"\]\s*\{[^}]*color-scheme:\s*light/.test(css));
+        assertTrue(/:root\[data-theme="dark"\]\s*\{[^}]*color-scheme:\s*dark/.test(css));
+    });
+
+    it('no hard-coded colours are used outside the theme variable blocks', () => {
+        const rest = css
+            .replace(/:root,\s*:root\[data-theme="light"\]\s*\{[^}]*\}/, '')
+            .replace(/:root\[data-theme="dark"\]\s*\{[^}]*\}/, '')
+            .replace(/\/\*[\s\S]*?\*\//g, '');
+        // Allowed: the semi-transparent white eyebrow border and the hero CTA shadow
+        // (both sit on the hero, which is dark in both themes).
+        const allowed = ['rgba(255, 255, 255, 0.35)', 'rgba(0, 0, 0, 0.25)'];
+        const found = (rest.match(/#[0-9a-fA-F]{3,8}\b|rgba?\([^)]*\)|\b(white|black)\b(?!-)/g) || [])
+            .filter(c => !allowed.includes(c));
+        assertEqual(found.join(', '), '', 'Hard-coded colours outside the variables');
+    });
+
+    const textPairs = [
+        ['--text-color', '--background-color'], ['--text-color', '--card-background'],
+        ['--text-color', '--completed-bg'], ['--text-color', '--route-background'],
+        ['--text-color', '--control-background'],
+        ['--muted-color', '--background-color'], ['--muted-color', '--card-background'],
+        ['--muted-color', '--completed-bg'], ['--muted-color', '--route-background'],
+        ['--heading-color', '--background-color'], ['--heading-color', '--card-background'],
+        ['--heading-color', '--completed-bg'], ['--heading-color', '--route-background'],
+        ['--heading-hover', '--card-background'],
+        ['--link-color', '--card-background'], ['--link-color', '--route-background'],
+        ['--completed-color', '--card-background'], ['--completed-color', '--completed-bg'],
+        ['--remaining-color', '--card-background'],
+        ['--outline-button-color', '--card-background'], ['--outline-button-color', '--completed-bg'],
+        ['--outline-button-color', '--outline-button-hover-bg'],
+        ['--button-text', '--button-bg'], ['--button-text', '--button-hover-bg'],
+        ['--button-text', '--button-remaining-bg'], ['--button-text', '--button-remaining-hover-bg'],
+        ['--error-color', '--card-background'],
+        ['--caption-text', '--caption-background'], ['--caption-link', '--caption-background'],
+        ['--hero-cta-text', '--hero-cta-bg'], ['--hero-cta-text', '--hero-cta-hover-bg'],
+    ];
+    const uiPairs = [
+        ['--control-border', '--card-background'], ['--control-border', '--background-color'],
+        ['--control-border', '--control-background'],
+        ['--focus-color', '--background-color'], ['--focus-color', '--card-background'],
+        ['--focus-color', '--completed-bg'], ['--focus-color', '--route-background'],
+        ['--outline-button-color', '--route-background'],
+    ];
+
+    for (const theme of ['light', 'dark']) {
+        it(`${theme} theme: text meets WCAG AA 4.5:1`, () => {
+            const vars = theme === 'light' ? light : dark;
+            const failures = textPairs
+                .map(([fg, bg]) => [fg, bg, contrast(resolve(vars, fg), resolve(vars, bg))])
+                .filter(([, , ratio]) => ratio < 4.5)
+                .map(([fg, bg, ratio]) => `${fg} on ${bg} = ${ratio.toFixed(2)}`);
+            assertEqual(failures.join('; '), '', 'Low-contrast text pairs');
+        });
+
+        it(`${theme} theme: control boundaries and focus outlines meet 3:1`, () => {
+            const vars = theme === 'light' ? light : dark;
+            const failures = uiPairs
+                .map(([fg, bg]) => [fg, bg, contrast(resolve(vars, fg), resolve(vars, bg))])
+                .filter(([, , ratio]) => ratio < 3)
+                .map(([fg, bg, ratio]) => `${fg} on ${bg} = ${ratio.toFixed(2)}`);
+            // Filled buttons: their fill (or their border, if they have one) stands out from the cards.
+            const border = resolve(vars, '--button-border');
+            const edge = border === 'transparent' ? resolve(vars, '--button-bg') : border;
+            for (const bg of ['--card-background', '--completed-bg', '--background-color']) {
+                const ratio = contrast(edge, resolve(vars, bg));
+                if (ratio < 3) failures.push(`button edge on ${bg} = ${ratio.toFixed(2)}`);
+            }
+            // Focus outline on the (always dark) hero.
+            for (const stop of ['#2d6a4f', '#1d3d2e']) {
+                const ratio = contrast(resolve(vars, '--focus-on-dark'), stop);
+                if (ratio < 3) failures.push(`--focus-on-dark on hero ${stop} = ${ratio.toFixed(2)}`);
+            }
+            assertEqual(failures.join('; '), '', 'Low-contrast UI pairs');
+        });
+    }
+
+    it('dark theme is actually dark and light theme is light', () => {
+        assertTrue(luminance(resolve(light, '--background-color')) > 0.8);
+        assertTrue(luminance(resolve(dark, '--background-color')) < 0.05);
+        assertTrue(luminance(resolve(dark, '--card-background')) < 0.05);
+        assertTrue(luminance(resolve(dark, '--route-background')) < 0.05);
+        assertTrue(luminance(resolve(dark, '--control-background')) < 0.05);
+    });
+
+    it('focus outlines use the theme focus colour', () => {
+        assertTrue(/button:focus-visible,[\s\S]*?\{\s*outline:\s*3px solid var\(--focus-color\)/.test(css));
+        assertTrue(/\.hero button:focus-visible[\s\S]*?outline-color:\s*var\(--focus-on-dark\)/.test(css));
+    });
+
+    it('theme toggle keeps its natural width on small screens', () => {
+        const mobile = css.slice(css.indexOf('@media (max-width: 600px)'));
+        assertTrue(/\.theme-toggle\s*\{\s*width:\s*auto;?\s*\}/.test(mobile));
     });
 });
 

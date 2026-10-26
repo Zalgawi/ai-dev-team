@@ -2,7 +2,7 @@
   "id": "TASK-006",
   "title": "Night mode theme toggle",
   "description": "Add a dark (night) theme and a toggle to switch between light and dark. By default the site follows the device's colour-scheme preference; once the user picks a theme with the toggle, that choice is remembered. Keep the existing outdoors look: the dark theme should feel like the same site at night, not a different design. No external libraries or web fonts.",
-  "status": "todo",
+  "status": "completed",
   "assignedTo": "developer",
   "priority": "medium",
   "acceptanceCriteria": [

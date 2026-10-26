@@ -17,6 +17,17 @@ import {
     escapeHtml,
 } from './peak-utils.js';
 import { createPeakDetailsController } from './peak-details-controller.js';
+import {
+    THEME_ATTRIBUTE,
+    THEME_COLORS,
+    DARK_SCHEME_QUERY,
+    resolveTheme,
+    nextTheme,
+    themeToggleLabel,
+    themeToggleText,
+    readSavedTheme,
+    saveTheme,
+} from './theme.js';
 
 const STORAGE_KEY = 'trail100_completed';
 const PEAKS_DATA_URL = '/data/peaks.json';
@@ -39,6 +50,59 @@ let peakDetails = null;
 // Cleared whenever the user changes the filters.
 let pinnedPeakId = null;
 
+// localStorage may be missing or throw (e.g. blocked storage): the app keeps
+// working for the current visit, it just cannot save.
+function getStorage() {
+    try {
+        return window.localStorage || null;
+    } catch {
+        return null;
+    }
+}
+
+function readStorage(key) {
+    try {
+        const storage = getStorage();
+        return storage ? storage.getItem(key) : null;
+    } catch {
+        return null;
+    }
+}
+
+// Light / dark theme toggle in the header. The inline script in index.html has
+// already applied the initial theme before first paint; this keeps the button,
+// the saved choice and the device preference in sync afterwards.
+function setupThemeToggle() {
+    const root = document.documentElement;
+    const button = document.getElementById('theme-toggle');
+    const meta = document.querySelector('meta[name="theme-color"]');
+    const systemDark = window.matchMedia(DARK_SCHEME_QUERY);
+    let savedTheme = readSavedTheme(getStorage());
+
+    const applyTheme = theme => {
+        root.setAttribute(THEME_ATTRIBUTE, theme);
+        if (meta) meta.setAttribute('content', THEME_COLORS[theme]);
+        if (button) {
+            button.setAttribute('aria-label', themeToggleLabel(theme));
+            button.querySelector('.theme-toggle-text').textContent = themeToggleText(theme);
+        }
+    };
+
+    applyTheme(resolveTheme(savedTheme, systemDark.matches));
+    // With no saved choice, follow changes to the device setting live.
+    systemDark.addEventListener('change', event => {
+        if (!savedTheme) applyTheme(resolveTheme(null, event.matches));
+    });
+    if (button) {
+        button.addEventListener('click', () => {
+            savedTheme = nextTheme(root.getAttribute(THEME_ATTRIBUTE));
+            // If saving fails, the choice still applies for this visit.
+            saveTheme(getStorage(), savedTheme);
+            applyTheme(savedTheme);
+        });
+    }
+}
+
 async function loadMedia() {
     try {
         const response = await fetch(MEDIA_DATA_URL);
@@ -60,7 +124,7 @@ async function loadPeaks() {
         }
         peaks = await response.json();
         mediaById = (await mediaPromise) || {};
-        completedPeaks = parseStoredCompleted(localStorage.getItem(STORAGE_KEY));
+        completedPeaks = parseStoredCompleted(readStorage(STORAGE_KEY));
         initializeApp();
     } catch (error) {
         console.error('Error loading peaks:', error);
@@ -69,7 +133,12 @@ async function loadPeaks() {
 }
 
 function saveCompletedStatus() {
-    localStorage.setItem(STORAGE_KEY, serializeCompleted(completedPeaks));
+    try {
+        const storage = getStorage();
+        if (storage) storage.setItem(STORAGE_KEY, serializeCompleted(completedPeaks));
+    } catch (error) {
+        console.warn('Could not save progress:', error);
+    }
 }
 
 function initializeApp() {
@@ -248,7 +317,9 @@ function setupEventListeners() {
 
 function showError(message) {
     const container = document.getElementById('peaks-container');
-    container.innerHTML = `<div class="empty-state" role="alert" style="color: #c00;">${escapeHtml(message)}</div>`;
+    container.innerHTML = `<div class="empty-state error-state" role="alert">${escapeHtml(message)}</div>`;
 }
 
+// Module scripts run after the document has been parsed, so the header exists.
+setupThemeToggle();
 document.addEventListener('DOMContentLoaded', loadPeaks);
