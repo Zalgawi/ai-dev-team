@@ -225,6 +225,18 @@ select:focus {
     background-color: #6b5433;
 }
 
+.details-button {
+    width: 100%;
+    margin-top: 0.5rem;
+    background-color: transparent;
+    color: var(--primary-color);
+    border: 2px solid var(--primary-color);
+}
+
+.details-button:hover {
+    background-color: var(--completed-bg);
+}
+
 .loading {
     grid-column: 1 / -1;
     text-align: center;
@@ -291,6 +303,99 @@ footer {
     background-color: var(--completed-color);
 }
 
+/* Peak details dialog */
+/* Lock background scrolling while the modal is open. This also removes the
+   page scrollbar so the dialog is centred in the whole window. */
+html:has(.peak-details-dialog[open]) {
+    overflow: hidden;
+}
+
+.peak-details-dialog {
+    width: 32rem;
+    max-width: calc(100vw - 2rem);
+    max-height: calc(100vh - 2rem);
+    overflow-y: auto;
+    margin: auto;
+    padding: 0;
+    border: none;
+    border-radius: 10px;
+    background-color: var(--card-background);
+    color: var(--text-color);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+}
+
+.peak-details-dialog::backdrop {
+    background-color: rgba(20, 35, 20, 0.6);
+}
+
+.peak-details {
+    padding: 1.5rem;
+    border-top: 6px solid var(--remaining-color);
+}
+
+.peak-details.completed {
+    border-top-color: var(--completed-color);
+}
+
+.peak-details-header {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 0.5rem 1rem;
+    margin-bottom: 1rem;
+}
+
+.peak-details-title {
+    margin-bottom: 0;
+    min-width: 0;
+    overflow-wrap: anywhere;
+}
+
+.details-close-button {
+    flex-shrink: 0;
+    min-height: 44px;
+    background-color: transparent;
+    color: var(--primary-color);
+    border: 2px solid var(--primary-color);
+}
+
+.details-close-button:hover {
+    background-color: var(--completed-bg);
+}
+
+.peak-details-list {
+    margin-bottom: 1.25rem;
+}
+
+.details-row {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 0 1rem;
+    padding: 0.5rem 0;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.details-row dt {
+    color: var(--muted-color);
+}
+
+.details-row dd {
+    font-weight: bold;
+    min-width: 0;
+    overflow-wrap: anywhere;
+}
+
+.details-row dd.peak-status {
+    font-size: 1rem;
+    margin-bottom: 0;
+}
+
+.details-toggle-button {
+    min-height: 44px;
+}
+
 @media (max-width: 600px) {
     header h1 {
         font-size: 1.8rem;
@@ -321,5 +426,19 @@ footer {
     select,
     button {
         width: 100%;
+    }
+
+    .peak-details-dialog {
+        width: calc(100vw - 1rem);
+        max-width: calc(100vw - 1rem);
+        max-height: calc(100vh - 1rem);
+    }
+
+    .peak-details {
+        padding: 1rem;
+    }
+
+    .details-close-button {
+        width: auto;
     }
 }

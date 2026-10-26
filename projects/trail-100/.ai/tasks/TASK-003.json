@@ -1,0 +1,19 @@
+{
+  "id": "TASK-003",
+  "title": "View individual peak information",
+  "description": "Let the user open a details view for any peak showing all information available for it in data/peaks.json, and mark it complete from there. Only display data that exists in the dataset; do not invent or fetch extra peak information.",
+  "status": "completed",
+  "assignedTo": "developer",
+  "priority": "medium",
+  "acceptanceCriteria": [
+    "Each peak card has an accessible control (a button or link with a descriptive accessible name) that opens a details view for that peak",
+    "The details view shows the peak's number, name, region, height in metres, and completion status",
+    "The details view shows the grid reference only when the peak has one in the dataset, and shows nothing misleading when it does not",
+    "The peak can be marked complete or unmarked from the details view, and the card, overall progress and region progress update to match",
+    "The details view can be closed with a visible close control and with the Escape key, and focus returns to the control that opened it",
+    "Keyboard focus moves into the details view when it opens and cannot reach the page behind it while open",
+    "The details view is usable on a 360px-wide mobile screen and on desktop",
+    "Rendering logic for the details view is a pure function in src/peak-utils.js with automated tests, including a peak with and without a grid reference",
+    "Existing functionality and tests keep passing, and npm test exits with code 0"
+  ]
+}
