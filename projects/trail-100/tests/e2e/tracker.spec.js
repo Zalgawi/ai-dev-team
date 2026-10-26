@@ -73,6 +73,9 @@ test('filters by region and status, and resets filters', async ({ page }) => {
 
 test('lists every region with an accessible progress bar', async ({ page }) => {
     const regions = [...new Set(peaks.map(p => p.region))].sort();
+    // The list is collapsed by default on small screens; open it first.
+    const toggle = page.locator('#region-progress-toggle');
+    if ((await toggle.getAttribute('aria-expanded')) !== 'true') await toggle.click();
     const items = page.locator('#region-progress-list li');
     await expect(items).toHaveCount(regions.length);
     await expect(items.locator('.region-name')).toHaveText(regions);

@@ -15,6 +15,12 @@ import {
     hasGridRef,
     hasPhoto,
     hasRoute,
+    hasGpxFile,
+    GENERIC_GPX_NOTE,
+    pluralize,
+    formatCount,
+    formatProgressText,
+    formatGalleryStatus,
     escapeHtml,
     PAGE_SIZE,
     getPageCount,
@@ -461,7 +467,7 @@ describe('Region progress rendering', () => {
             assertTrue(html.includes('aria-valuemin="0"'), `${r.region} aria-valuemin`);
             assertTrue(html.includes('aria-valuemax="100"'), `${r.region} aria-valuemax`);
             assertTrue(html.includes(`aria-label="${escapeHtml(r.region)} completion"`), `${r.region} accessible name`);
-            assertTrue(html.includes(`${r.completed} / ${r.total} peaks`), `${r.region} count`);
+            assertTrue(html.includes(`${r.completed} / ${r.total} ${r.total === 1 ? 'peak' : 'peaks'} ·`), `${r.region} count`);
         });
     });
 
@@ -1092,10 +1098,13 @@ describe('Peak media data (data/peak-media.json)', () => {
         });
     });
 
-    it('routes should be either null or complete (tests do not assume how many exist)', () => {
+    it('routes should be null or have a url; gpxUrl is a URL or null (tests do not assume how many exist)', () => {
         Object.entries(media).forEach(([id, entry]) => {
             if (entry.route === null) return;
-            assertTrue(hasRoute(entry), `${id} route should have url and gpxUrl`);
+            assertTrue(hasRoute(entry), `${id} route should have a url`);
+            const { gpxUrl, gpxNote } = entry.route;
+            assertTrue(gpxUrl === null || /^https?:\/\//.test(gpxUrl), `${id} gpxUrl should be a URL or null`);
+            if (gpxNote !== undefined) assertTrue(typeof gpxNote === 'string', `${id} gpxNote should be text`);
         });
     });
 });
@@ -1200,7 +1209,7 @@ describe('Route section rendering (createRouteSection)', () => {
     beforeAll(() => {
         peaks = loadPeaksData();
         media = loadMediaData();
-        withRoute = peaks.find(p => hasRoute(media[p.id]));
+        withRoute = peaks.find(p => hasGpxFile(media[p.id]));
         withoutRoute = peaks.find(p => media[p.id] && media[p.id].route === null);
     });
 
@@ -1278,7 +1287,9 @@ describe('Route section rendering (createRouteSection)', () => {
         peaks.forEach(p => {
             const html = createPeakDetails(p, false, media[p.id]);
             assertTrue(html.includes(`data-peak-id="${escapeHtml(p.id)}"`));
-            assertEqual(html.includes('Download GPX'), hasRoute(media[p.id]), `${p.id} route state`);
+            assertEqual(html.includes('Download GPX'), hasGpxFile(media[p.id]), `${p.id} GPX link state`);
+            assertEqual(html.includes('View route page'), hasRoute(media[p.id]), `${p.id} route link state`);
+            assertFalse(/href="#"/.test(html), `${p.id} has no placeholder links`);
             assertFalse(/href="(null|undefined|)"/.test(html), `${p.id} has no broken links`);
         });
     });
@@ -1318,6 +1329,189 @@ describe('Gallery wiring and design constraints', () => {
         assertTrue(html.includes('<header class="hero">'));
         assertTrue(html.includes('id="gallery-status"'));
         assertTrue(html.includes('<div id="pagination"></div>'));
+    });
+});
+
+
+// ---------------------------------------------------------------------------
+// TASK-005: routes without a direct GPX file, dashboard layout, counts
+// ---------------------------------------------------------------------------
+describe('Routes without a direct GPX file', () => {
+    let peaks;
+    let media;
+    beforeAll(() => { peaks = loadPeaksData(); media = loadMediaData(); });
+
+    const withGpx = { route: { title: 'Ridge walk', url: 'https://example.org/route', gpxUrl: 'https://example.org/route.gpx', source: 'Example Walks' } };
+    const withNote = { route: { title: 'Glen circuit', url: 'https://example.org/glen', gpxUrl: null, gpxNote: 'GPX download on the route page (free account)', source: 'Example Hills' } };
+    const withoutNote = { route: { title: 'Corrie round', url: 'https://example.org/corrie', gpxUrl: null, source: 'Example Hills' } };
+    const garminSteps = html => [...html.matchAll(/<li>([\s\S]*?)<\/li>/g)].map(m => m[1]);
+
+    it('hasRoute needs only a url; hasGpxFile also needs a gpxUrl', () => {
+        assertTrue(hasRoute(withGpx) && hasGpxFile(withGpx));
+        assertTrue(hasRoute(withNote));
+        assertFalse(hasGpxFile(withNote));
+        assertTrue(hasRoute(withoutNote));
+        assertFalse(hasGpxFile(withoutNote));
+        for (const entry of [null, undefined, {}, { route: null }, { route: { title: 'x', url: '', gpxUrl: 'https://e.org/g.gpx' } }, { route: { title: 'x', gpxUrl: null } }]) {
+            assertFalse(hasRoute(entry), 'No url means no usable route');
+            assertFalse(hasGpxFile(entry), 'No url means no GPX link either');
+        }
+    });
+
+    it('a route with gpxUrl keeps the Download GPX link and the direct-download first step', () => {
+        const html = createRouteSection(withGpx);
+        assertTrue(/<a class="gpx-link" href="https:\/\/example.org\/route.gpx"[^>]*>Download GPX/.test(html));
+        assertTrue(/<a class="route-link" href="https:\/\/example.org\/route"[^>]*>View route page/.test(html));
+        assertFalse(html.includes('route-gpx-note'), 'No note for a direct GPX file');
+        assertEqual(garminSteps(html)[0], 'Download the GPX file to your computer.');
+        assertFalse(html.includes('not available'));
+    });
+
+    it('a route with gpxUrl null and a gpxNote shows title, source, route link and the note, with no GPX link', () => {
+        const html = createRouteSection(withNote);
+        assertTrue(html.includes('Glen circuit'));
+        assertTrue(html.includes('Route source: Example Hills'));
+        assertTrue(/<a class="route-link" href="https:\/\/example.org\/glen"[^>]*>View route page/.test(html));
+        assertTrue(html.includes('<p class="route-gpx-note">GPX download on the route page (free account)</p>'));
+        assertFalse(html.includes('Download GPX'), 'No Download GPX link');
+        assertFalse(html.includes('gpx-link'), 'No GPX link element');
+        assertEqual(anchors(html).length, 1, 'Only the route page link');
+        assertFalse(/href="(#|null|undefined|)"/.test(html), 'No empty, # or null hrefs');
+        assertFalse(/\bnull\b|undefined/.test(html));
+        assertFalse(html.includes('not available'), 'It is a route, not a missing route');
+    });
+
+    it('a route with gpxUrl null and no gpxNote shows a generic note', () => {
+        const html = createRouteSection(withoutNote);
+        assertTrue(html.includes('Corrie round'));
+        assertTrue(html.includes(`<p class="route-gpx-note">${escapeHtml(GENERIC_GPX_NOTE)}</p>`));
+        assertTrue(/route page/i.test(GENERIC_GPX_NOTE), 'Generic note points to the route page');
+        assertTrue(/<a class="route-link" href="https:\/\/example.org\/corrie"/.test(html));
+        assertFalse(html.includes('Download GPX'));
+        assertEqual(anchors(html).length, 1);
+        assertFalse(/href="(#|null|undefined|)"/.test(html));
+        assertFalse(/\bnull\b|undefined/.test(html));
+        // Empty / blank notes also fall back to the generic note.
+        assertTrue(createRouteSection({ route: { ...withoutNote.route, gpxNote: '  ' } }).includes(escapeHtml(GENERIC_GPX_NOTE)));
+    });
+
+    it('Garmin steps tell the user to download the GPX from the route page when there is no direct file', () => {
+        for (const entry of [withNote, withoutNote]) {
+            const steps = garminSteps(createRouteSection(entry));
+            assertEqual(steps.length, 4);
+            assertTrue(/route page/i.test(steps[0]) && /download the GPX/i.test(steps[0]), `First step: ${steps[0]}`);
+            assertTrue(/Courses/.test(steps[1]) && /Import/.test(steps[1]));
+        }
+    });
+
+    it('no route (or a route without a url) shows the not-available message with no links', () => {
+        for (const entry of [null, { route: null }, { route: { title: 'x', url: null, gpxUrl: null, gpxNote: 'n' } }]) {
+            const html = createRouteSection(entry);
+            assertTrue(html.includes('A verified walking route is not available for this peak yet.'));
+            assertFalse(html.includes('<a'));
+            assertFalse(html.includes('route-gpx-note'));
+            assertFalse(html.includes('Garmin'));
+        }
+    });
+
+    it('escapes HTML in the gpxNote', () => {
+        const html = createRouteSection({ route: { ...withNote.route, gpxNote: '<img src=x onerror=alert(1)>' } });
+        assertFalse(html.includes('<img'));
+        assertTrue(html.includes('&lt;img'));
+    });
+
+    it('renders every dataset route without a direct GPX file with its own note and route link', () => {
+        const noGpx = peaks.filter(p => hasRoute(media[p.id]) && !hasGpxFile(media[p.id]));
+        noGpx.forEach(p => {
+            const route = media[p.id].route;
+            const html = createPeakDetails(p, false, media[p.id]);
+            assertTrue(html.includes(`href="${escapeHtml(route.url)}"`), `${p.id} route link`);
+            const note = typeof route.gpxNote === 'string' && route.gpxNote.trim() ? route.gpxNote : GENERIC_GPX_NOTE;
+            assertTrue(html.includes(escapeHtml(note)), `${p.id} note`);
+            assertFalse(html.includes('Download GPX'), `${p.id} no GPX link`);
+            assertFalse(html.includes('not available for this peak yet'), `${p.id} is a route`);
+        });
+    });
+});
+
+describe('Singular / plural counts', () => {
+    it('pluralize should use the singular only for exactly 1', () => {
+        assertEqual(pluralize(1, 'peak'), 'peak');
+        assertEqual(pluralize(0, 'peak'), 'peaks');
+        assertEqual(pluralize(2, 'peak'), 'peaks');
+        assertEqual(pluralize(25, 'peak'), 'peaks');
+        assertEqual(pluralize(100, 'peak'), 'peaks');
+        assertEqual(pluralize('1', 'peak'), 'peak', 'Numeric strings work too');
+        assertEqual(pluralize(2, 'person', 'people'), 'people', 'Custom plural');
+        assertEqual(pluralize(1, 'person', 'people'), 'person');
+    });
+
+    it('formatCount should prefix the count', () => {
+        assertEqual(formatCount(1, 'peak'), '1 peak');
+        assertEqual(formatCount(0, 'peak'), '0 peaks');
+        assertEqual(formatCount(21, 'peak'), '21 peaks');
+    });
+
+    it('region progress should say "1 / 1 peak" and "x / n peaks" otherwise', () => {
+        const one = createRegionProgressItem({ region: 'Dartmoor', completed: 1, total: 1, percentage: 100 });
+        assertTrue(one.includes('1 / 1 peak ·'), 'Singular for a one-peak region');
+        assertFalse(one.includes('1 / 1 peaks'));
+        assertTrue(one.includes('(1 of 1 peak)'), 'Accessible value text is grammatical too');
+        const zero = createRegionProgressItem({ region: 'Dartmoor', completed: 0, total: 1, percentage: 0 });
+        assertTrue(zero.includes('0 / 1 peak ·'));
+        const many = createRegionProgressItem({ region: 'Lake District', completed: 1, total: 25, percentage: 4 });
+        assertTrue(many.includes('1 / 25 peaks ·'));
+        assertTrue(many.includes('(1 of 25 peaks)'));
+    });
+
+    it('every dataset region uses the right word', () => {
+        const peaks = loadPeaksData();
+        calculateRegionProgress(new Set(), peaks).forEach(r => {
+            const html = createRegionProgressItem(r);
+            assertTrue(html.includes(`0 / ${r.total} ${r.total === 1 ? 'peak' : 'peaks'} ·`), `${r.region} count`);
+            if (r.total === 1) assertFalse(html.includes('/ 1 peaks'), `${r.region} should be singular`);
+        });
+    });
+
+    it('overall progress and gallery status text use the helper', () => {
+        assertEqual(formatProgressText({ completed: 1, remaining: 99, total: 100, percentage: 1 }), '1% complete (1/100 peaks, 99 remaining)');
+        assertEqual(formatProgressText({ completed: 0, remaining: 1, total: 1, percentage: 0 }), '0% complete (0/1 peak, 1 remaining)');
+        assertEqual(formatGalleryStatus({ start: 1, end: 12, totalItems: 100, page: 1, pageCount: 9 }), 'Showing 1–12 of 100 peaks (page 1 of 9)');
+        assertEqual(formatGalleryStatus({ start: 1, end: 1, totalItems: 1, page: 1, pageCount: 1 }), 'Showing 1–1 of 1 peak');
+        const js = readSource('src/app.js');
+        assertTrue(js.includes('formatProgressText(progress)'));
+        assertTrue(js.includes('formatGalleryStatus(result)'));
+        assertFalse(/\} peaks/.test(js), 'app.js should not hard-code "peaks" after a count');
+    });
+});
+
+describe('Dashboard layout and region disclosure', () => {
+    let css;
+    let html;
+    beforeAll(() => { css = readSource('src/style.css'); html = readSource('src/index.html'); });
+
+    it('region list is behind a disclosure button that is closed in the initial HTML', () => {
+        assertTrue(/<button type="button" id="region-progress-toggle"[^>]*aria-expanded="false"[^>]*aria-controls="region-progress-list"/.test(html));
+        assertTrue(/<h2 id="region-progress-heading"[^>]*>\s*<button[^>]*id="region-progress-toggle"/.test(html), 'Button sits inside the labelled heading');
+        assertTrue(/<ul id="region-progress-list"[^>]*hidden/.test(html), 'List starts hidden');
+        assertTrue(/\.region-progress-list\[hidden\]\s*\{[^}]*display:\s*none/.test(css), 'hidden wins over display: grid');
+    });
+
+    it('app.js opens the list by default only on screens wider than 600px and keeps aria-expanded in sync', () => {
+        const js = readSource('src/app.js');
+        assertTrue(js.includes("'(max-width: 600px)'"));
+        const fn = js.match(/function setupRegionDisclosure\(\)\s*\{([\s\S]*?)\n\}/);
+        assertTrue(fn, 'setupRegionDisclosure should exist');
+        assertTrue(fn[1].includes("setAttribute('aria-expanded'"));
+        assertTrue(fn[1].includes('list.hidden = !expanded'));
+        assertTrue(fn[1].includes('setExpanded(!narrow.matches)'));
+    });
+
+    it('dashboard cards are not stretched to a shared row height', () => {
+        const dash = css.match(/\.dashboard\s*\{([^}]*)\}/);
+        assertTrue(dash && /align-items:\s*start/.test(dash[1]));
+        const container = css.match(/\.progress-container\s*\{([^}]*)\}/);
+        assertFalse(/height:\s*100%/.test(container[1]), 'Progress cards use their natural height');
     });
 });
 

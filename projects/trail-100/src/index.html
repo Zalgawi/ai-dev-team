@@ -35,8 +35,13 @@
 
             <section id="region-progress" class="panel" aria-labelledby="region-progress-heading">
                 <div class="progress-container">
-                    <h2 id="region-progress-heading">Progress by Region</h2>
-                    <ul id="region-progress-list" class="region-progress-list"></ul>
+                    <h2 id="region-progress-heading" class="region-progress-heading">
+                        <button type="button" id="region-progress-toggle" class="region-progress-toggle" aria-expanded="false" aria-controls="region-progress-list">
+                            <span class="region-progress-toggle-label">Progress by Region</span>
+                            <span class="region-progress-toggle-icon" aria-hidden="true"></span>
+                        </button>
+                    </h2>
+                    <ul id="region-progress-list" class="region-progress-list" hidden></ul>
                 </div>
             </section>
         </div>

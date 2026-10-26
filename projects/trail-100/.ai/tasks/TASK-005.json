@@ -2,7 +2,7 @@
   "id": "TASK-005",
   "title": "Support routes without a direct GPX file, and dashboard layout polish",
   "description": "data/peak-media.json now has a route for every peak. 41 routes (source: Walkhighlands) have gpxUrl: null and a gpxNote explaining that the GPX is downloaded from the route page with a free account. The UI currently treats these as 'no route', which is wrong. Also fix layout issues found in screenshot review. Do NOT modify data/peaks.json or data/peak-media.json and do not invent URLs.",
-  "status": "todo",
+  "status": "completed",
   "assignedTo": "developer",
   "priority": "high",
   "dataNotes": [
