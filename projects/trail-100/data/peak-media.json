@@ -9,7 +9,13 @@
       "sourceUrl": "https://commons.wikimedia.org/wiki/File:A-Mhaighdean-from-Slioch.jpg",
       "source": "Wikimedia Commons"
     },
-    "route": null
+    "route": {
+      "title": "Fisherfield 6, from Shenavall",
+      "url": "https://www.walkhighlands.co.uk/ullapool/fisherfield-6.shtml",
+      "gpxUrl": null,
+      "gpxNote": "GPX download on the route page (free Walkhighlands account)",
+      "source": "Walkhighlands"
+    }
   },
   "an-teallach": {
     "image": {
@@ -21,7 +27,13 @@
       "sourceUrl": "https://commons.wikimedia.org/wiki/File:The_Central_Ridge_of_An_Teallach_-_geograph.org.uk_-_66461.jpg",
       "source": "Wikimedia Commons"
     },
-    "route": null
+    "route": {
+      "title": "An Teallach, Dundonnell",
+      "url": "https://www.walkhighlands.co.uk/ullapool/anteallach.shtml",
+      "gpxUrl": null,
+      "gpxNote": "GPX download on the route page (free Walkhighlands account)",
+      "source": "Walkhighlands"
+    }
   },
   "aran-fawddwy": {
     "image": {
@@ -33,7 +45,12 @@
       "sourceUrl": "https://commons.wikimedia.org/wiki/File:Aran_Fawddwy.jpg",
       "source": "Wikimedia Commons"
     },
-    "route": null
+    "route": {
+      "title": "Cwm Cywarch, Bryn Hafod, Aran Fawddwy and Drysgol",
+      "url": "https://www.walkingenglishman.com/outandabout/wales/46fawddwy.html",
+      "gpxUrl": "https://www.walkingenglishman.com/outandabout/wales/46fawddwy/trackfile.gpx",
+      "source": "The Walking Englishman"
+    }
   },
   "arenig-fach": {
     "image": {
@@ -45,7 +62,12 @@
       "sourceUrl": "https://commons.wikimedia.org/wiki/File:Moorland_above_Llyn_Arenig_Fach_779212.jpg",
       "source": "Wikimedia Commons"
     },
-    "route": null
+    "route": {
+      "title": "Walk up Arenig Fach From Llyn Celyn",
+      "url": "https://www.mudandroutes.com/routes/arenig-fach-from-llyn-celyn/",
+      "gpxUrl": "https://www.mudandroutes.com/wp-content/uploads/2011/09/280111_arenig_fach5.gpx",
+      "source": "Mud and Routes"
+    }
   },
   "askival": {
     "image": {
@@ -57,7 +79,13 @@
       "sourceUrl": "https://commons.wikimedia.org/wiki/File:Askival.jpg",
       "source": "Wikimedia Commons"
     },
-    "route": null
+    "route": {
+      "title": "Rum Cuillin traverse",
+      "url": "https://www.walkhighlands.co.uk/islands/rum-cuillin.shtml",
+      "gpxUrl": null,
+      "gpxNote": "GPX download on the route page (free Walkhighlands account)",
+      "source": "Walkhighlands"
+    }
   },
   "beinn-alligin": {
     "image": {
@@ -69,7 +97,13 @@
       "sourceUrl": "https://commons.wikimedia.org/wiki/File:Beinn_Alligin_in_Autumn_Sunshine_-_geograph.org.uk_-_144409.jpg",
       "source": "Wikimedia Commons"
     },
-    "route": null
+    "route": {
+      "title": "Beinn Alligin",
+      "url": "https://www.walkhighlands.co.uk/torridon/Beinnalligin.shtml",
+      "gpxUrl": null,
+      "gpxNote": "GPX download on the route page (free Walkhighlands account)",
+      "source": "Walkhighlands"
+    }
   },
   "beinn-an-oir": {
     "image": {
@@ -81,7 +115,13 @@
       "sourceUrl": "https://commons.wikimedia.org/wiki/File:SunsetOverThePaps.jpg",
       "source": "Wikimedia Commons"
     },
-    "route": null
+    "route": {
+      "title": "Beinn an Oir, via Loch an t-Siob",
+      "url": "https://www.walkhighlands.co.uk/islay-jura/beinn-an-oir.shtml",
+      "gpxUrl": null,
+      "gpxNote": "GPX download on the route page (free Walkhighlands account)",
+      "source": "Walkhighlands"
+    }
   },
   "beinn-dearg-mor": {
     "image": {
@@ -93,7 +133,13 @@
       "sourceUrl": "https://commons.wikimedia.org/wiki/File:Beinn_Dearg_Mor.JPG",
       "source": "Wikimedia Commons"
     },
-    "route": null
+    "route": {
+      "title": "Beinn Dearg Mòr (hill page with route notes)",
+      "url": "https://www.walkhighlands.co.uk/corbetts/beinn-dearg-mor",
+      "gpxUrl": null,
+      "gpxNote": "GPX download on the route page (free Walkhighlands account)",
+      "source": "Walkhighlands"
+    }
   },
   "beinn-eighe": {
     "image": {
@@ -105,7 +151,13 @@
       "sourceUrl": "https://commons.wikimedia.org/wiki/File:Beinn_Eighe_from_Loch_Clair_-_geograph.org.uk_-_7601.jpg",
       "source": "Wikimedia Commons"
     },
-    "route": null
+    "route": {
+      "title": "Beinn Eighe (western summits)",
+      "url": "https://www.walkhighlands.co.uk/torridon/Beinneighe.shtml",
+      "gpxUrl": null,
+      "gpxNote": "GPX download on the route page (free Walkhighlands account)",
+      "source": "Walkhighlands"
+    }
   },
   "ben-alder": {
     "image": {
@@ -117,7 +169,13 @@
       "sourceUrl": "https://commons.wikimedia.org/wiki/File:Ben_alder.jpg",
       "source": "Wikimedia Commons"
     },
-    "route": null
+    "route": {
+      "title": "Ben Alder and Beinn Bheòil from Culra",
+      "url": "https://www.walkhighlands.co.uk/cairngorms/ben-alder.shtml",
+      "gpxUrl": null,
+      "gpxNote": "GPX download on the route page (free Walkhighlands account)",
+      "source": "Walkhighlands"
+    }
   },
   "ben-cruachan": {
     "image": {
@@ -129,7 +187,13 @@
       "sourceUrl": "https://commons.wikimedia.org/wiki/File:Cruachan.jpg",
       "source": "Wikimedia Commons"
     },
-    "route": null
+    "route": {
+      "title": "Ben Cruachan and Stob Daimh",
+      "url": "https://www.walkhighlands.co.uk/argyll/ben-cruachan.shtml",
+      "gpxUrl": null,
+      "gpxNote": "GPX download on the route page (free Walkhighlands account)",
+      "source": "Walkhighlands"
+    }
   },
   "ben-hope": {
     "image": {
@@ -141,7 +205,13 @@
       "sourceUrl": "https://commons.wikimedia.org/wiki/File:BenHopefromLochEriboll.jpg",
       "source": "Wikimedia Commons"
     },
-    "route": null
+    "route": {
+      "title": "Ben Hope",
+      "url": "https://www.walkhighlands.co.uk/sutherland/ben-hope.shtml",
+      "gpxUrl": null,
+      "gpxNote": "GPX download on the route page (free Walkhighlands account)",
+      "source": "Walkhighlands"
+    }
   },
   "ben-lawers": {
     "image": {
@@ -153,7 +223,13 @@
       "sourceUrl": "https://commons.wikimedia.org/wiki/File:2011_Schotland_An_Stuc_(links_1118_m)_en_Ben_Lawers_6-06-2011_14-54-13.png",
       "source": "Wikimedia Commons"
     },
-    "route": null
+    "route": {
+      "title": "Ben Lawers and Beinn Ghlas",
+      "url": "https://www.walkhighlands.co.uk/perthshire/ben-lawers.shtml",
+      "gpxUrl": null,
+      "gpxNote": "GPX download on the route page (free Walkhighlands account)",
+      "source": "Walkhighlands"
+    }
   },
   "ben-lomond": {
     "image": {
@@ -165,7 +241,13 @@
       "sourceUrl": "https://commons.wikimedia.org/wiki/File:Loch_Lomond_Lomond_Mountain.jpg",
       "source": "Wikimedia Commons"
     },
-    "route": null
+    "route": {
+      "title": "Ben Lomond",
+      "url": "https://www.walkhighlands.co.uk/lochlomond/ben-lomond.shtml",
+      "gpxUrl": null,
+      "gpxNote": "GPX download on the route page (free Walkhighlands account)",
+      "source": "Walkhighlands"
+    }
   },
   "ben-lui": {
     "image": {
@@ -177,7 +259,13 @@
       "sourceUrl": "https://commons.wikimedia.org/wiki/File:Ben_lui_northern_corrie.jpg",
       "source": "Wikimedia Commons"
     },
-    "route": null
+    "route": {
+      "title": "Ben Lui and Beinn a'Chlèibh",
+      "url": "https://www.walkhighlands.co.uk/argyll/ben-lui.shtml",
+      "gpxUrl": null,
+      "gpxNote": "GPX download on the route page (free Walkhighlands account)",
+      "source": "Walkhighlands"
+    }
   },
   "ben-macdui": {
     "image": {
@@ -189,7 +277,13 @@
       "sourceUrl": "https://commons.wikimedia.org/wiki/File:Ben_Macdui_from_Derry_Cairngorm.jpg",
       "source": "Wikimedia Commons"
     },
-    "route": null
+    "route": {
+      "title": "Ben Macdui and Cairn Gorm",
+      "url": "https://www.walkhighlands.co.uk/cairngorms/macdui-cairngorm.shtml",
+      "gpxUrl": null,
+      "gpxNote": "GPX download on the route page (free Walkhighlands account)",
+      "source": "Walkhighlands"
+    }
   },
   "ben-more-south-highlands": {
     "image": {
@@ -201,7 +295,13 @@
       "sourceUrl": "https://commons.wikimedia.org/wiki/File:Ben_More,_Crainlarich.jpg",
       "source": "Wikimedia Commons"
     },
-    "route": null
+    "route": {
+      "title": "Ben More and Stob Binnein",
+      "url": "https://www.walkhighlands.co.uk/lochlomond/ben-more.shtml",
+      "gpxUrl": null,
+      "gpxNote": "GPX download on the route page (free Walkhighlands account)",
+      "source": "Walkhighlands"
+    }
   },
   "ben-more-isle-of-mull": {
     "image": {
@@ -213,7 +313,13 @@
       "sourceUrl": "https://commons.wikimedia.org/wiki/File:Ben_More_(Mull).jpg",
       "source": "Wikimedia Commons"
     },
-    "route": null
+    "route": {
+      "title": "Ben More (Mull) from Dhiseig",
+      "url": "https://www.walkhighlands.co.uk/mull/ben-more-mull.shtml",
+      "gpxUrl": null,
+      "gpxNote": "GPX download on the route page (free Walkhighlands account)",
+      "source": "Walkhighlands"
+    }
   },
   "ben-nevis": {
     "image": {
@@ -225,7 +331,13 @@
       "sourceUrl": "https://commons.wikimedia.org/wiki/File:Ben_nevis.jpg",
       "source": "Wikimedia Commons"
     },
-    "route": null
+    "route": {
+      "title": "Ben Nevis by the Mountain Path",
+      "url": "https://www.walkhighlands.co.uk/fortwilliam/bennevis.shtml",
+      "gpxUrl": null,
+      "gpxNote": "GPX download on the route page (free Walkhighlands account)",
+      "source": "Walkhighlands"
+    }
   },
   "bidean-nam-bian": {
     "image": {
@@ -237,7 +349,13 @@
       "sourceUrl": "https://commons.wikimedia.org/wiki/File:Bidean_nam_Bian_-_geograph.org.uk_-_1012165.jpg",
       "source": "Wikimedia Commons"
     },
-    "route": null
+    "route": {
+      "title": "Bidean nam Bian",
+      "url": "https://www.walkhighlands.co.uk/fortwilliam/bideannambian.shtml",
+      "gpxUrl": null,
+      "gpxNote": "GPX download on the route page (free Walkhighlands account)",
+      "source": "Walkhighlands"
+    }
   },
   "bla-bheinn": {
     "image": {
@@ -249,7 +367,13 @@
       "sourceUrl": "https://commons.wikimedia.org/wiki/File:Blaven_geograph.jpg",
       "source": "Wikimedia Commons"
     },
-    "route": null
+    "route": {
+      "title": "Blà Bheinn (Blaven)",
+      "url": "https://www.walkhighlands.co.uk/skye/blabheinn.shtml",
+      "gpxUrl": null,
+      "gpxNote": "GPX download on the route page (free Walkhighlands account)",
+      "source": "Walkhighlands"
+    }
   },
   "black-combe": {
     "image": {
@@ -261,7 +385,12 @@
       "sourceUrl": "https://commons.wikimedia.org/wiki/File:Black_combe_from_foxfield.JPG",
       "source": "Wikimedia Commons"
     },
-    "route": null
+    "route": {
+      "title": "The Outlying Fells of Lakeland in 34 Walks — Black Combe",
+      "url": "https://www.walkingenglishman.com/outlyingfells03.html",
+      "gpxUrl": "https://www.walkingenglishman.com/lists/outlyingfells/03blackcombe/trackfile.gpx",
+      "source": "The Walking Englishman"
+    }
   },
   "blencathra": {
     "image": {
@@ -307,7 +436,13 @@
       "sourceUrl": "https://commons.wikimedia.org/wiki/File:Braeriach.jpg",
       "source": "Wikimedia Commons"
     },
-    "route": null
+    "route": {
+      "title": "Braeriach, circuit from Whitewell",
+      "url": "https://www.walkhighlands.co.uk/cairngorms/braeriach.shtml",
+      "gpxUrl": null,
+      "gpxNote": "GPX download on the route page (free Walkhighlands account)",
+      "source": "Walkhighlands"
+    }
   },
   "buachaille-etive-mor": {
     "image": {
@@ -319,7 +454,13 @@
       "sourceUrl": "https://commons.wikimedia.org/wiki/File:Buachaille_Etive_Mor.jpg",
       "source": "Wikimedia Commons"
     },
-    "route": null
+    "route": {
+      "title": "Buachaille Etive Mòr",
+      "url": "https://www.walkhighlands.co.uk/fortwilliam/buachailleetivemor.shtml",
+      "gpxUrl": null,
+      "gpxNote": "GPX download on the route page (free Walkhighlands account)",
+      "source": "Walkhighlands"
+    }
   },
   "cadair-idris": {
     "image": {
@@ -450,7 +591,12 @@
       "sourceUrl": "https://commons.wikimedia.org/wiki/File:Elidir_Fawr_ridge,_as_seen_from_the_ridge_along_Mynydd_Perfedd,_above_the_reservoir,_with_Moel_Cynghorion_in_the_background.jpg",
       "source": "Wikimedia Commons"
     },
-    "route": null
+    "route": {
+      "title": "Walk up Elidir Fawr From Marchlyn Mawr and Deiniolen",
+      "url": "https://www.mudandroutes.com/routes/snowdonia-walks-marchlyn-mawr-circuit/",
+      "gpxUrl": "https://www.mudandroutes.com/wp-content/uploads/2011/12/marchllyn.gpx",
+      "source": "Mud and Routes"
+    }
   },
   "fairfield": {
     "image": {
@@ -479,7 +625,12 @@
       "sourceUrl": "https://commons.wikimedia.org/wiki/File:Bannaubrych.JPG",
       "source": "Wikimedia Commons"
     },
-    "route": null
+    "route": {
+      "title": "Picws Du, Fan Foel, Fan Brycheiniog and Llyn y Fan Fawr",
+      "url": "https://www.walkingenglishman.com/outandabout/wales/61picws.html",
+      "gpxUrl": "https://www.walkingenglishman.com/outandabout/wales/61picws/trackfile.gpx",
+      "source": "The Walking Englishman"
+    }
   },
   "foinaven": {
     "image": {
@@ -491,7 +642,13 @@
       "sourceUrl": "https://commons.wikimedia.org/wiki/File:Foinaven_from_Achriesgill.jpg",
       "source": "Wikimedia Commons"
     },
-    "route": null
+    "route": {
+      "title": "Foinaven circuit",
+      "url": "https://www.walkhighlands.co.uk/sutherland/foinaven.shtml",
+      "gpxUrl": null,
+      "gpxNote": "GPX download on the route page (free Walkhighlands account)",
+      "source": "Walkhighlands"
+    }
   },
   "garbh-bheinn": {
     "image": {
@@ -503,7 +660,13 @@
       "sourceUrl": "https://commons.wikimedia.org/wiki/File:Garbh_Bheinn_from_SE_top.jpg",
       "source": "Wikimedia Commons"
     },
-    "route": null
+    "route": {
+      "title": "Garbh Bheinn of Ardgour",
+      "url": "https://www.walkhighlands.co.uk/fortwilliam/garbh-bheinn-ardgour.shtml",
+      "gpxUrl": null,
+      "gpxNote": "GPX download on the route page (free Walkhighlands account)",
+      "source": "Walkhighlands"
+    }
   },
   "glaramara": {
     "image": {
@@ -549,7 +712,13 @@
       "sourceUrl": "https://commons.wikimedia.org/wiki/File:Goatfell_from_Brodick_Harbour.jpg",
       "source": "Wikimedia Commons"
     },
-    "route": null
+    "route": {
+      "title": "Goatfell, from Brodick Castle",
+      "url": "https://www.walkhighlands.co.uk/arran/goatfell.shtml",
+      "gpxUrl": null,
+      "gpxNote": "GPX download on the route page (free Walkhighlands account)",
+      "source": "Walkhighlands"
+    }
   },
   "grasmoor": {
     "image": {
@@ -748,7 +917,13 @@
       "sourceUrl": "https://commons.wikimedia.org/wiki/File:Ladhar_Bheinn.jpg",
       "source": "Wikimedia Commons"
     },
-    "route": null
+    "route": {
+      "title": "Ladhar Bheinn from Inverie, Knoydart",
+      "url": "https://www.walkhighlands.co.uk/fortwilliam/ladhar-bheinn.shtml",
+      "gpxUrl": null,
+      "gpxNote": "GPX download on the route page (free Walkhighlands account)",
+      "source": "Walkhighlands"
+    }
   },
   "liathach": {
     "image": {
@@ -760,7 +935,13 @@
       "sourceUrl": "https://commons.wikimedia.org/wiki/File:Liathach_from_Loch_Clair_May_2006_-_geograph.org.uk_-_282854.jpg",
       "source": "Wikimedia Commons"
     },
-    "route": null
+    "route": {
+      "title": "Liathach, Glen Torridon",
+      "url": "https://www.walkhighlands.co.uk/torridon/Liathach.shtml",
+      "gpxUrl": null,
+      "gpxNote": "GPX download on the route page (free Walkhighlands account)",
+      "source": "Walkhighlands"
+    }
   },
   "lochnagar": {
     "image": {
@@ -772,7 +953,13 @@
       "sourceUrl": "https://commons.wikimedia.org/wiki/File:Lochnagar_-_Mountain_and_Corrie_Lochan._-_geograph.org.uk_-_113301.jpg",
       "source": "Wikimedia Commons"
     },
-    "route": null
+    "route": {
+      "title": "Lochnagar circuit, Glen Muick",
+      "url": "https://www.walkhighlands.co.uk/cairngorms/lochnagar.shtml",
+      "gpxUrl": null,
+      "gpxNote": "GPX download on the route page (free Walkhighlands account)",
+      "source": "Walkhighlands"
+    }
   },
   "maesglaese": {
     "image": {
@@ -784,7 +971,12 @@
       "sourceUrl": "https://commons.wikimedia.org/wiki/File:Maesglase.jpg",
       "source": "Wikimedia Commons"
     },
-    "route": null
+    "route": {
+      "title": "Maesglase and Waun Oer",
+      "url": "https://www.mudandroutes.com/routes/snowdonia-walks-walk-eryri-maesglase-and-waun-oer/",
+      "gpxUrl": "https://www.mudandroutes.com/wp-content/uploads/2011/08/maesglase.gpx",
+      "source": "Mud and Routes"
+    }
   },
   "merrick": {
     "image": {
@@ -796,7 +988,13 @@
       "sourceUrl": "https://commons.wikimedia.org/wiki/File:Awful_Hand_and_Loch_Enoch.jpg",
       "source": "Wikimedia Commons"
     },
-    "route": null
+    "route": {
+      "title": "The Merrick, from Loch Trool",
+      "url": "https://www.walkhighlands.co.uk/galloway/merrick.shtml",
+      "gpxUrl": null,
+      "gpxNote": "GPX download on the route page (free Walkhighlands account)",
+      "source": "Walkhighlands"
+    }
   },
   "moel-hebog": {
     "image": {
@@ -825,7 +1023,12 @@
       "sourceUrl": "https://commons.wikimedia.org/wiki/File:MoelSiabod.jpg",
       "source": "Wikimedia Commons"
     },
-    "route": null
+    "route": {
+      "title": "Walk up Moel Siabod from Pont Cyfyng and Capel Curig",
+      "url": "https://www.mudandroutes.com/routes/moel-siabod-from-pont-cyfyng/",
+      "gpxUrl": "https://www.mudandroutes.com/wp-content/uploads/2011/07/siabod1.gpx",
+      "source": "Mud and Routes"
+    }
   },
   "mynydd-drws-y-coed": {
     "image": {
@@ -837,7 +1040,12 @@
       "sourceUrl": "https://commons.wikimedia.org/wiki/File:Drwsycoed.jpg",
       "source": "Wikimedia Commons"
     },
-    "route": null
+    "route": {
+      "title": "Nantlle Ridge Circuit From Rhyd Ddu - Cwm Dwyfor Return",
+      "url": "https://www.mudandroutes.com/routes/nantlle-ridge-circuit-from-rhyd-ddu/",
+      "gpxUrl": "https://www.mudandroutes.com/wp-content/uploads/2017/09/nantlle_ridge_circuit.gpx",
+      "source": "Mud and Routes"
+    }
   },
   "pen-y-fan": {
     "image": {
@@ -934,7 +1142,12 @@
       "sourceUrl": "https://commons.wikimedia.org/wiki/File:Pumlumon_Fawr.jpg",
       "source": "Wikimedia Commons"
     },
-    "route": null
+    "route": {
+      "title": "County Tops of Wales: Cardiganshire",
+      "url": "https://www.walkingenglishman.com/lists/countytopswales/cardiganshire.html",
+      "gpxUrl": "https://www.walkingenglishman.com/lists/countytopswales/cardiganshire.gpx",
+      "source": "The Walking Englishman"
+    }
   },
   "quinag": {
     "image": {
@@ -946,7 +1159,13 @@
       "sourceUrl": "https://commons.wikimedia.org/wiki/File:Quinag.JPG",
       "source": "Wikimedia Commons"
     },
-    "route": null
+    "route": {
+      "title": "Quinag: three Corbetts",
+      "url": "https://www.walkhighlands.co.uk/ullapool/quinag.shtml",
+      "gpxUrl": null,
+      "gpxNote": "GPX download on the route page (free Walkhighlands account)",
+      "source": "Walkhighlands"
+    }
   },
   "rhinog-fawr": {
     "image": {
@@ -958,7 +1177,12 @@
       "sourceUrl": "https://commons.wikimedia.org/wiki/File:Rhinog_Fawr.jpg",
       "source": "Wikimedia Commons"
     },
-    "route": null
+    "route": {
+      "title": "Walk up Rhinog Fawr and Roman Steps from Cwm Bychan",
+      "url": "https://www.mudandroutes.com/routes/rhinog-fawr-from-cwm-bychan/",
+      "gpxUrl": "https://www.mudandroutes.com/wp-content/uploads/2011/07/rhinogfaw2.gpx",
+      "source": "Mud and Routes"
+    }
   },
   "roseberry-topping": {
     "image": {
@@ -1021,7 +1245,13 @@
       "sourceUrl": "https://commons.wikimedia.org/wiki/File:Schiehallion_01.jpg",
       "source": "Wikimedia Commons"
     },
-    "route": null
+    "route": {
+      "title": "Schiehallion",
+      "url": "https://www.walkhighlands.co.uk/perthshire/schiehallion.shtml",
+      "gpxUrl": null,
+      "gpxNote": "GPX download on the route page (free Walkhighlands account)",
+      "source": "Walkhighlands"
+    }
   },
   "sgurr-a-mhaim": {
     "image": {
@@ -1033,7 +1263,13 @@
       "sourceUrl": "https://commons.wikimedia.org/wiki/File:Sgurr_a%27_Mhaim_from_the_Devils_Ridge.jpg",
       "source": "Wikimedia Commons"
     },
-    "route": null
+    "route": {
+      "title": "The Ring of Steall, Mamores",
+      "url": "https://www.walkhighlands.co.uk/fortwilliam/ringofsteall.shtml",
+      "gpxUrl": null,
+      "gpxNote": "GPX download on the route page (free Walkhighlands account)",
+      "source": "Walkhighlands"
+    }
   },
   "sgurr-alasdair": {
     "image": {
@@ -1045,7 +1281,13 @@
       "sourceUrl": "https://commons.wikimedia.org/wiki/File:Sgurr_alasdair.jpg",
       "source": "Wikimedia Commons"
     },
-    "route": null
+    "route": {
+      "title": "Sgùrr Alasdair",
+      "url": "https://www.walkhighlands.co.uk/skye/sgurralasdair.shtml",
+      "gpxUrl": null,
+      "gpxNote": "GPX download on the route page (free Walkhighlands account)",
+      "source": "Walkhighlands"
+    }
   },
   "sgurr-dearg": {
     "image": {
@@ -1057,7 +1299,13 @@
       "sourceUrl": "https://commons.wikimedia.org/wiki/File:In_pinn.jpg",
       "source": "Wikimedia Commons"
     },
-    "route": null
+    "route": {
+      "title": "Sgùrr Dearg and the In Pinn (walk to the foot of the Pinnacle)",
+      "url": "https://www.walkhighlands.co.uk/skye/innpinn.shtml",
+      "gpxUrl": null,
+      "gpxNote": "GPX download on the route page (free Walkhighlands account)",
+      "source": "Walkhighlands"
+    }
   },
   "sgurr-fhuaran": {
     "image": {
@@ -1069,7 +1317,13 @@
       "sourceUrl": "https://commons.wikimedia.org/wiki/File:Sgurr_Fhuran_from_Sgurr_na_Ciste_Duibhe.jpg",
       "source": "Wikimedia Commons"
     },
-    "route": null
+    "route": {
+      "title": "Five Sisters of Kintail",
+      "url": "https://www.walkhighlands.co.uk/kintail/Fivesisters.shtml",
+      "gpxUrl": null,
+      "gpxNote": "GPX download on the route page (free Walkhighlands account)",
+      "source": "Walkhighlands"
+    }
   },
   "sgurr-na-ciche": {
     "image": {
@@ -1081,7 +1335,13 @@
       "sourceUrl": "https://commons.wikimedia.org/wiki/File:Sgurr_na_Ciche.jpg",
       "source": "Wikimedia Commons"
     },
-    "route": null
+    "route": {
+      "title": "Sgùrr na Cìche: 3 Munros from Loch Arkaig",
+      "url": "https://www.walkhighlands.co.uk/fortwilliam/sgurrnaciche.shtml",
+      "gpxUrl": null,
+      "gpxNote": "GPX download on the route page (free Walkhighlands account)",
+      "source": "Walkhighlands"
+    }
   },
   "sgurr-nan-gillean": {
     "image": {
@@ -1093,7 +1353,13 @@
       "sourceUrl": "https://commons.wikimedia.org/wiki/File:Sgurr_nan_gillean_arp.jpg",
       "source": "Wikimedia Commons"
     },
-    "route": null
+    "route": {
+      "title": "Sgùrr nan Gillean",
+      "url": "https://www.walkhighlands.co.uk/skye/sgurrnangillean.shtml",
+      "gpxUrl": null,
+      "gpxNote": "GPX download on the route page (free Walkhighlands account)",
+      "source": "Walkhighlands"
+    }
   },
   "skiddaw": {
     "image": {
@@ -1122,7 +1388,12 @@
       "sourceUrl": "https://commons.wikimedia.org/wiki/File:Slieve_Donard_-_geograph.org.uk_-_1138189.jpg",
       "source": "Wikimedia Commons"
     },
-    "route": null
+    "route": {
+      "title": "Walk up Slieve Donard from Newcastle",
+      "url": "https://www.mudandroutes.com/routes/walk-up-slieve-donard-from-newcastle/",
+      "gpxUrl": "https://www.mudandroutes.com/wp-content/uploads/2019/01/SlieveDonard1.gpx",
+      "source": "Mud and Routes"
+    }
   },
   "slioch": {
     "image": {
@@ -1134,7 +1405,13 @@
       "sourceUrl": "https://commons.wikimedia.org/wiki/File:Slioch_from_Loch_Maree.jpg",
       "source": "Wikimedia Commons"
     },
-    "route": null
+    "route": {
+      "title": "Slioch, near Kinlochewe",
+      "url": "https://www.walkhighlands.co.uk/torridon/Slioch.shtml",
+      "gpxUrl": null,
+      "gpxNote": "GPX download on the route page (free Walkhighlands account)",
+      "source": "Walkhighlands"
+    }
   },
   "snowdon": {
     "image": {
@@ -1180,7 +1457,13 @@
       "sourceUrl": "https://commons.wikimedia.org/wiki/File:Stac_Pollaidh.jpg",
       "source": "Wikimedia Commons"
     },
-    "route": null
+    "route": {
+      "title": "Stac Pollaidh ridge and circuit",
+      "url": "https://www.walkhighlands.co.uk/ullapool/stacpollaidh.shtml",
+      "gpxUrl": null,
+      "gpxNote": "GPX download on the route page (free Walkhighlands account)",
+      "source": "Walkhighlands"
+    }
   },
   "sugar-loaf": {
     "image": {
@@ -1243,7 +1526,12 @@
       "sourceUrl": "https://commons.wikimedia.org/wiki/File:The_Cheviot_from_Broadhope_Hill.jpg",
       "source": "Wikimedia Commons"
     },
-    "route": null
+    "route": {
+      "title": "County Tops of England: Northumberland",
+      "url": "https://www.walkingenglishman.com/lists/countytopsengland/northumberland.html",
+      "gpxUrl": "https://www.walkingenglishman.com/lists/countytopsengland/northumberland.gpx",
+      "source": "The Walking Englishman"
+    }
   },
   "the-cobbler": {
     "image": {
@@ -1255,7 +1543,13 @@
       "sourceUrl": "https://commons.wikimedia.org/wiki/File:Ben_Arthur.JPG",
       "source": "Wikimedia Commons"
     },
-    "route": null
+    "route": {
+      "title": "The Cobbler, Arrochar",
+      "url": "https://www.walkhighlands.co.uk/lochlomond/the-cobbler.shtml",
+      "gpxUrl": null,
+      "gpxNote": "GPX download on the route page (free Walkhighlands account)",
+      "source": "Walkhighlands"
+    }
   },
   "the-devils-point": {
     "image": {
@@ -1267,7 +1561,13 @@
       "sourceUrl": "https://commons.wikimedia.org/wiki/File:Coire_Odhar,_Devil%27s_Point_-_geograph.org.uk_-_229151.jpg",
       "source": "Wikimedia Commons"
     },
-    "route": null
+    "route": {
+      "title": "Cairn Toul - Braeriach traverse",
+      "url": "https://www.walkhighlands.co.uk/cairngorms/cairn-toul.shtml",
+      "gpxUrl": null,
+      "gpxNote": "GPX download on the route page (free Walkhighlands account)",
+      "source": "Walkhighlands"
+    }
   },
   "the-old-man-of-coniston": {
     "image": {
@@ -1296,7 +1596,13 @@
       "sourceUrl": "https://commons.wikimedia.org/wiki/File:Forcan_Ridge_The_Saddle_Glen_Sheil_-_geograph.org.uk_-_26570.jpg",
       "source": "Wikimedia Commons"
     },
-    "route": null
+    "route": {
+      "title": "The Saddle, Forcan Ridge and Sgùrr na Sgìne",
+      "url": "https://www.walkhighlands.co.uk/kintail/Thesaddle.shtml",
+      "gpxUrl": null,
+      "gpxNote": "GPX download on the route page (free Walkhighlands account)",
+      "source": "Walkhighlands"
+    }
   },
   "tryfan": {
     "image": {
@@ -1359,7 +1665,12 @@
       "sourceUrl": "https://commons.wikimedia.org/wiki/File:Y_Lliwedd_next_to_Snowdon.jpg",
       "source": "Wikimedia Commons"
     },
-    "route": null
+    "route": {
+      "title": "The Snowdon Horseshoe Scrambling Route",
+      "url": "https://www.mudandroutes.com/routes/the-snowdon-horseshoe-classic-scrambling-route/",
+      "gpxUrl": "https://www.mudandroutes.com/wp-content/uploads/2015/03/horseshoe.gpx",
+      "source": "Mud and Routes"
+    }
   },
   "yes-tor": {
     "image": {
@@ -1405,7 +1716,12 @@
       "sourceUrl": "https://commons.wikimedia.org/wiki/File:Yr_Aran_-_geograph.org.uk_-_272804.jpg",
       "source": "Wikimedia Commons"
     },
-    "route": null
+    "route": {
+      "title": "Yr Aran From Rhyd Ddu",
+      "url": "https://www.mudandroutes.com/routes/aran-from-rhyd-ddu/",
+      "gpxUrl": "https://www.mudandroutes.com/wp-content/uploads/2011/09/Aran.gpx",
+      "source": "Mud and Routes"
+    }
   },
   "yr-eifl": {
     "image": {
@@ -1417,6 +1733,11 @@
       "sourceUrl": "https://commons.wikimedia.org/wiki/File:Yr_Eifl_o_ochrau_(from)_Clynnog_Fawr,_Gwynedd,_Cymru_(Wales)_02_(cropped).jpg",
       "source": "Wikimedia Commons"
     },
-    "route": null
+    "route": {
+      "title": "Direct Walk up Yr Eifl from Llithfaen",
+      "url": "https://www.mudandroutes.com/routes/direct-walk-up-yr-eifl-from-llithfaen/",
+      "gpxUrl": "https://www.mudandroutes.com/wp-content/uploads/2015/08/yreifl_direct.gpx",
+      "source": "Mud and Routes"
+    }
   }
 }

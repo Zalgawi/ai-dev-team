@@ -1,0 +1,23 @@
+{
+  "id": "TASK-005",
+  "title": "Support routes without a direct GPX file, and dashboard layout polish",
+  "description": "data/peak-media.json now has a route for every peak. 41 routes (source: Walkhighlands) have gpxUrl: null and a gpxNote explaining that the GPX is downloaded from the route page with a free account. The UI currently treats these as 'no route', which is wrong. Also fix layout issues found in screenshot review. Do NOT modify data/peaks.json or data/peak-media.json and do not invent URLs.",
+  "status": "todo",
+  "assignedTo": "developer",
+  "priority": "high",
+  "dataNotes": [
+    "route: { title, url, gpxUrl: string | null, gpxNote?: string, source }",
+    "A route is usable when it has a url. gpxUrl may be null; in that case gpxNote may be present."
+  ],
+  "acceptanceCriteria": [
+    "A route with a url but gpxUrl null is shown as a route: title, source, a View route page link, and the gpxNote text (or a sensible generic note if gpxNote is missing). No Download GPX link and no empty or '#' href is rendered for it.",
+    "Routes with a gpxUrl keep the existing Download GPX link. The 'not available yet' message is only shown when there is no route or the route has no url.",
+    "The Garmin instructions read correctly in both cases: for routes without a direct file, the first step tells the user to download the GPX from the route page.",
+    "The Overall Progress card no longer stretches to the height of the region panel leaving a large empty area; on desktop it sits at its natural height (for example aligned to the top, or with the region panel placed below it).",
+    "Region progress is compact and does not push the gallery far down the page: on screens 600px wide or less the region list is collapsed behind an accessible disclosure control (button with aria-expanded, or details/summary) that is closed by default; on desktop it may stay open.",
+    "Counts are grammatical: '1 / 1 peak' not '1 / 1 peaks' (and 'peaks' for any other total), in region progress and anywhere else counts are shown.",
+    "Unit tests cover the route section for: a route with gpxUrl, a route with gpxUrl null and a gpxNote, a route with gpxUrl null and no gpxNote, and no route; plus the singular/plural count helper.",
+    "Playwright tests cover a Walkhighlands-style route (no Download GPX link, note visible, route page link present), the collapsed region list at 360px and that it expands, and that the overall progress card has no large empty area at 1280px.",
+    "Existing features and tests keep working; npm test and npm run test:e2e both pass."
+  ]
+}
