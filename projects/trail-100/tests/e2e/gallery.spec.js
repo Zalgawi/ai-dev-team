@@ -10,8 +10,11 @@ const totalPages = pageCountFor(peaks.length);
 
 // Peaks are chosen from the media data at run time; route coverage will grow,
 // so no test assumes how many peaks have routes.
-const peakWithRoute = peaks.find(p => media[p.id] && media[p.id].route);
-const peakWithoutRoute = peaks.find(p => media[p.id] && media[p.id].route === null);
+const routeOf = p => (media[p.id] && media[p.id].route) || null;
+const peakWithRoute = peaks.find(p => routeOf(p) && routeOf(p).url && routeOf(p).gpxUrl);
+// Walkhighlands-style: a route page but no direct GPX file (gpxUrl: null).
+const peakWithoutGpxFile = peaks.find(p => routeOf(p) && routeOf(p).url && !routeOf(p).gpxUrl);
+const peakWithoutRoute = peaks.find(p => !routeOf(p) || !routeOf(p).url);
 
 async function expectPageShows(page, n) {
     const expected = peaks.slice((n - 1) * PAGE_SIZE, n * PAGE_SIZE);
@@ -164,6 +167,7 @@ test.describe('details dialog photo and route', () => {
         }
         await expect(section).toContainText('Garmin Connect');
         await expect(section).toContainText('Courses');
+        await expect(section.locator('.garmin-steps li').first()).toHaveText('Download the GPX file to your computer.');
 
         // Every external link in the dialog opens safely in a new tab.
         const links = await dialog(page).locator('a').evaluateAll(as => as.map(a => ({ target: a.target, rel: a.rel, href: a.getAttribute('href') })));
@@ -172,6 +176,32 @@ test.describe('details dialog photo and route', () => {
             expect(link.rel).toBe('noopener noreferrer');
             expect(link.href).toMatch(/^https?:\/\//);
         }
+    });
+
+    test('a route without a direct GPX file shows the route page link and note, with no Download GPX link', async ({ page }) => {
+        test.skip(!peakWithoutGpxFile, 'Every route in data/peak-media.json has a direct GPX file');
+        const route = routeOf(peakWithoutGpxFile);
+        await openDetails(page, peakWithoutGpxFile);
+        const section = dialog(page).locator('.route-section');
+        await expect(section).toContainText(route.title);
+        await expect(section).toContainText(route.source);
+
+        const routeLink = section.getByRole('link', { name: /View route page/ });
+        await expect(routeLink).toBeVisible();
+        await expect(routeLink).toHaveAttribute('href', route.url);
+        await expect(routeLink).toHaveAttribute('target', '_blank');
+        await expect(routeLink).toHaveAttribute('rel', 'noopener noreferrer');
+
+        const note = section.locator('.route-gpx-note');
+        await expect(note).toBeVisible();
+        if (route.gpxNote) await expect(note).toHaveText(route.gpxNote);
+
+        await expect(section.getByRole('link', { name: /Download GPX/ })).toHaveCount(0);
+        await expect(dialog(page)).not.toContainText('Download GPX');
+        await expect(section).not.toContainText('not available');
+        await expect(section.locator('a')).toHaveCount(1);
+        await expect(dialog(page).locator('a[href=""], a[href="#"], a:not([href])')).toHaveCount(0);
+        await expect(section.locator('.garmin-steps li').first()).toContainText('download the GPX file from there');
     });
 
     test('a peak without a route says no verified route is available, with no route links', async ({ page }) => {

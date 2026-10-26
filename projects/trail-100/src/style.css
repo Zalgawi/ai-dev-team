@@ -163,10 +163,14 @@ section {
     margin-bottom: var(--space-3);
 }
 
+/* Overall progress sits on top at its natural height and the (taller) region
+   panel spans the full width below it, so no card is stretched to match the
+   height of another. */
 .dashboard {
     display: grid;
-    grid-template-columns: minmax(0, 1fr) minmax(0, 2fr);
-    gap: var(--space-3);
+    grid-template-columns: minmax(0, 1fr);
+    align-items: start;
+    gap: var(--space-2);
     margin-bottom: var(--space-3);
 }
 
@@ -181,7 +185,6 @@ h2 {
 }
 
 .progress-container {
-    height: 100%;
     background-color: var(--card-background);
     border-radius: var(--radius);
     padding: var(--space-3);
@@ -504,8 +507,54 @@ footer {
 .region-progress-list {
     list-style: none;
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
-    gap: 0.75rem 1.5rem;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 0.6rem 1.5rem;
+    margin-top: 0.75rem;
+}
+
+/* The author display:grid above would otherwise override the hidden attribute. */
+.region-progress-list[hidden] {
+    display: none;
+}
+
+/* Disclosure button that shows/hides the region list (collapsed by default on
+   small screens, see setupRegionDisclosure in app.js). Styled as the heading. */
+.region-progress-heading {
+    margin-bottom: 0;
+}
+
+.region-progress-toggle {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-1);
+    width: 100%;
+    padding: 0;
+    border: none;
+    background-color: transparent;
+    color: var(--primary-color);
+    font: inherit;
+    text-align: left;
+}
+
+.region-progress-toggle:hover {
+    background-color: transparent;
+    color: var(--primary-dark);
+}
+
+.region-progress-toggle-icon {
+    flex-shrink: 0;
+    width: 0.65rem;
+    height: 0.65rem;
+    margin-right: 0.35rem;
+    border-right: 3px solid currentColor;
+    border-bottom: 3px solid currentColor;
+    transform: rotate(45deg);
+    transition: transform 0.2s ease;
+}
+
+.region-progress-toggle[aria-expanded="true"] .region-progress-toggle-icon {
+    transform: rotate(-135deg);
 }
 
 .region-progress-item {
@@ -705,6 +754,13 @@ html:has(.peak-details-dialog[open]) {
     margin: 0.75rem 0;
 }
 
+/* Routes without a direct GPX file: how to get the GPX from the route page. */
+.route-gpx-note {
+    margin-bottom: 0.75rem;
+    font-size: 0.95rem;
+    overflow-wrap: anywhere;
+}
+
 .route-link,
 .gpx-link {
     display: inline-flex;
@@ -750,19 +806,14 @@ html:has(.peak-details-dialog[open]) {
 
     .peak-card,
     .peak-photo img,
-    .progress-fill {
+    .progress-fill,
+    .region-progress-toggle-icon {
         transition: none;
     }
 
     .peak-card:hover,
     .peak-card:hover .peak-photo img {
         transform: none;
-    }
-}
-
-@media (max-width: 900px) {
-    .dashboard {
-        grid-template-columns: 1fr;
     }
 }
 

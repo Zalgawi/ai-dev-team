@@ -40,7 +40,7 @@ test.describe('@screenshots', () => {
         await page.locator('#peaks-heading').scrollIntoViewIfNeeded();
         await shot('05-gallery-page-2');
 
-        const withRoute = peaks.find(p => media[p.id] && media[p.id].route) || peaks[0];
+        const withRoute = peaks.find(p => media[p.id] && media[p.id].route && media[p.id].route.gpxUrl) || peaks[0];
         await showPeak(page, withRoute);
         await page.getByRole('button', { name: `View details for ${withRoute.name}` }).click();
         const dialog = page.locator('#peak-details');
@@ -49,5 +49,16 @@ test.describe('@screenshots', () => {
         await shot('06-peak-details-route');
         await dialog.locator('.route-section').scrollIntoViewIfNeeded();
         await shot('07-peak-details-route-section');
+        await page.keyboard.press('Escape');
+
+        // A route whose GPX is only downloadable from the route page.
+        const noGpx = peaks.find(p => media[p.id] && media[p.id].route && media[p.id].route.url && !media[p.id].route.gpxUrl);
+        if (noGpx) {
+            await showPeak(page, noGpx);
+            await page.getByRole('button', { name: `View details for ${noGpx.name}` }).click();
+            await expect(dialog).toBeVisible();
+            await dialog.locator('.route-section').scrollIntoViewIfNeeded();
+            await shot('08-peak-details-route-page-gpx');
+        }
     });
 });

@@ -12,6 +12,8 @@ import {
     createPeakCard,
     createPeakDetails,
     createRegionProgressItem,
+    formatProgressText,
+    formatGalleryStatus,
     escapeHtml,
 } from './peak-utils.js';
 import { createPeakDetailsController } from './peak-details-controller.js';
@@ -19,6 +21,9 @@ import { createPeakDetailsController } from './peak-details-controller.js';
 const STORAGE_KEY = 'trail100_completed';
 const PEAKS_DATA_URL = '/data/peaks.json';
 const MEDIA_DATA_URL = '/data/peak-media.json';
+// Screens this narrow show the region progress list collapsed by default
+// (matches the mobile breakpoint in style.css).
+const NARROW_SCREEN_QUERY = '(max-width: 600px)';
 
 let peaks = [];
 // Photos and routes keyed by peak id (data/peak-media.json).
@@ -69,6 +74,7 @@ function saveCompletedStatus() {
 
 function initializeApp() {
     populateRegionFilter();
+    setupRegionDisclosure();
     renderPeaks();
     updateProgressSummary();
     setupEventListeners();
@@ -81,6 +87,24 @@ function populateRegionFilter() {
         option.value = region;
         option.textContent = region;
         select.appendChild(option);
+    });
+}
+
+// Region progress disclosure: collapsed by default on narrow screens, open on
+// wider screens. The button's aria-expanded always matches the list state.
+function setupRegionDisclosure() {
+    const toggle = document.getElementById('region-progress-toggle');
+    const list = document.getElementById('region-progress-list');
+    const setExpanded = expanded => {
+        toggle.setAttribute('aria-expanded', String(expanded));
+        list.hidden = !expanded;
+    };
+    const narrow = window.matchMedia(NARROW_SCREEN_QUERY);
+    setExpanded(!narrow.matches);
+    // Crossing the breakpoint (e.g. rotating a tablet) restores that size's default.
+    narrow.addEventListener('change', event => setExpanded(!event.matches));
+    toggle.addEventListener('click', () => {
+        setExpanded(toggle.getAttribute('aria-expanded') !== 'true');
     });
 }
 
@@ -110,8 +134,7 @@ function renderPeaks() {
         .map(peak => createPeakCard(peak, completedPeaks.has(peak.id), mediaFor(peak.id)))
         .join('');
     pagination.innerHTML = result.pageCount > 1 ? createPagination(result.page, result.pageCount) : '';
-    status.textContent = `Showing ${result.start}–${result.end} of ${result.totalItems} peaks` +
-        (result.pageCount > 1 ? ` (page ${result.page} of ${result.pageCount})` : '');
+    status.textContent = formatGalleryStatus(result);
 }
 
 // The user changed the filters: stop pinning the last opened peak, go back to
@@ -183,12 +206,11 @@ function handleToggleComplete(event) {
 }
 
 function updateProgressSummary() {
-    const { completed, remaining, total, percentage } = calculateProgress(completedPeaks, peaks);
+    const progress = calculateProgress(completedPeaks, peaks);
     const bar = document.getElementById('overall-progress-bar');
-    bar.setAttribute('aria-valuenow', String(percentage));
-    document.getElementById('progress-fill').style.width = `${percentage}%`;
-    document.getElementById('progress-text').textContent =
-        `${percentage}% complete (${completed}/${total} peaks, ${remaining} remaining)`;
+    bar.setAttribute('aria-valuenow', String(progress.percentage));
+    document.getElementById('progress-fill').style.width = `${progress.percentage}%`;
+    document.getElementById('progress-text').textContent = formatProgressText(progress);
     renderRegionProgress();
 }
 

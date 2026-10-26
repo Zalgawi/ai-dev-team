@@ -11,6 +11,28 @@ export function escapeHtml(value) {
         .replace(/'/g, '&#39;');
 }
 
+// Singular/plural word for a count: pluralize(1, 'peak') -> 'peak';
+// any other count (0, 2, 25 ...) -> 'peaks'.
+export function pluralize(count, singular, plural = `${singular}s`) {
+    return Number(count) === 1 ? singular : plural;
+}
+
+// Count followed by the correctly pluralised word, e.g. '1 peak', '25 peaks'.
+export function formatCount(count, singular, plural) {
+    return `${count} ${pluralize(count, singular, plural)}`;
+}
+
+// Text under the overall progress bar, e.g. '1% complete (1/100 peaks, 99 remaining)'.
+export function formatProgressText({ completed, remaining, total, percentage }) {
+    return `${percentage}% complete (${completed}/${formatCount(total, 'peak')}, ${remaining} remaining)`;
+}
+
+// Gallery status line, e.g. 'Showing 1–12 of 100 peaks (page 1 of 9)'.
+export function formatGalleryStatus({ start, end, totalItems, page, pageCount }) {
+    return `Showing ${start}–${end} of ${formatCount(totalItems, 'peak')}` +
+        (pageCount > 1 ? ` (page ${page} of ${pageCount})` : '');
+}
+
 export function calculateProgress(completedIds, peaks) {
     const validIds = new Set(peaks.map(p => p.id));
     const completed = [...completedIds].filter(id => validIds.has(id)).length;
@@ -159,11 +181,20 @@ export function hasPhoto(media) {
     return Boolean(media && media.image && isNonEmptyString(media.image.src));
 }
 
-// True when the media entry has a route with both a route page and a GPX file.
+// True when the media entry has a usable route, i.e. one with a route page
+// URL. The route may or may not also have a direct GPX file (see hasGpxFile).
 export function hasRoute(media) {
     const route = media && media.route;
-    return Boolean(route && isNonEmptyString(route.url) && isNonEmptyString(route.gpxUrl));
+    return Boolean(route && isNonEmptyString(route.url));
 }
+
+// True when the route also has a direct GPX download link.
+export function hasGpxFile(media) {
+    return hasRoute(media) && isNonEmptyString(media.route.gpxUrl);
+}
+
+// Shown for a route without a direct GPX file when the data has no gpxNote.
+export const GENERIC_GPX_NOTE = 'There is no direct GPX download link for this route. Download the GPX file from the route page.';
 
 function photoAlt(peak, image) {
     return isNonEmptyString(image.alt) ? image.alt : `${peak.name}, ${peak.region}`;
@@ -190,13 +221,14 @@ export function createCardPhoto(peak, media) {
 export function createRegionProgressItem({ region, completed, total, percentage }) {
     const name = escapeHtml(region);
     const itemClass = total > 0 && completed === total ? 'region-progress-item complete' : 'region-progress-item';
+    const count = `${completed} / ${formatCount(total, 'peak')}`;
     return `
         <li class="${itemClass}">
             <div class="region-progress-header">
                 <span class="region-name">${name}</span>
-                <span class="region-count">${completed} / ${total} peaks · ${percentage}%</span>
+                <span class="region-count">${count} · ${percentage}%</span>
             </div>
-            <div class="progress-bar region-progress-bar" role="progressbar" aria-label="${name} completion" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${percentage}" aria-valuetext="${percentage}% (${completed} of ${total} peaks)">
+            <div class="progress-bar region-progress-bar" role="progressbar" aria-label="${name} completion" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${percentage}" aria-valuetext="${percentage}% (${completed} of ${formatCount(total, 'peak')})">
                 <div class="progress-fill" style="width: ${percentage}%"></div>
             </div>
         </li>
@@ -270,8 +302,11 @@ export function createDetailsPhoto(peak, media) {
             </figure>`;
 }
 
-// Walking route section of the details dialog. Peaks without a verified route
-// get a plain message and no links.
+// Walking route section of the details dialog. Three cases:
+// - route with a url and a gpxUrl: route page link + Download GPX link;
+// - route with a url but no gpxUrl (e.g. GPX only downloadable from the route
+//   page): route page link + the gpxNote (or a generic note), no GPX link;
+// - no route, or a route without a url: a plain message and no links.
 export function createRouteSection(media) {
     if (!hasRoute(media)) {
         return `
@@ -281,23 +316,32 @@ export function createRouteSection(media) {
             </section>`;
     }
     const route = media.route;
+    const directGpx = hasGpxFile(media);
     const title = isNonEmptyString(route.title) ? escapeHtml(route.title) : 'Walking route';
     const source = isNonEmptyString(route.source)
         ? `<p class="route-source">Route source: ${escapeHtml(route.source)}</p>`
         : '';
+    const gpxLink = directGpx ? `
+                    ${externalLink(route.gpxUrl, 'Download GPX', 'gpx-link')}` : '';
+    const gpxNote = directGpx
+        ? ''
+        : `
+                <p class="route-gpx-note">${escapeHtml(isNonEmptyString(route.gpxNote) ? route.gpxNote : GENERIC_GPX_NOTE)}</p>`;
+    const firstStep = directGpx
+        ? 'Download the GPX file to your computer.'
+        : 'Open the route page and download the GPX file from there to your computer.';
     return `
-            <section class="route-section has-route" aria-labelledby="route-heading">
+            <section class="route-section has-route ${directGpx ? 'has-gpx-file' : 'no-gpx-file'}" aria-labelledby="route-heading">
                 <h3 id="route-heading" class="route-heading">Walking route</h3>
                 <p class="route-title">${title}</p>
                 ${source}
                 <div class="route-links">
-                    ${externalLink(route.url, 'View route page', 'route-link')}
-                    ${externalLink(route.gpxUrl, 'Download GPX', 'gpx-link')}
-                </div>
+                    ${externalLink(route.url, 'View route page', 'route-link')}${gpxLink}
+                </div>${gpxNote}
                 <div class="garmin-help">
                     <h4 class="garmin-heading">Load the route onto a Garmin watch</h4>
                     <ol class="garmin-steps">
-                        <li>Download the GPX file to your computer.</li>
+                        <li>${firstStep}</li>
                         <li>Sign in to Garmin Connect on the web, open Training &amp; Planning › Courses and choose Import.</li>
                         <li>Select the GPX file, save it as a course and choose Send to Device.</li>
                         <li>Sync your watch with the Garmin Connect app or Garmin Express, then find the route under Navigation › Courses.</li>
