@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Trail 100 Tracker</title>
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="/src/style.css">
 </head>
 <body>
     <header>
@@ -16,10 +16,17 @@
         <section id="progress-summary">
             <div class="progress-container">
                 <h2>Overall Progress</h2>
-                <div class="progress-bar">
+                <div class="progress-bar" id="overall-progress-bar" role="progressbar" aria-label="Overall completion" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
                     <div class="progress-fill" id="progress-fill"></div>
                 </div>
-                <p id="progress-text">0% complete (0/100 peaks)</p>
+                <p id="progress-text" aria-live="polite">0% complete (0/100 peaks, 100 remaining)</p>
+            </div>
+        </section>
+
+        <section id="region-progress" aria-labelledby="region-progress-heading">
+            <div class="progress-container">
+                <h2 id="region-progress-heading">Progress by Region</h2>
+                <ul id="region-progress-list" class="region-progress-list"></ul>
             </div>
         </section>
 
@@ -39,13 +46,12 @@
                     <option value="remaining">Remaining</option>
                 </select>
             </div>
-            <button id="reset-filters">Reset Filters</button>
+            <button type="button" id="reset-filters">Reset Filters</button>
         </section>
 
         <section id="peaks-grid">
             <h2>Peaks</h2>
             <div id="peaks-container" class="peaks-grid">
-                <!-- Peaks will be loaded here dynamically -->
                 <div class="loading">Loading peaks...</div>
             </div>
         </section>
@@ -55,6 +61,6 @@
         <p>&copy; 2026 Trail 100 Tracker. Data sourced from Live for the Outdoors Trail 100 challenge.</p>
     </footer>
 
-    <script type="module" src="app.js"></script>
+    <script type="module" src="/src/app.js"></script>
 </body>
 </html>

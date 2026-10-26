@@ -1,5 +1,18 @@
+import {
+    calculateProgress,
+    calculateRegionProgress,
+    toggleCompleted,
+    filterPeaks,
+    getRegions,
+    parseStoredCompleted,
+    serializeCompleted,
+    createPeakCard,
+    createRegionProgressItem,
+    escapeHtml,
+} from './peak-utils.js';
+
 const STORAGE_KEY = 'trail100_completed';
-const PEAKS_DATA_URL = '../data/peaks.json';
+const PEAKS_DATA_URL = '/data/peaks.json';
 
 let peaks = [];
 let completedPeaks = new Set();
@@ -11,7 +24,7 @@ async function loadPeaks() {
             throw new Error(`Failed to load peaks: ${response.status}`);
         }
         peaks = await response.json();
-        loadCompletedStatus();
+        completedPeaks = parseStoredCompleted(localStorage.getItem(STORAGE_KEY));
         initializeApp();
     } catch (error) {
         console.error('Error loading peaks:', error);
@@ -19,20 +32,8 @@ async function loadPeaks() {
     }
 }
 
-function loadCompletedStatus() {
-    const stored = localStorage.getItem(STORAGE_KEY);
-    if (stored) {
-        try {
-            completedPeaks = new Set(JSON.parse(stored));
-        } catch (e) {
-            console.error('Error parsing completed peaks:', e);
-            completedPeaks = new Set();
-        }
-    }
-}
-
 function saveCompletedStatus() {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify([...completedPeaks]));
+    localStorage.setItem(STORAGE_KEY, serializeCompleted(completedPeaks));
 }
 
 function initializeApp() {
@@ -43,10 +44,8 @@ function initializeApp() {
 }
 
 function populateRegionFilter() {
-    const regions = [...new Set(peaks.map(p => p.region))].sort();
     const select = document.getElementById('region-filter');
-
-    regions.forEach(region => {
+    getRegions(peaks).forEach(region => {
         const option = document.createElement('option');
         option.value = region;
         option.textContent = region;
@@ -59,80 +58,50 @@ function renderPeaks() {
     const regionFilter = document.getElementById('region-filter').value;
     const statusFilter = document.getElementById('status-filter').value;
 
-    const filteredPeaks = peaks.filter(peak => {
-        const matchesRegion = regionFilter === 'all' || peak.region === regionFilter;
-        const isCompleted = completedPeaks.has(peak.id);
-        const matchesStatus = statusFilter === 'all' ||
-            (statusFilter === 'completed' && isCompleted) ||
-            (statusFilter === 'remaining' && !isCompleted);
-        return matchesRegion && matchesStatus;
-    });
+    const filteredPeaks = filterPeaks(peaks, completedPeaks, regionFilter, statusFilter);
 
     if (filteredPeaks.length === 0) {
         container.innerHTML = '<div class="empty-state">No peaks match the current filters.</div>';
         return;
     }
 
-    container.innerHTML = filteredPeaks.map(peak => createPeakCard(peak)).join('');
-    attachToggleListeners();
-}
-
-function createPeakCard(peak) {
-    const isCompleted = completedPeaks.has(peak.id);
-    const cardClass = isCompleted ? 'peak-card completed' : 'peak-card';
-    const statusClass = isCompleted ? 'completed' : 'remaining';
-    const statusText = isCompleted ? 'Completed' : 'Not climbed';
-    const buttonClass = isCompleted ? 'mark-remaining' : 'mark-complete';
-    const buttonText = isCompleted ? 'Mark as not climbed' : 'Mark as climbed';
-
-    return `
-        <article class="${cardClass}" data-peak-id="${peak.id}">
-            <span class="peak-number">#${peak.number}</span>
-            <h3 class="peak-name">${escapeHtml(peak.name)}</h3>
-            <p class="peak-region">${escapeHtml(peak.region)}</p>
-            <p class="peak-height">${peak.heightM}m</p>
-            <p class="peak-status ${statusClass}">${statusText}</p>
-            <button class="toggle-button ${buttonClass}" data-peak-id="${peak.id}" aria-label="${isCompleted ? 'Mark as not climbed' : 'Mark as climbed'}: ${escapeHtml(peak.name)}">
-                ${buttonText}
-            </button>
-        </article>
-    `;
-}
-
-function escapeHtml(text) {
-    const div = document.createElement('div');
-    div.textContent = text;
-    return div.innerHTML;
-}
-
-function attachToggleListeners() {
-    document.querySelectorAll('.toggle-button').forEach(button => {
-        button.addEventListener('click', handleToggleComplete);
-    });
+    container.innerHTML = filteredPeaks
+        .map(peak => createPeakCard(peak, completedPeaks.has(peak.id)))
+        .join('');
 }
 
 function handleToggleComplete(event) {
-    const peakId = event.currentTarget.dataset.peakId;
-    if (completedPeaks.has(peakId)) {
-        completedPeaks.delete(peakId);
-    } else {
-        completedPeaks.add(peakId);
-    }
+    const button = event.target.closest('.toggle-button');
+    if (!button) return;
+    const peakId = button.dataset.peakId;
+    completedPeaks = toggleCompleted(completedPeaks, peakId);
     saveCompletedStatus();
     renderPeaks();
     updateProgressSummary();
+    // Keep keyboard focus on the re-rendered button for the same peak.
+    const sameButton = document.querySelector(`.toggle-button[data-peak-id="${CSS.escape(peakId)}"]`);
+    if (sameButton) sameButton.focus();
 }
 
 function updateProgressSummary() {
-    const completed = completedPeaks.size;
-    const total = peaks.length;
-    const percentage = total > 0 ? Math.round((completed / total) * 100) : 0;
-
+    const { completed, remaining, total, percentage } = calculateProgress(completedPeaks, peaks);
+    const bar = document.getElementById('overall-progress-bar');
+    bar.setAttribute('aria-valuenow', String(percentage));
     document.getElementById('progress-fill').style.width = `${percentage}%`;
-    document.getElementById('progress-text').textContent = `${percentage}% complete (${completed}/${total} peaks)`;
+    document.getElementById('progress-text').textContent =
+        `${percentage}% complete (${completed}/${total} peaks, ${remaining} remaining)`;
+    renderRegionProgress();
+}
+
+function renderRegionProgress() {
+    document.getElementById('region-progress-list').innerHTML =
+        calculateRegionProgress(completedPeaks, peaks)
+            .map(createRegionProgressItem)
+            .join('');
 }
 
 function setupEventListeners() {
+    document.getElementById('peaks-container').addEventListener('click', handleToggleComplete);
     document.getElementById('region-filter').addEventListener('change', renderPeaks);
     document.getElementById('status-filter').addEventListener('change', renderPeaks);
     document.getElementById('reset-filters').addEventListener('click', () => {
@@ -144,7 +113,7 @@ function setupEventListeners() {
 
 function showError(message) {
     const container = document.getElementById('peaks-container');
-    container.innerHTML = `<div class="empty-state" style="color: #c00;">${escapeHtml(message)}</div>`;
+    container.innerHTML = `<div class="empty-state" role="alert" style="color: #c00;">${escapeHtml(message)}</div>`;
 }
 
 document.addEventListener('DOMContentLoaded', loadPeaks);
