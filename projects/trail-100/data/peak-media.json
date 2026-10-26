@@ -1,0 +1,1422 @@
+{
+  "a-mhaighdean": {
+    "image": {
+      "src": "/src/assets/peaks/a-mhaighdean.jpg",
+      "alt": "A’ Mhaighdean, Fisherfield Forest",
+      "credit": "John Wood",
+      "licence": "CC BY-SA 3.0",
+      "licenceUrl": "https://creativecommons.org/licenses/by-sa/3.0",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:A-Mhaighdean-from-Slioch.jpg",
+      "source": "Wikimedia Commons"
+    },
+    "route": null
+  },
+  "an-teallach": {
+    "image": {
+      "src": "/src/assets/peaks/an-teallach.jpg",
+      "alt": "An Teallach, Torridon",
+      "credit": "David Crocker",
+      "licence": "CC BY-SA 2.0",
+      "licenceUrl": "https://creativecommons.org/licenses/by-sa/2.0",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:The_Central_Ridge_of_An_Teallach_-_geograph.org.uk_-_66461.jpg",
+      "source": "Wikimedia Commons"
+    },
+    "route": null
+  },
+  "aran-fawddwy": {
+    "image": {
+      "src": "/src/assets/peaks/aran-fawddwy.jpg",
+      "alt": "Aran Fawddwy, Eryri (Snowdonia)",
+      "credit": "See source page",
+      "licence": "Public domain",
+      "licenceUrl": null,
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Aran_Fawddwy.jpg",
+      "source": "Wikimedia Commons"
+    },
+    "route": null
+  },
+  "arenig-fach": {
+    "image": {
+      "src": "/src/assets/peaks/arenig-fach.jpg",
+      "alt": "Arenig Fach, Eryri (Snowdonia)",
+      "credit": "Peter Aylmer",
+      "licence": "CC BY-SA 2.0",
+      "licenceUrl": "https://creativecommons.org/licenses/by-sa/2.0",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Moorland_above_Llyn_Arenig_Fach_779212.jpg",
+      "source": "Wikimedia Commons"
+    },
+    "route": null
+  },
+  "askival": {
+    "image": {
+      "src": "/src/assets/peaks/askival.jpg",
+      "alt": "Askival, Isle of Rum",
+      "credit": "Richard Webb",
+      "licence": "CC BY-SA 2.0",
+      "licenceUrl": "https://creativecommons.org/licenses/by-sa/2.0",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Askival.jpg",
+      "source": "Wikimedia Commons"
+    },
+    "route": null
+  },
+  "beinn-alligin": {
+    "image": {
+      "src": "/src/assets/peaks/beinn-alligin.jpg",
+      "alt": "Beinn Alligin, Torridon",
+      "credit": "David Crocker",
+      "licence": "CC BY-SA 2.0",
+      "licenceUrl": "https://creativecommons.org/licenses/by-sa/2.0",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Beinn_Alligin_in_Autumn_Sunshine_-_geograph.org.uk_-_144409.jpg",
+      "source": "Wikimedia Commons"
+    },
+    "route": null
+  },
+  "beinn-an-oir": {
+    "image": {
+      "src": "/src/assets/peaks/beinn-an-oir.jpg",
+      "alt": "Beinn an Oir, Isle of Jura",
+      "credit": "KPiG at English Wikipedia",
+      "licence": "Public domain",
+      "licenceUrl": null,
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:SunsetOverThePaps.jpg",
+      "source": "Wikimedia Commons"
+    },
+    "route": null
+  },
+  "beinn-dearg-mor": {
+    "image": {
+      "src": "/src/assets/peaks/beinn-dearg-mor.jpg",
+      "alt": "Beinn Dearg Mòr, Fisherfield Forest",
+      "credit": "Moyearo",
+      "licence": "Public domain",
+      "licenceUrl": null,
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Beinn_Dearg_Mor.JPG",
+      "source": "Wikimedia Commons"
+    },
+    "route": null
+  },
+  "beinn-eighe": {
+    "image": {
+      "src": "/src/assets/peaks/beinn-eighe.jpg",
+      "alt": "Beinn Eighe, Torridon",
+      "credit": "Anne Burgess",
+      "licence": "CC BY-SA 2.0",
+      "licenceUrl": "https://creativecommons.org/licenses/by-sa/2.0",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Beinn_Eighe_from_Loch_Clair_-_geograph.org.uk_-_7601.jpg",
+      "source": "Wikimedia Commons"
+    },
+    "route": null
+  },
+  "ben-alder": {
+    "image": {
+      "src": "/src/assets/peaks/ben-alder.jpg",
+      "alt": "Ben Alder, Central Highlands",
+      "credit": "Grinner at en.wikipedia",
+      "licence": "CC BY-SA 2.5",
+      "licenceUrl": "https://creativecommons.org/licenses/by-sa/2.5",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Ben_alder.jpg",
+      "source": "Wikimedia Commons"
+    },
+    "route": null
+  },
+  "ben-cruachan": {
+    "image": {
+      "src": "/src/assets/peaks/ben-cruachan.jpg",
+      "alt": "Ben Cruachan, West Highlands",
+      "credit": "The original uploader was Grinner at English Wikipedia.",
+      "licence": "CC BY-SA 3.0",
+      "licenceUrl": "http://creativecommons.org/licenses/by-sa/3.0/",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Cruachan.jpg",
+      "source": "Wikimedia Commons"
+    },
+    "route": null
+  },
+  "ben-hope": {
+    "image": {
+      "src": "/src/assets/peaks/ben-hope.jpg",
+      "alt": "Ben Hope, Sutherland",
+      "credit": "Squiddy at English Wikipedia",
+      "licence": "Public domain",
+      "licenceUrl": null,
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:BenHopefromLochEriboll.jpg",
+      "source": "Wikimedia Commons"
+    },
+    "route": null
+  },
+  "ben-lawers": {
+    "image": {
+      "src": "/src/assets/peaks/ben-lawers.png",
+      "alt": "Ben Lawers, Central Highlands",
+      "credit": "Paul Hermans",
+      "licence": "CC BY-SA 3.0",
+      "licenceUrl": "https://creativecommons.org/licenses/by-sa/3.0",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:2011_Schotland_An_Stuc_(links_1118_m)_en_Ben_Lawers_6-06-2011_14-54-13.png",
+      "source": "Wikimedia Commons"
+    },
+    "route": null
+  },
+  "ben-lomond": {
+    "image": {
+      "src": "/src/assets/peaks/ben-lomond.jpg",
+      "alt": "Ben Lomond, South Highlands",
+      "credit": "See source page",
+      "licence": "CC BY-SA 2.0 de",
+      "licenceUrl": "https://creativecommons.org/licenses/by-sa/2.0/de/deed.en",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Loch_Lomond_Lomond_Mountain.jpg",
+      "source": "Wikimedia Commons"
+    },
+    "route": null
+  },
+  "ben-lui": {
+    "image": {
+      "src": "/src/assets/peaks/ben-lui.jpg",
+      "alt": "Ben Lui, Central Highlands",
+      "credit": "The original uploader was Grinner at English Wikipedia.",
+      "licence": "Attribution",
+      "licenceUrl": null,
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Ben_lui_northern_corrie.jpg",
+      "source": "Wikimedia Commons"
+    },
+    "route": null
+  },
+  "ben-macdui": {
+    "image": {
+      "src": "/src/assets/peaks/ben-macdui.jpg",
+      "alt": "Ben Macdui, Cairngorms",
+      "credit": "Mick Knapton at English Wikipedia",
+      "licence": "CC BY-SA 3.0",
+      "licenceUrl": "http://creativecommons.org/licenses/by-sa/3.0/",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Ben_Macdui_from_Derry_Cairngorm.jpg",
+      "source": "Wikimedia Commons"
+    },
+    "route": null
+  },
+  "ben-more-south-highlands": {
+    "image": {
+      "src": "/src/assets/peaks/ben-more-south-highlands.jpg",
+      "alt": "Ben More, South Highlands",
+      "credit": "Richard Webb",
+      "licence": "CC BY-SA 2.0",
+      "licenceUrl": "https://creativecommons.org/licenses/by-sa/2.0",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Ben_More,_Crainlarich.jpg",
+      "source": "Wikimedia Commons"
+    },
+    "route": null
+  },
+  "ben-more-isle-of-mull": {
+    "image": {
+      "src": "/src/assets/peaks/ben-more-isle-of-mull.jpg",
+      "alt": "Ben More, Isle of Mull",
+      "credit": "Released into public domain by author/original uploader was Deus Ex at en.wikipedia",
+      "licence": "Public domain",
+      "licenceUrl": null,
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Ben_More_(Mull).jpg",
+      "source": "Wikimedia Commons"
+    },
+    "route": null
+  },
+  "ben-nevis": {
+    "image": {
+      "src": "/src/assets/peaks/ben-nevis.jpg",
+      "alt": "Ben Nevis, West Highlands",
+      "credit": "Loek037 at Dutch Wikipedia",
+      "licence": "CC BY-SA 3.0",
+      "licenceUrl": "http://creativecommons.org/licenses/by-sa/3.0/",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Ben_nevis.jpg",
+      "source": "Wikimedia Commons"
+    },
+    "route": null
+  },
+  "bidean-nam-bian": {
+    "image": {
+      "src": "/src/assets/peaks/bidean-nam-bian.jpg",
+      "alt": "Bidean nam Bian, West Highlands",
+      "credit": "wfmillar",
+      "licence": "CC BY-SA 2.0",
+      "licenceUrl": "https://creativecommons.org/licenses/by-sa/2.0",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Bidean_nam_Bian_-_geograph.org.uk_-_1012165.jpg",
+      "source": "Wikimedia Commons"
+    },
+    "route": null
+  },
+  "bla-bheinn": {
+    "image": {
+      "src": "/src/assets/peaks/bla-bheinn.jpg",
+      "alt": "Bla Bheinn, Isle of Skye",
+      "credit": "Sarah Maidment",
+      "licence": "CC BY-SA 2.0",
+      "licenceUrl": "https://creativecommons.org/licenses/by-sa/2.0",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Blaven_geograph.jpg",
+      "source": "Wikimedia Commons"
+    },
+    "route": null
+  },
+  "black-combe": {
+    "image": {
+      "src": "/src/assets/peaks/black-combe.jpg",
+      "alt": "Black Combe, Lake District",
+      "credit": "Silence-is-infinite",
+      "licence": "CC BY-SA 3.0",
+      "licenceUrl": "https://creativecommons.org/licenses/by-sa/3.0",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Black_combe_from_foxfield.JPG",
+      "source": "Wikimedia Commons"
+    },
+    "route": null
+  },
+  "blencathra": {
+    "image": {
+      "src": "/src/assets/peaks/blencathra.jpg",
+      "alt": "Blencathra, Lake District",
+      "credit": "Rob Bendall (Highfields)",
+      "licence": "Attribution",
+      "licenceUrl": null,
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Blencathra_from_Castlerigg.jpg",
+      "source": "Wikimedia Commons"
+    },
+    "route": {
+      "title": "Blencathra via Sharp Edge",
+      "url": "https://www.walkingenglishman.com/lakes03.html",
+      "gpxUrl": "https://www.walkingenglishman.com/gpx/lakes03.gpx",
+      "source": "The Walking Englishman"
+    }
+  },
+  "bow-fell": {
+    "image": {
+      "src": "/src/assets/peaks/bow-fell.jpg",
+      "alt": "Bow Fell, Lake District",
+      "credit": "Brooksaf at English Wikipedia",
+      "licence": "CC BY 2.5",
+      "licenceUrl": "https://creativecommons.org/licenses/by/2.5",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Bowfell_summit_towards_Eskdale.jpg",
+      "source": "Wikimedia Commons"
+    },
+    "route": {
+      "title": "Bowfell, Rossett Pike and The Langdale Pikes",
+      "url": "https://www.walkingenglishman.com/lakes38.html",
+      "gpxUrl": "https://www.walkingenglishman.com/gpx/lakes38.gpx",
+      "source": "The Walking Englishman"
+    }
+  },
+  "braeriach": {
+    "image": {
+      "src": "/src/assets/peaks/braeriach.jpg",
+      "alt": "Braeriach, Cairngorms",
+      "credit": "The original uploader was Grinner at English Wikipedia.",
+      "licence": "Attribution",
+      "licenceUrl": null,
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Braeriach.jpg",
+      "source": "Wikimedia Commons"
+    },
+    "route": null
+  },
+  "buachaille-etive-mor": {
+    "image": {
+      "src": "/src/assets/peaks/buachaille-etive-mor.jpg",
+      "alt": "Buachaille Etive Mor, West Highlands",
+      "credit": "Doug Lee",
+      "licence": "CC BY-SA 2.0",
+      "licenceUrl": "https://creativecommons.org/licenses/by-sa/2.0",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Buachaille_Etive_Mor.jpg",
+      "source": "Wikimedia Commons"
+    },
+    "route": null
+  },
+  "cadair-idris": {
+    "image": {
+      "src": "/src/assets/peaks/cadair-idris.jpg",
+      "alt": "Cadair Idris, Eryri (Snowdonia)",
+      "credit": "Entopos",
+      "licence": "CC BY-SA 3.0",
+      "licenceUrl": "https://creativecommons.org/licenses/by-sa/3.0",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Cadair_Idris_from_Bwlch_y_Rhiwgyr.jpg",
+      "source": "Wikimedia Commons"
+    },
+    "route": {
+      "title": "Cadair Idris",
+      "url": "https://www.walkingenglishman.com/wales01.html",
+      "gpxUrl": "https://www.walkingenglishman.com/wales/01/trackfile.gpx",
+      "source": "The Walking Englishman"
+    }
+  },
+  "carnedd-daffyd": {
+    "image": {
+      "src": "/src/assets/peaks/carnedd-daffyd.jpg",
+      "alt": "Carnedd Daffyd, Eryri (Snowdonia)",
+      "credit": "Espresso Addict",
+      "licence": "CC BY-SA 2.0",
+      "licenceUrl": "https://creativecommons.org/licenses/by-sa/2.0",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Carnedd_Dafydd.jpg",
+      "source": "Wikimedia Commons"
+    },
+    "route": {
+      "title": "Conwy Mountain to Pen yr Ole Wen (Welsh 3000's)",
+      "url": "https://www.walkingenglishman.com/wales06.html",
+      "gpxUrl": "https://www.walkingenglishman.com/wales/06/trackfile.gpx",
+      "source": "The Walking Englishman"
+    }
+  },
+  "carnedd-llewellyn": {
+    "image": {
+      "src": "/src/assets/peaks/carnedd-llewellyn.jpg",
+      "alt": "Carnedd Llewellyn, Eryri (Snowdonia)",
+      "credit": "en:User:Sowen",
+      "licence": "Copyrighted free use",
+      "licenceUrl": null,
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Carnedd_Llewelyn.jpg",
+      "source": "Wikimedia Commons"
+    },
+    "route": {
+      "title": "Conwy Mountain to Pen yr Ole Wen (Welsh 3000's)",
+      "url": "https://www.walkingenglishman.com/wales06.html",
+      "gpxUrl": "https://www.walkingenglishman.com/wales/06/trackfile.gpx",
+      "source": "The Walking Englishman"
+    }
+  },
+  "cat-bells": {
+    "image": {
+      "src": "/src/assets/peaks/cat-bells.jpg",
+      "alt": "Cat Bells, Lake District",
+      "credit": "Diliff",
+      "licence": "CC BY-SA 3.0",
+      "licenceUrl": "https://creativecommons.org/licenses/by-sa/3.0",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Catbells_Northern_Ascent,_Lake_District_-_June_2009.jpg",
+      "source": "Wikimedia Commons"
+    },
+    "route": {
+      "title": "A walk to Cat Bells from Little Town",
+      "url": "https://www.walkingenglishman.com/lakes35.html",
+      "gpxUrl": "https://www.walkingenglishman.com/gpx/lakes35.gpx",
+      "source": "The Walking Englishman"
+    }
+  },
+  "cnicht": {
+    "image": {
+      "src": "/src/assets/peaks/cnicht.jpg",
+      "alt": "Cnicht, Eryri (Snowdonia)",
+      "credit": "See source page",
+      "licence": "Public domain",
+      "licenceUrl": null,
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Cnicht_from_west.jpg",
+      "source": "Wikimedia Commons"
+    },
+    "route": {
+      "title": "Cnicht, Matterhorn of Wales",
+      "url": "https://www.walkingenglishman.com/wales18.html",
+      "gpxUrl": "https://www.walkingenglishman.com/wales/18cnicht/trackfile.gpx",
+      "source": "The Walking Englishman"
+    }
+  },
+  "crib-goch": {
+    "image": {
+      "src": "/src/assets/peaks/crib-goch.jpg",
+      "alt": "Crib Goch, Eryri (Snowdonia)",
+      "credit": "Diliff",
+      "licence": "CC BY-SA 3.0",
+      "licenceUrl": "https://creativecommons.org/licenses/by-sa/3.0",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Crib_Goch,_Snowdonia,_Wales_-_August_2007.jpg",
+      "source": "Wikimedia Commons"
+    },
+    "route": {
+      "title": "Crib Goch, Garnedd Ugain and Mount Snowdon",
+      "url": "https://www.walkingenglishman.com/wales04.html",
+      "gpxUrl": "https://www.walkingenglishman.com/wales/04/trackfile.gpx",
+      "source": "The Walking Englishman"
+    }
+  },
+  "cross-fell": {
+    "image": {
+      "src": "/src/assets/peaks/cross-fell.jpg",
+      "alt": "Cross Fell, North Pennines",
+      "credit": "Carl Bendelow",
+      "licence": "CC BY-SA 2.0",
+      "licenceUrl": "https://creativecommons.org/licenses/by-sa/2.0",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Crossfell.jpg",
+      "source": "Wikimedia Commons"
+    },
+    "route": {
+      "title": "Milburn, Great Dun Fell, Little Dun Fell and Cross Fell — Walks in Northern England",
+      "url": "https://www.walkingenglishman.com/northernengland11.html",
+      "gpxUrl": "https://www.walkingenglishman.com/gpx/ne11.gpx",
+      "source": "The Walking Englishman"
+    }
+  },
+  "elidir-fawr": {
+    "image": {
+      "src": "/src/assets/peaks/elidir-fawr.jpg",
+      "alt": "Elidir Fawr, Eryri (Snowdonia)",
+      "credit": "Seraaron",
+      "licence": "CC BY-SA 4.0",
+      "licenceUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Elidir_Fawr_ridge,_as_seen_from_the_ridge_along_Mynydd_Perfedd,_above_the_reservoir,_with_Moel_Cynghorion_in_the_background.jpg",
+      "source": "Wikimedia Commons"
+    },
+    "route": null
+  },
+  "fairfield": {
+    "image": {
+      "src": "/src/assets/peaks/fairfield.jpg",
+      "alt": "Fairfield, Lake District",
+      "credit": "Rwendland",
+      "licence": "CC BY-SA 4.0",
+      "licenceUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Fairfield_from_Heron_Pike.jpg",
+      "source": "Wikimedia Commons"
+    },
+    "route": {
+      "title": "Route 3: The Greater Fairfield Horseshoe",
+      "url": "https://www.walkingenglishman.com/walkingthewainwrights03.html",
+      "gpxUrl": "https://www.walkingenglishman.com/gpx/wainwrights03.gpx",
+      "source": "The Walking Englishman"
+    }
+  },
+  "fan-brycheiniog": {
+    "image": {
+      "src": "/src/assets/peaks/fan-brycheiniog.jpg",
+      "alt": "Fan Brycheiniog, Brecon Beacons",
+      "credit": "Gabby77 (talk)",
+      "licence": "Public domain",
+      "licenceUrl": null,
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Bannaubrych.JPG",
+      "source": "Wikimedia Commons"
+    },
+    "route": null
+  },
+  "foinaven": {
+    "image": {
+      "src": "/src/assets/peaks/foinaven.jpg",
+      "alt": "Foinaven, Sutherland",
+      "credit": "Anne Burgess",
+      "licence": "CC BY-SA 2.0",
+      "licenceUrl": "https://creativecommons.org/licenses/by-sa/2.0",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Foinaven_from_Achriesgill.jpg",
+      "source": "Wikimedia Commons"
+    },
+    "route": null
+  },
+  "garbh-bheinn": {
+    "image": {
+      "src": "/src/assets/peaks/garbh-bheinn.jpg",
+      "alt": "Garbh Bheinn, West Highlands",
+      "credit": "Viewfinder at English Wikipedia",
+      "licence": "Public domain",
+      "licenceUrl": null,
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Garbh_Bheinn_from_SE_top.jpg",
+      "source": "Wikimedia Commons"
+    },
+    "route": null
+  },
+  "glaramara": {
+    "image": {
+      "src": "/src/assets/peaks/glaramara.jpg",
+      "alt": "Glaramara, Lake District",
+      "credit": "Mick Knapton at English Wikipedia",
+      "licence": "CC BY-SA 3.0",
+      "licenceUrl": "http://creativecommons.org/licenses/by-sa/3.0/",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Borrowdale_and_Glaramara_from_Grange_Fell.jpg",
+      "source": "Wikimedia Commons"
+    },
+    "route": {
+      "title": "Route 17: Great End and Glaramara",
+      "url": "https://www.walkingenglishman.com/walkingthewainwrights17.html",
+      "gpxUrl": "https://www.walkingenglishman.com/gpx/wainwrights17.gpx",
+      "source": "The Walking Englishman"
+    }
+  },
+  "glyder-fach": {
+    "image": {
+      "src": "/src/assets/peaks/glyder-fach.jpg",
+      "alt": "Glyder Fach, Eryri (Snowdonia)",
+      "credit": "Gabby77",
+      "licence": "Public domain",
+      "licenceUrl": null,
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Glyder_Fach_from_Gallt_yr_Ogof.jpg",
+      "source": "Wikimedia Commons"
+    },
+    "route": {
+      "title": "Tryfan, Glyder Fach and Glyder Fawr",
+      "url": "https://www.walkingenglishman.com/wales02.html",
+      "gpxUrl": "https://www.walkingenglishman.com/wales/02/trackfile.gpx",
+      "source": "The Walking Englishman"
+    }
+  },
+  "goatfell": {
+    "image": {
+      "src": "/src/assets/peaks/goatfell.jpg",
+      "alt": "Goatfell, Isle of Arran",
+      "credit": "Clydecoast",
+      "licence": "CC BY-SA 3.0",
+      "licenceUrl": "https://creativecommons.org/licenses/by-sa/3.0",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Goatfell_from_Brodick_Harbour.jpg",
+      "source": "Wikimedia Commons"
+    },
+    "route": null
+  },
+  "grasmoor": {
+    "image": {
+      "src": "/src/assets/peaks/grasmoor.jpg",
+      "alt": "Grasmoor, Lake District",
+      "credit": "K A",
+      "licence": "CC BY-SA 2.0",
+      "licenceUrl": "https://creativecommons.org/licenses/by-sa/2.0",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Crummock_Water_and_Grasmoor_-_geograph.org.uk_-_1557755.jpg",
+      "source": "Wikimedia Commons"
+    },
+    "route": {
+      "title": "Route 29: A Whiteside and Grasmoor Round",
+      "url": "https://www.walkingenglishman.com/walkingthewainwrights29.html",
+      "gpxUrl": "https://www.walkingenglishman.com/gpx/wainwrights29.gpx",
+      "source": "The Walking Englishman"
+    }
+  },
+  "great-gable": {
+    "image": {
+      "src": "/src/assets/peaks/great-gable.jpg",
+      "alt": "Great Gable, Lake District",
+      "credit": "Phillip Capper from Wellington, New Zealand",
+      "licence": "CC BY 2.0",
+      "licenceUrl": "https://creativecommons.org/licenses/by/2.0",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Great_Gable_1962.jpg",
+      "source": "Wikimedia Commons"
+    },
+    "route": {
+      "title": "Green Gable and Great Gable from Seathwaite",
+      "url": "https://www.walkingenglishman.com/lakes15.html",
+      "gpxUrl": "https://www.walkingenglishman.com/gpx/lakes15.gpx",
+      "source": "The Walking Englishman"
+    }
+  },
+  "grisedale-pike": {
+    "image": {
+      "src": "/src/assets/peaks/grisedale-pike.jpg",
+      "alt": "Grisedale Pike, Lake District",
+      "credit": "Mick Knapton at English Wikipedia",
+      "licence": "CC BY-SA 3.0",
+      "licenceUrl": "http://creativecommons.org/licenses/by-sa/3.0/",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Grisedale_Pike_from_Barrow.jpg",
+      "source": "Wikimedia Commons"
+    },
+    "route": {
+      "title": "Sail, Crag Hill, Grasmoor, Hopegill Head and Grisedale Pike",
+      "url": "https://www.walkingenglishman.com/lakes23.html",
+      "gpxUrl": "https://www.walkingenglishman.com/gpx/lakes23.gpx",
+      "source": "The Walking Englishman"
+    }
+  },
+  "haystacks": {
+    "image": {
+      "src": "/src/assets/peaks/haystacks.jpg",
+      "alt": "Haystacks, Lake District",
+      "credit": "Tango22",
+      "licence": "CC BY-SA 3.0",
+      "licenceUrl": "https://creativecommons.org/licenses/by-sa/3.0",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Haystacks_summit_%26_high_crag.jpg",
+      "source": "Wikimedia Commons"
+    },
+    "route": {
+      "title": "Buttermere, Haystacks and Fleetwith Pike",
+      "url": "https://www.walkingenglishman.com/lakes53.html",
+      "gpxUrl": "https://www.walkingenglishman.com/gpx/lakes53.gpx",
+      "source": "The Walking Englishman"
+    }
+  },
+  "helm-crag": {
+    "image": {
+      "src": "/src/assets/peaks/helm-crag.jpg",
+      "alt": "Helm Crag, Lake District",
+      "credit": "User:Harthacanute",
+      "licence": "Public domain",
+      "licenceUrl": null,
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Helm_Crag_from_Gibson_Knott.jpg",
+      "source": "Wikimedia Commons"
+    },
+    "route": {
+      "title": "Steel Fell, Calf Crag, Gibson Knott and Helm Crag",
+      "url": "https://www.walkingenglishman.com/lakes28.html",
+      "gpxUrl": "https://www.walkingenglishman.com/gpx/lakes28.gpx",
+      "source": "The Walking Englishman"
+    }
+  },
+  "helvellyn": {
+    "image": {
+      "src": "/src/assets/peaks/helvellyn.jpg",
+      "alt": "Helvellyn, Lake District",
+      "credit": "Simon Ledingham",
+      "licence": "CC BY-SA 2.0",
+      "licenceUrl": "https://creativecommons.org/licenses/by-sa/2.0",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Helvellyn(SimonLedingham)Dec2004.jpg",
+      "source": "Wikimedia Commons"
+    },
+    "route": {
+      "title": "Raise, Helvellyn and Striding Edge",
+      "url": "https://www.walkingenglishman.com/lakes04.html",
+      "gpxUrl": "https://www.walkingenglishman.com/gpx/lakes04.gpx",
+      "source": "The Walking Englishman"
+    }
+  },
+  "high-stile": {
+    "image": {
+      "src": "/src/assets/peaks/high-stile.jpg",
+      "alt": "High Stile, Lake District",
+      "credit": "Andrew Smith",
+      "licence": "CC BY-SA 2.0",
+      "licenceUrl": "https://creativecommons.org/licenses/by-sa/2.0",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:High_Stile_from_Red_Pike_-_geograph.org.uk_-_782504.jpg",
+      "source": "Wikimedia Commons"
+    },
+    "route": {
+      "title": "Buttermere, Crummock Water, Red Pike, High Stile and High Crag",
+      "url": "https://www.walkingenglishman.com/lakes61.html",
+      "gpxUrl": "https://www.walkingenglishman.com/gpx/lakes61.gpx",
+      "source": "The Walking Englishman"
+    }
+  },
+  "high-street": {
+    "image": {
+      "src": "/src/assets/peaks/high-street.jpg",
+      "alt": "High Street, Lake District",
+      "credit": "Personal Photo taken by Mick Knapton at en.wikipedia",
+      "licence": "CC BY-SA 3.0",
+      "licenceUrl": "http://creativecommons.org/licenses/by-sa/3.0/",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:High_Street_and_Small_Water_from_Harter_Fell.jpg",
+      "source": "Wikimedia Commons"
+    },
+    "route": {
+      "title": "High Street from Mardale Head",
+      "url": "https://www.walkingenglishman.com/lakes24.html",
+      "gpxUrl": "https://www.walkingenglishman.com/gpx/lakes24.gpx",
+      "source": "The Walking Englishman"
+    }
+  },
+  "ill-bell": {
+    "image": {
+      "src": "/src/assets/peaks/ill-bell.jpg",
+      "alt": "Ill Bell, Lake District",
+      "credit": "Mick Knapton at English Wikipedia",
+      "licence": "CC BY-SA 3.0",
+      "licenceUrl": "http://creativecommons.org/licenses/by-sa/3.0/",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Ill_Bell_from_Froswick.jpg",
+      "source": "Wikimedia Commons"
+    },
+    "route": {
+      "title": "Riggindale Crag, High Street and Mardale Ill Bell",
+      "url": "https://www.walkingenglishman.com/lakes46.html",
+      "gpxUrl": "https://www.walkingenglishman.com/gpx/lakes46.gpx",
+      "source": "The Walking Englishman"
+    }
+  },
+  "ingleborough": {
+    "image": {
+      "src": "/src/assets/peaks/ingleborough.jpg",
+      "alt": "Ingleborough, Yorkshire Dales",
+      "credit": "Mick Melvin",
+      "licence": "CC BY-SA 2.0",
+      "licenceUrl": "https://creativecommons.org/licenses/by-sa/2.0",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Ingleborough.jpg",
+      "source": "Wikimedia Commons"
+    },
+    "route": {
+      "title": "Skirwith, Ingleborough, Chapel-le-Dale and Twisleton Scars",
+      "url": "https://www.walkingenglishman.com/dales44.html",
+      "gpxUrl": "https://www.walkingenglishman.com/gpx/dales44.gpx",
+      "source": "The Walking Englishman"
+    }
+  },
+  "kinder-scout": {
+    "image": {
+      "src": "/src/assets/peaks/kinder-scout.jpg",
+      "alt": "Kinder Scout, Peak District",
+      "credit": "Dave Dunford",
+      "licence": "CC BY-SA 2.0",
+      "licenceUrl": "https://creativecommons.org/licenses/by-sa/2.0",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Kinder_Scout_(northwestern_end)_-_geograph.org.uk_-_80943.jpg",
+      "source": "Wikimedia Commons"
+    },
+    "route": {
+      "title": "Kinder Scout from Edale",
+      "url": "https://www.walkingenglishman.com/peakdistrict07.html",
+      "gpxUrl": "https://www.walkingenglishman.com/gpx/peaks07.gpx",
+      "source": "The Walking Englishman"
+    }
+  },
+  "ladhar-bheinn": {
+    "image": {
+      "src": "/src/assets/peaks/ladhar-bheinn.jpg",
+      "alt": "Ladhar Bheinn, Knoydart",
+      "credit": "See source page",
+      "licence": "CC BY 2.5",
+      "licenceUrl": "https://creativecommons.org/licenses/by/2.5",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Ladhar_Bheinn.jpg",
+      "source": "Wikimedia Commons"
+    },
+    "route": null
+  },
+  "liathach": {
+    "image": {
+      "src": "/src/assets/peaks/liathach.jpg",
+      "alt": "Liathach, Torridon",
+      "credit": "Roddy Smith",
+      "licence": "CC BY-SA 2.0",
+      "licenceUrl": "https://creativecommons.org/licenses/by-sa/2.0",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Liathach_from_Loch_Clair_May_2006_-_geograph.org.uk_-_282854.jpg",
+      "source": "Wikimedia Commons"
+    },
+    "route": null
+  },
+  "lochnagar": {
+    "image": {
+      "src": "/src/assets/peaks/lochnagar.jpg",
+      "alt": "Lochnagar, Cairngorms",
+      "credit": "Colin Smith",
+      "licence": "CC BY-SA 2.0",
+      "licenceUrl": "https://creativecommons.org/licenses/by-sa/2.0",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Lochnagar_-_Mountain_and_Corrie_Lochan._-_geograph.org.uk_-_113301.jpg",
+      "source": "Wikimedia Commons"
+    },
+    "route": null
+  },
+  "maesglaese": {
+    "image": {
+      "src": "/src/assets/peaks/maesglaese.jpg",
+      "alt": "Maesglaese, Eryri (Snowdonia)",
+      "credit": "Velela",
+      "licence": "CC BY-SA 2.5",
+      "licenceUrl": "https://creativecommons.org/licenses/by-sa/2.5",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Maesglase.jpg",
+      "source": "Wikimedia Commons"
+    },
+    "route": null
+  },
+  "merrick": {
+    "image": {
+      "src": "/src/assets/peaks/merrick.jpg",
+      "alt": "Merrick, Southern Uplands",
+      "credit": "w:User:DavidAdamson",
+      "licence": "CC BY 3.0",
+      "licenceUrl": "https://creativecommons.org/licenses/by/3.0",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Awful_Hand_and_Loch_Enoch.jpg",
+      "source": "Wikimedia Commons"
+    },
+    "route": null
+  },
+  "moel-hebog": {
+    "image": {
+      "src": "/src/assets/peaks/moel-hebog.jpg",
+      "alt": "Moel Hebog, Eryri (Snowdonia)",
+      "credit": "Stemonitis at English Wikipedia",
+      "licence": "Public domain",
+      "licenceUrl": null,
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Moel_Hebog.jpg",
+      "source": "Wikimedia Commons"
+    },
+    "route": {
+      "title": "Beddgelert, Moel Hebog, Moel yr Ogof, Moel Lefn and Beddgelert Forest",
+      "url": "https://www.walkingenglishman.com/wales23.html",
+      "gpxUrl": "https://www.walkingenglishman.com/wales/23beddgelert/trackfile.gpx",
+      "source": "The Walking Englishman"
+    }
+  },
+  "moel-siabod": {
+    "image": {
+      "src": "/src/assets/peaks/moel-siabod.jpg",
+      "alt": "Moel Siabod, Eryri (Snowdonia)",
+      "credit": "See source page",
+      "licence": "CC BY-SA 3.0",
+      "licenceUrl": "http://creativecommons.org/licenses/by-sa/3.0/",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:MoelSiabod.jpg",
+      "source": "Wikimedia Commons"
+    },
+    "route": null
+  },
+  "mynydd-drws-y-coed": {
+    "image": {
+      "src": "/src/assets/peaks/mynydd-drws-y-coed.jpg",
+      "alt": "Mynydd Drws-y-Coed, Eryri (Snowdonia)",
+      "credit": "Gabby77 (talk)",
+      "licence": "Public domain",
+      "licenceUrl": null,
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Drwsycoed.jpg",
+      "source": "Wikimedia Commons"
+    },
+    "route": null
+  },
+  "pen-y-fan": {
+    "image": {
+      "src": "/src/assets/peaks/pen-y-fan.jpg",
+      "alt": "Pen y Fan, Brecon Beacons",
+      "credit": "Dave.Dunford at English Wikipedia",
+      "licence": "Public domain",
+      "licenceUrl": null,
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Pen_y_Fan_from_Cribyn.jpg",
+      "source": "Wikimedia Commons"
+    },
+    "route": {
+      "title": "Corn Du, Pen y Fan, Cribyn and Fan y Big (Brecon Beacons Horseshoe)",
+      "url": "https://www.walkingenglishman.com/wales10.html",
+      "gpxUrl": "https://www.walkingenglishman.com/wales/10/trackfile.gpx",
+      "source": "The Walking Englishman"
+    }
+  },
+  "pen-yr-ole-wen": {
+    "image": {
+      "src": "/src/assets/peaks/pen-yr-ole-wen.png",
+      "alt": "Pen yr Ole Wen, Eryri (Snowdonia)",
+      "credit": "Llywelyn2000",
+      "licence": "CC BY-SA 4.0",
+      "licenceUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Pen_yr_Ole_Wen_7fed_mynydd_uchaf_Cymru,_Eryri_National_Park_16.png",
+      "source": "Wikimedia Commons"
+    },
+    "route": {
+      "title": "Conwy Mountain to Pen yr Ole Wen (Welsh 3000's)",
+      "url": "https://www.walkingenglishman.com/wales06.html",
+      "gpxUrl": "https://www.walkingenglishman.com/wales/06/trackfile.gpx",
+      "source": "The Walking Englishman"
+    }
+  },
+  "pike-of-stickle": {
+    "image": {
+      "src": "/src/assets/peaks/pike-of-stickle.jpg",
+      "alt": "Pike of Stickle, Lake District",
+      "credit": "The original uploader was Mick Knapton at English Wikipedia.",
+      "licence": "CC BY-SA 3.0",
+      "licenceUrl": "http://creativecommons.org/licenses/by-sa/3.0/",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Pike_of_Stickle_from_Loft_Crag.jpg",
+      "source": "Wikimedia Commons"
+    },
+    "route": {
+      "title": "The Langdale Pikes",
+      "url": "https://www.walkingenglishman.com/lakes30.html",
+      "gpxUrl": "https://www.walkingenglishman.com/gpx/lakes30.gpx",
+      "source": "The Walking Englishman"
+    }
+  },
+  "pillar": {
+    "image": {
+      "src": "/src/assets/peaks/pillar.jpg",
+      "alt": "Pillar, Lake District",
+      "credit": "Malcolm Morris",
+      "licence": "CC BY-SA 2.0",
+      "licenceUrl": "https://creativecommons.org/licenses/by-sa/2.0",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Lake_District_-_geograph.org.uk_-_539195.jpg",
+      "source": "Wikimedia Commons"
+    },
+    "route": {
+      "title": "Pillar, Scoat Fell, Red Pike and Yewbarrow",
+      "url": "https://www.walkingenglishman.com/lakes08.html",
+      "gpxUrl": "https://www.walkingenglishman.com/gpx/lakes08.gpx",
+      "source": "The Walking Englishman"
+    }
+  },
+  "place-fell": {
+    "image": {
+      "src": "/src/assets/peaks/place-fell.jpg",
+      "alt": "Place Fell, Lake District",
+      "credit": "The original uploader was StephenDawson at English Wikipedia.",
+      "licence": "CC BY-SA 2.0",
+      "licenceUrl": "https://creativecommons.org/licenses/by-sa/2.0",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Place_Fell.jpg",
+      "source": "Wikimedia Commons"
+    },
+    "route": {
+      "title": "Route 8: The Western Martindale Fells",
+      "url": "https://www.walkingenglishman.com/walkingthewainwrights08.html",
+      "gpxUrl": "https://www.walkingenglishman.com/gpx/wainwrights08.gpx",
+      "source": "The Walking Englishman"
+    }
+  },
+  "pumlumon": {
+    "image": {
+      "src": "/src/assets/peaks/pumlumon.jpg",
+      "alt": "Pumlumon, Central Wales",
+      "credit": "Richard Webb",
+      "licence": "CC BY-SA 2.0",
+      "licenceUrl": "https://creativecommons.org/licenses/by-sa/2.0",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Pumlumon_Fawr.jpg",
+      "source": "Wikimedia Commons"
+    },
+    "route": null
+  },
+  "quinag": {
+    "image": {
+      "src": "/src/assets/peaks/quinag.jpg",
+      "alt": "Quinag, Sutherland",
+      "credit": "Foxie001 at Dutch Wikipedia",
+      "licence": "CC BY-SA 3.0",
+      "licenceUrl": "http://creativecommons.org/licenses/by-sa/3.0/",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Quinag.JPG",
+      "source": "Wikimedia Commons"
+    },
+    "route": null
+  },
+  "rhinog-fawr": {
+    "image": {
+      "src": "/src/assets/peaks/rhinog-fawr.jpg",
+      "alt": "Rhinog Fawr, Eryri (Snowdonia)",
+      "credit": "Blisco",
+      "licence": "CC BY-SA 3.0",
+      "licenceUrl": "http://creativecommons.org/licenses/by-sa/3.0/",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Rhinog_Fawr.jpg",
+      "source": "Wikimedia Commons"
+    },
+    "route": null
+  },
+  "roseberry-topping": {
+    "image": {
+      "src": "/src/assets/peaks/roseberry-topping.jpg",
+      "alt": "Roseberry Topping, North York Moors",
+      "credit": "The original uploader was ChrisO at English Wikipedia.",
+      "licence": "CC BY-SA 2.5",
+      "licenceUrl": "https://creativecommons.org/licenses/by-sa/2.5",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Roseberry_topping_north_side.jpg",
+      "source": "Wikimedia Commons"
+    },
+    "route": {
+      "title": "Great Ayton, Roseberry Topping and Captain Cook's Monument — Walks in North Yorkshire",
+      "url": "https://www.walkingenglishman.com/northyorkshire01.html",
+      "gpxUrl": "https://www.walkingenglishman.com/gpx/ny01.gpx",
+      "source": "The Walking Englishman"
+    }
+  },
+  "sca-fell": {
+    "image": {
+      "src": "/src/assets/peaks/sca-fell.jpg",
+      "alt": "Sca Fell, Lake District",
+      "credit": "See source page",
+      "licence": "CC BY-SA 3.0",
+      "licenceUrl": "http://creativecommons.org/licenses/by-sa/3.0/",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Annotated_Scafell_range.jpg",
+      "source": "Wikimedia Commons"
+    },
+    "route": {
+      "title": "Scafell and Scafell Pike from Seathwaite",
+      "url": "https://www.walkingenglishman.com/lakes01.html",
+      "gpxUrl": "https://www.walkingenglishman.com/gpx/lakes01.gpx",
+      "source": "The Walking Englishman"
+    }
+  },
+  "scafell-pike": {
+    "image": {
+      "src": "/src/assets/peaks/scafell-pike.jpg",
+      "alt": "Scafell Pike, Lake District",
+      "credit": "Thorneh at English Wikipedia",
+      "licence": "Public domain",
+      "licenceUrl": null,
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Scafell_Pike.JPG",
+      "source": "Wikimedia Commons"
+    },
+    "route": {
+      "title": "Scafell and Scafell Pike from Seathwaite",
+      "url": "https://www.walkingenglishman.com/lakes01.html",
+      "gpxUrl": "https://www.walkingenglishman.com/gpx/lakes01.gpx",
+      "source": "The Walking Englishman"
+    }
+  },
+  "schiehallion": {
+    "image": {
+      "src": "/src/assets/peaks/schiehallion.jpg",
+      "alt": "Schiehallion, Central Highlands",
+      "credit": "The original uploader was Andrew2606 at English Wikipedia.",
+      "licence": "CC BY 3.0",
+      "licenceUrl": "https://creativecommons.org/licenses/by/3.0",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Schiehallion_01.jpg",
+      "source": "Wikimedia Commons"
+    },
+    "route": null
+  },
+  "sgurr-a-mhaim": {
+    "image": {
+      "src": "/src/assets/peaks/sgurr-a-mhaim.jpg",
+      "alt": "Sgurr a’ Mhaim, West Highlands",
+      "credit": "Mick Knapton at English Wikipedia",
+      "licence": "CC BY-SA 3.0",
+      "licenceUrl": "http://creativecommons.org/licenses/by-sa/3.0/",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Sgurr_a%27_Mhaim_from_the_Devils_Ridge.jpg",
+      "source": "Wikimedia Commons"
+    },
+    "route": null
+  },
+  "sgurr-alasdair": {
+    "image": {
+      "src": "/src/assets/peaks/sgurr-alasdair.jpg",
+      "alt": "Sgurr Alasdair, Isle of Skye",
+      "credit": "A' chachaileith",
+      "licence": "Public domain",
+      "licenceUrl": null,
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Sgurr_alasdair.jpg",
+      "source": "Wikimedia Commons"
+    },
+    "route": null
+  },
+  "sgurr-dearg": {
+    "image": {
+      "src": "/src/assets/peaks/sgurr-dearg.jpg",
+      "alt": "Sgurr Dearg (Inaccessible Pinnacle), Isle of Skye",
+      "credit": "Grinner",
+      "licence": "CC BY-SA 3.0",
+      "licenceUrl": "https://creativecommons.org/licenses/by-sa/3.0",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:In_pinn.jpg",
+      "source": "Wikimedia Commons"
+    },
+    "route": null
+  },
+  "sgurr-fhuaran": {
+    "image": {
+      "src": "/src/assets/peaks/sgurr-fhuaran.jpg",
+      "alt": "Sgurr Fhuaran, West Highlands",
+      "credit": "Mick Knapton at English Wikipedia",
+      "licence": "CC BY-SA 3.0",
+      "licenceUrl": "http://creativecommons.org/licenses/by-sa/3.0/",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Sgurr_Fhuran_from_Sgurr_na_Ciste_Duibhe.jpg",
+      "source": "Wikimedia Commons"
+    },
+    "route": null
+  },
+  "sgurr-na-ciche": {
+    "image": {
+      "src": "/src/assets/peaks/sgurr-na-ciche.jpg",
+      "alt": "Sgurr na Ciche, Knoydart",
+      "credit": "paul birrell",
+      "licence": "CC BY-SA 2.0",
+      "licenceUrl": "https://creativecommons.org/licenses/by-sa/2.0",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Sgurr_na_Ciche.jpg",
+      "source": "Wikimedia Commons"
+    },
+    "route": null
+  },
+  "sgurr-nan-gillean": {
+    "image": {
+      "src": "/src/assets/peaks/sgurr-nan-gillean.jpg",
+      "alt": "Sgurr nan Gillean, Isle of Skye",
+      "credit": "Adrian Pingstone",
+      "licence": "Public domain",
+      "licenceUrl": null,
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Sgurr_nan_gillean_arp.jpg",
+      "source": "Wikimedia Commons"
+    },
+    "route": null
+  },
+  "skiddaw": {
+    "image": {
+      "src": "/src/assets/peaks/skiddaw.jpg",
+      "alt": "Skiddaw, Lake District",
+      "credit": "Antiquary",
+      "licence": "CC BY-SA 4.0",
+      "licenceUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Skiddaw.JPG",
+      "source": "Wikimedia Commons"
+    },
+    "route": {
+      "title": "Route 22: The Skiddaw Group",
+      "url": "https://www.walkingenglishman.com/walkingthewainwrights22.html",
+      "gpxUrl": "https://www.walkingenglishman.com/gpx/wainwrights22.gpx",
+      "source": "The Walking Englishman"
+    }
+  },
+  "slieve-donard": {
+    "image": {
+      "src": "/src/assets/peaks/slieve-donard.jpg",
+      "alt": "Slieve Donard, Mourne Mountains",
+      "credit": "Ross",
+      "licence": "CC BY-SA 2.0",
+      "licenceUrl": "https://creativecommons.org/licenses/by-sa/2.0",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Slieve_Donard_-_geograph.org.uk_-_1138189.jpg",
+      "source": "Wikimedia Commons"
+    },
+    "route": null
+  },
+  "slioch": {
+    "image": {
+      "src": "/src/assets/peaks/slioch.jpg",
+      "alt": "Slioch, North Highlands",
+      "credit": "Mick Knapton at English Wikipedia",
+      "licence": "CC BY-SA 3.0",
+      "licenceUrl": "http://creativecommons.org/licenses/by-sa/3.0/",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Slioch_from_Loch_Maree.jpg",
+      "source": "Wikimedia Commons"
+    },
+    "route": null
+  },
+  "snowdon": {
+    "image": {
+      "src": "/src/assets/peaks/snowdon.jpg",
+      "alt": "Snowdon, Eryri (Snowdonia)",
+      "credit": "User:Gdr",
+      "licence": "CC BY-SA 3.0",
+      "licenceUrl": "http://creativecommons.org/licenses/by-sa/3.0/",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Snowdon_from_Llyn_Llydaw.jpg",
+      "source": "Wikimedia Commons"
+    },
+    "route": {
+      "title": "Snowdon via the South Ridge from Rhyd Ddu",
+      "url": "https://www.walkingenglishman.com/snowdonia6.html",
+      "gpxUrl": "https://www.walkingenglishman.com/snowdonia/06/trackfile.gpx",
+      "source": "The Walking Englishman"
+    }
+  },
+  "st-sunday-crag": {
+    "image": {
+      "src": "/src/assets/peaks/st-sunday-crag.jpg",
+      "alt": "St Sunday Crag, Lake District",
+      "credit": "Mick Garratt",
+      "licence": "CC BY-SA 2.0",
+      "licenceUrl": "https://creativecommons.org/licenses/by-sa/2.0",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:St_sunday_crag.jpg",
+      "source": "Wikimedia Commons"
+    },
+    "route": {
+      "title": "Striding Edge, Helvellyn, Nethermost Pike, Dollywaggon Pike, Grisedale Tarn, St Sunday Crag and Birks",
+      "url": "https://www.walkingenglishman.com/lakes63.html",
+      "gpxUrl": "https://www.walkingenglishman.com/gpx/lakes63.gpx",
+      "source": "The Walking Englishman"
+    }
+  },
+  "stac-pollaidh": {
+    "image": {
+      "src": "/src/assets/peaks/stac-pollaidh.jpg",
+      "alt": "Stac Pollaidh, Assynt",
+      "credit": "Mehmet Karatay",
+      "licence": "CC BY-SA 3.0",
+      "licenceUrl": "https://creativecommons.org/licenses/by-sa/3.0",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Stac_Pollaidh.jpg",
+      "source": "Wikimedia Commons"
+    },
+    "route": null
+  },
+  "sugar-loaf": {
+    "image": {
+      "src": "/src/assets/peaks/sugar-loaf.jpg",
+      "alt": "Sugar Loaf, Brecon Beacons",
+      "credit": "Philip Halling",
+      "licence": "CC BY-SA 2.0",
+      "licenceUrl": "https://creativecommons.org/licenses/by-sa/2.0",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Summit_of_Sugar_Loaf_-_geograph.org.uk_-_220784.jpg",
+      "source": "Wikimedia Commons"
+    },
+    "route": {
+      "title": "Sugar Loaf",
+      "url": "https://www.walkingenglishman.com/wales03.html",
+      "gpxUrl": "https://www.walkingenglishman.com/wales/03/trackfile.gpx",
+      "source": "The Walking Englishman"
+    }
+  },
+  "suilven": {
+    "image": {
+      "src": "/src/assets/peaks/suilven.jpg",
+      "alt": "Suilven, Assynt",
+      "credit": "Original uploader was Grinner at en.wikipedia",
+      "licence": "CC BY-SA 3.0",
+      "licenceUrl": "http://creativecommons.org/licenses/by-sa/3.0/",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Suilven_looking_east.jpg",
+      "source": "Wikimedia Commons"
+    },
+    "route": {
+      "title": "Lochinver and Suilven",
+      "url": "https://www.walkingenglishman.com/scotland14.html",
+      "gpxUrl": "https://www.walkingenglishman.com/scotland/14suilven/trackfile.gpx",
+      "source": "The Walking Englishman"
+    }
+  },
+  "the-calf": {
+    "image": {
+      "src": "/src/assets/peaks/the-calf.jpg",
+      "alt": "The Calf, Howgills",
+      "credit": "John Illingworth",
+      "licence": "CC BY-SA 2.0",
+      "licenceUrl": "https://creativecommons.org/licenses/by-sa/2.0",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:The_Calf_summit.jpg",
+      "source": "Wikimedia Commons"
+    },
+    "route": {
+      "title": "Cautley Spout and the Calf Howgill Fells Walk",
+      "url": "https://www.walkingenglishman.com/dales05.html",
+      "gpxUrl": "https://www.walkingenglishman.com/gpx/dales05.gpx",
+      "source": "The Walking Englishman"
+    }
+  },
+  "the-cheviot": {
+    "image": {
+      "src": "/src/assets/peaks/the-cheviot.jpg",
+      "alt": "The Cheviot, Northumberland",
+      "credit": "See source page",
+      "licence": "CC BY 2.5",
+      "licenceUrl": "https://creativecommons.org/licenses/by/2.5",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:The_Cheviot_from_Broadhope_Hill.jpg",
+      "source": "Wikimedia Commons"
+    },
+    "route": null
+  },
+  "the-cobbler": {
+    "image": {
+      "src": "/src/assets/peaks/the-cobbler.jpg",
+      "alt": "The Cobbler, Arrochar Alps",
+      "credit": "Macsels",
+      "licence": "CC BY-SA 3.0",
+      "licenceUrl": "http://creativecommons.org/licenses/by-sa/3.0/",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Ben_Arthur.JPG",
+      "source": "Wikimedia Commons"
+    },
+    "route": null
+  },
+  "the-devils-point": {
+    "image": {
+      "src": "/src/assets/peaks/the-devils-point.jpg",
+      "alt": "The Devil’s Point, Cairngorms",
+      "credit": "Donald Thomas",
+      "licence": "CC BY-SA 2.0",
+      "licenceUrl": "https://creativecommons.org/licenses/by-sa/2.0",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Coire_Odhar,_Devil%27s_Point_-_geograph.org.uk_-_229151.jpg",
+      "source": "Wikimedia Commons"
+    },
+    "route": null
+  },
+  "the-old-man-of-coniston": {
+    "image": {
+      "src": "/src/assets/peaks/the-old-man-of-coniston.jpg",
+      "alt": "The Old Man of Coniston, Lake District",
+      "credit": "John H Darch",
+      "licence": "CC BY-SA 2.0",
+      "licenceUrl": "https://creativecommons.org/licenses/by-sa/2.0",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Ascending_the_Old_Man_-_geograph.org.uk_-_5036739.jpg",
+      "source": "Wikimedia Commons"
+    },
+    "route": {
+      "title": "Old Man Of Coniston, Black Crag, Swirl How and Wetherlam",
+      "url": "https://www.walkingenglishman.com/lakes11.html",
+      "gpxUrl": "https://www.walkingenglishman.com/gpx/lakes11.gpx",
+      "source": "The Walking Englishman"
+    }
+  },
+  "the-saddle": {
+    "image": {
+      "src": "/src/assets/peaks/the-saddle.jpg",
+      "alt": "The Saddle, West Highlands",
+      "credit": "paul birrell",
+      "licence": "CC BY-SA 2.0",
+      "licenceUrl": "https://creativecommons.org/licenses/by-sa/2.0",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Forcan_Ridge_The_Saddle_Glen_Sheil_-_geograph.org.uk_-_26570.jpg",
+      "source": "Wikimedia Commons"
+    },
+    "route": null
+  },
+  "tryfan": {
+    "image": {
+      "src": "/src/assets/peaks/tryfan.jpg",
+      "alt": "Tryfan, Eryri (Snowdonia)",
+      "credit": "Llywelyn2000",
+      "licence": "CC BY-SA 4.0",
+      "licenceUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Tryfan,_Gwynedd,_Parc_Cenedlaethol_Eryri_National_Park,_Cymru_07.jpg",
+      "source": "Wikimedia Commons"
+    },
+    "route": {
+      "title": "A Tryfan Walk from Llyn Ogwen",
+      "url": "https://www.walkingenglishman.com/snowdonia1.html",
+      "gpxUrl": "https://www.walkingenglishman.com/snowdonia/01/trackfile.gpx",
+      "source": "The Walking Englishman"
+    }
+  },
+  "wetherlam": {
+    "image": {
+      "src": "/src/assets/peaks/wetherlam.jpg",
+      "alt": "Wetherlam, Lake District",
+      "credit": "Bobble Hat at English Wikipedia",
+      "licence": "CC BY-SA 3.0",
+      "licenceUrl": "http://creativecommons.org/licenses/by-sa/3.0/",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Wetherlam.jpg",
+      "source": "Wikimedia Commons"
+    },
+    "route": {
+      "title": "Old Man Of Coniston, Black Crag, Swirl How and Wetherlam",
+      "url": "https://www.walkingenglishman.com/lakes11.html",
+      "gpxUrl": "https://www.walkingenglishman.com/gpx/lakes11.gpx",
+      "source": "The Walking Englishman"
+    }
+  },
+  "y-garn": {
+    "image": {
+      "src": "/src/assets/peaks/y-garn.jpg",
+      "alt": "Y Garn, Eryri (Snowdonia)",
+      "credit": "David Medcalf",
+      "licence": "CC BY-SA 2.0",
+      "licenceUrl": "https://creativecommons.org/licenses/by-sa/2.0",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Y_Garn_-_geograph.org.uk_-_22398.jpg",
+      "source": "Wikimedia Commons"
+    },
+    "route": {
+      "title": "Y Garn and Devil's Kitchen",
+      "url": "https://www.walkingenglishman.com/wales21.html",
+      "gpxUrl": "https://www.walkingenglishman.com/wales/21YGarn/trackfile.gpx",
+      "source": "The Walking Englishman"
+    }
+  },
+  "y-lliwedd": {
+    "image": {
+      "src": "/src/assets/peaks/y-lliwedd.jpg",
+      "alt": "Y Lliwedd, Eryri (Snowdonia)",
+      "credit": "Soloist at English Wikipedia",
+      "licence": "CC BY-SA 3.0",
+      "licenceUrl": "http://creativecommons.org/licenses/by-sa/3.0/",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Y_Lliwedd_next_to_Snowdon.jpg",
+      "source": "Wikimedia Commons"
+    },
+    "route": null
+  },
+  "yes-tor": {
+    "image": {
+      "src": "/src/assets/peaks/yes-tor.jpg",
+      "alt": "Yes Tor, Dartmoor",
+      "credit": "Roger Cornfoot",
+      "licence": "CC BY-SA 2.0",
+      "licenceUrl": "https://creativecommons.org/licenses/by-sa/2.0",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Summit,_of_Yes_Tor_-_geograph.org.uk_-_1423987.jpg",
+      "source": "Wikimedia Commons"
+    },
+    "route": {
+      "title": "Belstone Cleave, Rowtor, Yes Tor, High Willhays, Meldon Reservoir and Black Down",
+      "url": "https://www.walkingenglishman.com/southwest01.html",
+      "gpxUrl": "https://www.walkingenglishman.com/southwest/01yestor/trackfile.gpx",
+      "source": "The Walking Englishman"
+    }
+  },
+  "yewbarrow": {
+    "image": {
+      "src": "/src/assets/peaks/yewbarrow.jpg",
+      "alt": "Yewbarrow, Lake District",
+      "credit": "Ben Gamble",
+      "licence": "CC BY-SA 2.0",
+      "licenceUrl": "https://creativecommons.org/licenses/by-sa/2.0",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Yewbarrow_-_geograph.org.uk_-_1874.jpg",
+      "source": "Wikimedia Commons"
+    },
+    "route": {
+      "title": "Pillar, Scoat Fell, Red Pike and Yewbarrow",
+      "url": "https://www.walkingenglishman.com/lakes08.html",
+      "gpxUrl": "https://www.walkingenglishman.com/gpx/lakes08.gpx",
+      "source": "The Walking Englishman"
+    }
+  },
+  "yr-aran": {
+    "image": {
+      "src": "/src/assets/peaks/yr-aran.jpg",
+      "alt": "Yr Aran, Eryri (Snowdonia)",
+      "credit": "Geraint Smith",
+      "licence": "CC BY-SA 2.0",
+      "licenceUrl": "https://creativecommons.org/licenses/by-sa/2.0",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Yr_Aran_-_geograph.org.uk_-_272804.jpg",
+      "source": "Wikimedia Commons"
+    },
+    "route": null
+  },
+  "yr-eifl": {
+    "image": {
+      "src": "/src/assets/peaks/yr-eifl.jpg",
+      "alt": "Yr Eifl, Eryri (Snowdonia)",
+      "credit": "Llywelyn2000",
+      "licence": "CC BY-SA 4.0",
+      "licenceUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Yr_Eifl_o_ochrau_(from)_Clynnog_Fawr,_Gwynedd,_Cymru_(Wales)_02_(cropped).jpg",
+      "source": "Wikimedia Commons"
+    },
+    "route": null
+  }
+}

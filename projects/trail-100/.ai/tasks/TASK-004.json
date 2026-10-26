@@ -1,0 +1,27 @@
+{
+  "id": "TASK-004",
+  "title": "Modern photo gallery with pagination, peak photos and Garmin route links",
+  "description": "Redesign the app as a modern, outdoorsy website. Peaks are shown as a large photo-card gallery with pagination. Selecting a card opens the peak's details with a large photo, the photo credit, and a link to a walking route with a GPX file the user can load onto a Garmin watch. Photos and routes come from data/peak-media.json (keyed by peak id), which was researched and verified separately. Do NOT modify data/peaks.json or data/peak-media.json, do not add or invent images, routes or URLs, and do not hard-code any peak, image or route data in the UI. Some peaks have no route yet (route is null); the UI must handle that.",
+  "status": "todo",
+  "assignedTo": "developer",
+  "priority": "high",
+  "dataNotes": [
+    "data/peak-media.json: { [peakId]: { image: { src, alt, credit, licence, licenceUrl, sourceUrl, source }, route: { title, url, gpxUrl, source } | null } }",
+    "Images are local files under src/assets/peaks/ and are served by the existing server at the path in image.src.",
+    "Route coverage is incomplete and will grow; tests must not assume a specific number of peaks have routes."
+  ],
+  "acceptanceCriteria": [
+    "The page has a modern, cohesive design suited to hiking and the outdoors: a hero header, consistent spacing, typography and colour, and photo cards. No external CSS/JS frameworks or web fonts are added.",
+    "Peaks are shown in a responsive photo-card gallery: 1 column at 360px, and more columns on wider screens (at least 3 at 1280px).",
+    "Each card shows the peak photo (lazy-loaded, with descriptive alt text and fixed aspect ratio so the layout does not jump), number, name, region, height, and completion state, plus the existing mark-complete control.",
+    "The gallery is paginated at 12 peaks per page with Previous/Next buttons and numbered page buttons; the current page is marked with aria-current=\"page\"; Previous is disabled on the first page and Next on the last.",
+    "Changing page shows the right peaks and moves keyboard focus to the start of the gallery; changing a filter returns to page 1; the page count reflects the filtered results.",
+    "Selecting a card (its View details control) opens the existing accessible details dialog, which now also shows the large peak photo with its credit, licence (linked to licenceUrl) and a link to the photo's source page.",
+    "When a peak has a route, the details dialog shows the route title and source, a link to the route page, a Download GPX link, and brief instructions for loading a GPX file onto a Garmin watch via Garmin Connect. External links open in a new tab with rel=\"noopener noreferrer\".",
+    "When a peak has no route, the details dialog says a verified route is not available yet, with no broken or placeholder links.",
+    "Existing features keep working: overall and region progress, filters, mark/unmark from cards and dialog, saved progress, keyboard focus handling.",
+    "Pure functions in src/peak-utils.js cover pagination (page slicing, page count, clamping out-of-range pages) and rendering of the photo card and route section, with unit tests including a peak with and without a route.",
+    "Playwright tests in tests/e2e cover pagination, card photos loading, the route and no-route dialog states, and layout at 360px and 1280px. tests/e2e/screenshots.spec.js is updated to capture the gallery and a details dialog with a route.",
+    "npm test and npm run test:e2e both pass."
+  ]
+}
