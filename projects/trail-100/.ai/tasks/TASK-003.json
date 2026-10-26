@@ -2,7 +2,7 @@
   "id": "TASK-003",
   "title": "View individual peak information",
   "description": "Let the user open a details view for any peak showing all information available for it in data/peaks.json, and mark it complete from there. Only display data that exists in the dataset; do not invent or fetch extra peak information.",
-  "status": "todo",
+  "status": "completed",
   "assignedTo": "developer",
   "priority": "medium",
   "acceptanceCriteria": [

@@ -41,8 +41,12 @@ export function toggleCompleted(completedIds, peakId) {
     return next;
 }
 
-export function filterPeaks(peaks, completedIds, regionFilter = 'all', statusFilter = 'all') {
+// keepVisibleId (optional): a peak that stays in the list even if it no longer
+// matches the filters, e.g. the peak whose details view is/was open, so the
+// control that opened the details view still exists when focus returns to it.
+export function filterPeaks(peaks, completedIds, regionFilter = 'all', statusFilter = 'all', keepVisibleId = null) {
     return peaks.filter(peak => {
+        if (keepVisibleId != null && peak.id === keepVisibleId) return true;
         const matchesRegion = regionFilter === 'all' || peak.region === regionFilter;
         const isCompleted = completedIds.has(peak.id);
         const matchesStatus = statusFilter === 'all' ||
@@ -70,6 +74,11 @@ export function serializeCompleted(completedIds) {
     return JSON.stringify([...completedIds]);
 }
 
+// True only when the dataset provides a non-empty grid reference for the peak.
+export function hasGridRef(peak) {
+    return typeof peak.gridRef === 'string' && peak.gridRef.trim().length > 0;
+}
+
 export function createRegionProgressItem({ region, completed, total, percentage }) {
     const name = escapeHtml(region);
     const itemClass = total > 0 && completed === total ? 'region-progress-item complete' : 'region-progress-item';
@@ -94,7 +103,7 @@ export function createPeakCard(peak, isCompleted) {
     const buttonText = isCompleted ? 'Mark as not climbed' : 'Mark as climbed';
     const name = escapeHtml(peak.name);
     // Grid reference is shown only when present in the dataset; it is never invented.
-    const gridRef = peak.gridRef
+    const gridRef = hasGridRef(peak)
         ? `<p class="peak-gridref">Grid ref: ${escapeHtml(peak.gridRef)}</p>`
         : '';
 
@@ -109,6 +118,60 @@ export function createPeakCard(peak, isCompleted) {
             <button type="button" class="toggle-button ${buttonClass}" data-peak-id="${escapeHtml(peak.id)}" aria-pressed="${isCompleted}" aria-label="${buttonText}: ${name}">
                 ${buttonText}
             </button>
+            <button type="button" class="details-button" data-peak-id="${escapeHtml(peak.id)}" aria-haspopup="dialog" aria-label="View details for ${name}">
+                View details
+            </button>
         </article>
+    `;
+}
+
+// Inner content of the peak details dialog. Only fields present in
+// data/peaks.json are shown; the grid reference row is omitted entirely
+// when the dataset does not provide one.
+export function createPeakDetails(peak, isCompleted) {
+    const id = escapeHtml(peak.id);
+    const name = escapeHtml(peak.name);
+    const statusClass = isCompleted ? 'completed' : 'remaining';
+    const statusText = isCompleted ? '✓ Completed' : 'Not climbed';
+    const buttonClass = isCompleted ? 'mark-remaining' : 'mark-complete';
+    const buttonText = isCompleted ? 'Mark as not climbed' : 'Mark as climbed';
+    const gridRefRow = hasGridRef(peak)
+        ? `
+                <div class="details-row">
+                    <dt>Grid reference</dt>
+                    <dd>${escapeHtml(peak.gridRef)}</dd>
+                </div>`
+        : '';
+
+    return `
+        <div class="peak-details ${statusClass}" data-peak-id="${id}">
+            <div class="peak-details-header">
+                <h2 id="peak-details-title" class="peak-details-title">${name}</h2>
+                <button type="button" class="details-close-button" aria-label="Close details for ${name}">
+                    <span aria-hidden="true">×</span> Close
+                </button>
+            </div>
+            <dl class="peak-details-list">
+                <div class="details-row">
+                    <dt>Peak number</dt>
+                    <dd>#${escapeHtml(peak.number)}</dd>
+                </div>
+                <div class="details-row">
+                    <dt>Region</dt>
+                    <dd>${escapeHtml(peak.region)}</dd>
+                </div>
+                <div class="details-row">
+                    <dt>Height</dt>
+                    <dd>${escapeHtml(peak.heightM)}m</dd>
+                </div>${gridRefRow}
+                <div class="details-row">
+                    <dt>Status</dt>
+                    <dd class="peak-status ${statusClass}">${statusText}</dd>
+                </div>
+            </dl>
+            <button type="button" class="toggle-button details-toggle-button ${buttonClass}" data-peak-id="${id}" aria-pressed="${isCompleted}" aria-label="${buttonText}: ${name}">
+                ${buttonText}
+            </button>
+        </div>
     `;
 }

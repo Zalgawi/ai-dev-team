@@ -11,9 +11,13 @@ import {
     serializeCompleted,
     createPeakCard,
     createRegionProgressItem,
+    createPeakDetails,
+    hasGridRef,
     escapeHtml,
 } from '../src/peak-utils.js';
+import { createPeakDetailsController } from '../src/peak-details-controller.js';
 import { createServer } from '../src/server.js';
+import { registerBrowserTests } from './browser-tests.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.join(__dirname, '..');
@@ -477,7 +481,9 @@ describe('Region progress rendering', () => {
         assertTrue(fn, 'updateProgressSummary should exist');
         assertTrue(fn[1].includes('renderRegionProgress()'), 'updateProgressSummary should call renderRegionProgress');
         const toggle = js.match(/function handleToggleComplete\([^)]*\)\s*\{([\s\S]*?)\n\}/);
-        assertTrue(toggle && toggle[1].includes('updateProgressSummary()'), 'Toggling should update progress');
+        assertTrue(toggle && toggle[1].includes('setPeakToggled(peakId)'), 'Card toggle should use the shared toggle path');
+        const shared = js.match(/function setPeakToggled\([^)]*\)\s*\{([\s\S]*?)\n\}/);
+        assertTrue(shared && shared[1].includes('updateProgressSummary()'), 'Toggling should update progress');
         assertTrue(js.includes('calculateRegionProgress(completedPeaks, peaks)'));
     });
 });
@@ -539,7 +545,7 @@ describe('Local server', () => {
     });
 
     it('should serve all assets referenced by index.html', async () => {
-        for (const asset of ['/src/style.css', '/src/app.js', '/src/peak-utils.js']) {
+        for (const asset of ['/src/style.css', '/src/app.js', '/src/peak-utils.js', '/src/peak-details-controller.js']) {
             const res = await fetch(`${baseUrl}${asset}`);
             assertEqual(res.status, 200, `${asset} should be served`);
             await res.arrayBuffer();
@@ -565,6 +571,341 @@ describe('Local server', () => {
         assertTrue(readSource('src/app.js').includes("'/data/peaks.json'"));
     });
 });
+
+// ---------------------------------------------------------------------------
+// TASK-003: peak details view
+// ---------------------------------------------------------------------------
+describe('Peak details rendering (createPeakDetails)', () => {
+    let peaks;
+    let peak;
+    beforeAll(() => {
+        peaks = loadPeaksData();
+        peak = peaks.find(p => p.id === 'beinn-dearg-mor');
+    });
+
+    // Text content of the <dd> that follows the given <dt> label, or null.
+    const detailValue = (html, label) => {
+        const m = html.match(new RegExp(`<dt>${label}</dt>\\s*<dd[^>]*>([^<]*)</dd>`));
+        return m ? m[1].trim() : null;
+    };
+
+    it('should show the peak number, name, region, height in metres and status', () => {
+        const html = createPeakDetails(peak, false);
+        assertTrue(html.includes('<h2 id="peak-details-title" class="peak-details-title">Beinn Dearg Mòr</h2>'), 'Name heading');
+        assertEqual(detailValue(html, 'Peak number'), `#${peak.number}`);
+        assertEqual(detailValue(html, 'Region'), escapeHtml(peak.region));
+        assertEqual(detailValue(html, 'Height'), `${peak.heightM}m`);
+        assertEqual(detailValue(html, 'Status'), 'Not climbed');
+        assertFalse(MOJIBAKE_PATTERN.test(html), 'No garbled characters');
+    });
+
+    it('should render every peak in the dataset with its own data', () => {
+        peaks.forEach(p => {
+            const html = createPeakDetails(p, false);
+            assertTrue(html.includes(`data-peak-id="${escapeHtml(p.id)}"`), `${p.id} id`);
+            assertEqual(detailValue(html, 'Peak number'), `#${p.number}`, `${p.id} number`);
+            assertEqual(detailValue(html, 'Region'), escapeHtml(p.region), `${p.id} region`);
+            assertEqual(detailValue(html, 'Height'), `${p.heightM}m`, `${p.id} height`);
+        });
+    });
+
+    it('should show the grid reference when the peak has one', () => {
+        const withRef = { ...peak, gridRef: 'NH 019 718' };
+        assertTrue(hasGridRef(withRef));
+        const html = createPeakDetails(withRef, false);
+        assertEqual(detailValue(html, 'Grid reference'), 'NH 019 718');
+    });
+
+    it('should omit the grid reference row entirely when the peak has none', () => {
+        for (const variant of [peak, { ...peak, gridRef: undefined }, { ...peak, gridRef: '' }, { ...peak, gridRef: '   ' }, { ...peak, gridRef: null }]) {
+            const html = createPeakDetails(variant, false);
+            assertFalse(html.includes('Grid reference'), 'No grid reference label');
+            assertFalse(/grid ref/i.test(html), 'No grid ref text at all');
+            assertFalse(/undefined|null|N\/A|Unknown/.test(html), 'No placeholder or misleading value');
+        }
+    });
+
+    it('should not show a grid reference for any dataset peak (none have one in data/peaks.json)', () => {
+        peaks.filter(p => !hasGridRef(p)).forEach(p => {
+            assertFalse(createPeakDetails(p, false).includes('Grid reference'), `${p.id} should not show a grid reference`);
+        });
+    });
+
+    it('should reflect completion status and offer the matching toggle', () => {
+        const done = createPeakDetails(peak, true);
+        assertEqual(detailValue(done, 'Status'), '✓ Completed');
+        assertTrue(done.includes('class="peak-details completed"'));
+        assertTrue(done.includes('aria-pressed="true"'));
+        assertTrue(done.includes(`aria-label="Mark as not climbed: Beinn Dearg Mòr"`));
+
+        const notDone = createPeakDetails(peak, false);
+        assertTrue(notDone.includes('class="peak-details remaining"'));
+        assertTrue(notDone.includes('aria-pressed="false"'));
+        assertTrue(notDone.includes(`aria-label="Mark as climbed: Beinn Dearg Mòr"`));
+    });
+
+    it('should include a visible, labelled close control and a real toggle button', () => {
+        const html = createPeakDetails(peak, false);
+        assertTrue(/<button type="button" class="details-close-button" aria-label="Close details for Beinn Dearg Mòr">[\s\S]*Close\s*<\/button>/.test(html), 'Visible Close button');
+        assertTrue(/<button type="button" class="toggle-button details-toggle-button mark-complete"/.test(html), 'Toggle is a button');
+    });
+
+    it('should escape HTML in peak data', () => {
+        const html = createPeakDetails({ id: 'x"y', number: 1, name: '<img src=x>', region: '<b>R</b>', heightM: 1, gridRef: '<i>G</i>' }, false);
+        assertFalse(/<img|<b>|<i>/.test(html));
+        assertTrue(html.includes('&lt;img src=x&gt;'));
+        assertTrue(html.includes('data-peak-id="x&quot;y"'));
+    });
+
+    it('should be pure (same output for same input, input not mutated)', () => {
+        const copy = JSON.stringify(peak);
+        assertEqual(createPeakDetails(peak, true), createPeakDetails(peak, true));
+        assertEqual(JSON.stringify(peak), copy);
+    });
+
+    it('should not invent fields that are not in the dataset', () => {
+        const html = createPeakDetails(peak, false);
+        const labels = [...html.matchAll(/<dt>([^<]*)<\/dt>/g)].map(m => m[1]);
+        assertEqual(JSON.stringify(labels), JSON.stringify(['Peak number', 'Region', 'Height', 'Status']));
+    });
+});
+
+describe('Peak card "View details" control', () => {
+    let peaks;
+    beforeAll(() => { peaks = loadPeaksData(); });
+
+    it('every card should have a details button with a descriptive accessible name', () => {
+        peaks.forEach(p => {
+            const html = createPeakCard(p, false);
+            const name = escapeHtml(p.name);
+            assertTrue(html.includes(`<button type="button" class="details-button" data-peak-id="${escapeHtml(p.id)}" aria-haspopup="dialog" aria-label="View details for ${name}">`), `${p.id} details button`);
+            assertTrue(/>\s*View details\s*<\/button>/.test(html), `${p.id} visible label`);
+        });
+    });
+
+    it('index.html should contain a labelled native dialog for the details view', () => {
+        const html = readSource('src/index.html');
+        assertTrue(/<dialog id="peak-details"[^>]*aria-labelledby="peak-details-title"/.test(html));
+    });
+
+    it('filterPeaks should keep the pinned peak visible even if it no longer matches', () => {
+        const done = new Set([peaks[0].id]);
+        const completedOnly = filterPeaks(peaks, new Set(), 'all', 'completed', peaks[0].id);
+        assertEqual(completedOnly.length, 1);
+        assertEqual(completedOnly[0].id, peaks[0].id);
+        assertEqual(filterPeaks(peaks, done, 'all', 'remaining', null).length, 99);
+        // Pinned peak keeps its dataset position.
+        const ids = filterPeaks(peaks, new Set([peaks[0].id, peaks[2].id]), 'all', 'completed', peaks[1].id).map(p => p.id);
+        assertEqual(JSON.stringify(ids), JSON.stringify([peaks[0].id, peaks[1].id, peaks[2].id]));
+    });
+});
+
+// Tiny fake of the DOM pieces the controller uses, so its behaviour can be
+// tested in Node. Elements are created per class found in the dialog HTML.
+function createFakeEnvironment(peaks) {
+    const focus = { current: null };
+    class FakeElement {
+        constructor(className, label) { this.className = className; this.label = label; }
+        focus() { focus.current = this; }
+        closest(selector) { return selector === `.${this.className}` ? this : null; }
+    }
+    const listeners = {};
+    let html = '';
+    let elements = {};
+    const calls = { showModal: 0, show: 0 };
+    const dialog = {
+        open: false,
+        modal: false,
+        get innerHTML() { return html; },
+        set innerHTML(value) {
+            html = value;
+            elements = {};
+            for (const cls of ['details-close-button', 'details-toggle-button']) {
+                if (value.includes(cls)) elements[`.${cls}`] = new FakeElement(cls, 'dialog');
+            }
+        },
+        querySelector(selector) { return elements[selector] || null; },
+        addEventListener(type, fn) { (listeners[type] ||= []).push(fn); },
+        showModal() { calls.showModal++; this.open = true; this.modal = true; },
+        show() { calls.show++; this.open = true; },
+        close() {
+            if (!this.open) return;
+            this.open = false;
+            this.modal = false;
+            (listeners.close || []).forEach(fn => fn({ type: 'close' }));
+        },
+        dispatch(type, event) {
+            const ev = { defaultPrevented: false, preventDefault() { this.defaultPrevented = true; }, ...event };
+            (listeners[type] || []).forEach(fn => fn(ev));
+            return ev;
+        },
+    };
+
+    let completed = new Set();
+    const visible = new Set(peaks.map(p => p.id));
+    // Openers are re-created on each "render" like real re-rendered cards.
+    let openers = {};
+    const renderCards = () => {
+        openers = {};
+        visible.forEach(id => { openers[id] = new FakeElement('details-button', id); });
+    };
+    renderCards();
+    const fallback = new FakeElement('peaks-heading', 'fallback');
+    const toggles = [];
+
+    const controller = createPeakDetailsController({
+        dialog,
+        renderDetails: id => {
+            const peak = peaks.find(p => p.id === id);
+            return peak ? createPeakDetails(peak, completed.has(id)) : null;
+        },
+        togglePeak: id => { toggles.push(id); completed = toggleCompleted(completed, id); renderCards(); },
+        findOpener: id => openers[id] || null,
+        fallbackFocus: () => fallback,
+    });
+
+    return {
+        dialog, controller, focus, calls, fallback, toggles, visible,
+        get completed() { return completed; },
+        opener: id => openers[id],
+        renderCards,
+        clickIn: selector => dialog.dispatch('click', { target: dialog.querySelector(selector) }),
+    };
+}
+
+describe('Peak details controller (open, close, focus, toggle)', () => {
+    let peaks;
+    beforeAll(() => { peaks = loadPeaksData(); });
+
+    it('should open as a modal dialog showing the chosen peak and move focus inside', () => {
+        const env = createFakeEnvironment(peaks);
+        env.opener(peaks[3].id).focus();
+        env.controller.open(peaks[3].id);
+        assertTrue(env.dialog.open, 'Dialog should be open');
+        assertTrue(env.dialog.modal, 'Dialog should be modal (showModal makes the page behind inert)');
+        assertEqual(env.calls.showModal, 1);
+        assertEqual(env.calls.show, 0, 'Non-modal show() must not be used');
+        assertTrue(env.dialog.innerHTML.includes(`data-peak-id="${peaks[3].id}"`));
+        assertEqual(env.focus.current, env.dialog.querySelector('.details-close-button'), 'Focus should move to the close button');
+        assertEqual(env.controller.currentPeakId, peaks[3].id);
+    });
+
+    it('should do nothing for an unknown peak id', () => {
+        const env = createFakeEnvironment(peaks);
+        env.controller.open('not-a-real-peak');
+        assertFalse(env.dialog.open);
+        assertEqual(env.controller.currentPeakId, null);
+    });
+
+    it('should close with the visible close control and return focus to the opener', () => {
+        const env = createFakeEnvironment(peaks);
+        const id = peaks[0].id;
+        env.opener(id).focus();
+        env.controller.open(id);
+        env.clickIn('.details-close-button');
+        assertFalse(env.dialog.open, 'Dialog should be closed');
+        assertEqual(env.dialog.innerHTML, '', 'Dialog content should be cleared');
+        assertEqual(env.focus.current, env.opener(id), 'Focus should return to the View details button');
+    });
+
+    it('should close with the Escape key and return focus to the opener', () => {
+        const env = createFakeEnvironment(peaks);
+        const id = peaks[1].id;
+        env.controller.open(id);
+        const ev = env.dialog.dispatch('keydown', { key: 'Escape' });
+        assertTrue(ev.defaultPrevented);
+        assertFalse(env.dialog.open);
+        assertEqual(env.focus.current, env.opener(id));
+    });
+
+    it('should ignore other keys', () => {
+        const env = createFakeEnvironment(peaks);
+        env.controller.open(peaks[1].id);
+        env.dialog.dispatch('keydown', { key: 'Tab' });
+        env.dialog.dispatch('keydown', { key: 'Enter' });
+        assertTrue(env.dialog.open);
+    });
+
+    it('should toggle completion from the details view and re-render it', () => {
+        const env = createFakeEnvironment(peaks);
+        const id = peaks[2].id;
+        env.controller.open(id);
+        env.clickIn('.details-toggle-button');
+        assertEqual(JSON.stringify(env.toggles), JSON.stringify([id]), 'Shared toggle path should be used once');
+        assertTrue(env.completed.has(id));
+        assertTrue(env.dialog.open, 'Dialog stays open after toggling');
+        assertTrue(env.dialog.innerHTML.includes('✓ Completed'));
+        assertTrue(env.dialog.innerHTML.includes('aria-pressed="true"'));
+        assertEqual(env.focus.current, env.dialog.querySelector('.details-toggle-button'), 'Focus stays on the toggle');
+
+        env.clickIn('.details-toggle-button');
+        assertFalse(env.completed.has(id), 'Second click unmarks');
+        assertTrue(env.dialog.innerHTML.includes('Not climbed'));
+        assertTrue(env.dialog.innerHTML.includes('aria-pressed="false"'));
+    });
+
+    it('should return focus to the re-rendered opener after toggling', () => {
+        const env = createFakeEnvironment(peaks);
+        const id = peaks[4].id;
+        const original = env.opener(id);
+        env.controller.open(id);
+        env.clickIn('.details-toggle-button');
+        env.controller.close();
+        assertFalse(env.focus.current === original, 'Old element was replaced by re-render');
+        assertEqual(env.focus.current, env.opener(id), 'Focus goes to the current View details button of the same peak');
+    });
+
+    it('should fall back to a sensible target only when the opener no longer exists', () => {
+        const env = createFakeEnvironment(peaks);
+        const id = peaks[5].id;
+        env.controller.open(id);
+        env.visible.delete(id);
+        env.renderCards();
+        env.controller.close();
+        assertEqual(env.focus.current, env.fallback);
+    });
+
+    it('app.js should wire the controller to the shared toggle path and card opener', () => {
+        const js = readSource('src/app.js');
+        assertTrue(js.includes("import { createPeakDetailsController } from './peak-details-controller.js';"));
+        assertTrue(js.includes('togglePeak: setPeakToggled'), 'Details toggle uses the same path as cards (cards, overall and region progress)');
+        assertTrue(js.includes("findOpener: peakId => findCardButton('.details-button', peakId)"));
+        assertTrue(js.includes('filterPeaks(peaks, completedPeaks, regionFilter, statusFilter, pinnedPeakId)'), 'Opener card is kept visible');
+    });
+});
+
+describe('Peak details responsive layout', () => {
+    let css;
+    let mobile;
+    beforeAll(() => {
+        css = readSource('src/style.css');
+        mobile = css.match(/@media \(max-width: 600px\)\s*\{([\s\S]*)\}\s*$/)[1];
+    });
+
+    it('should never be wider than the viewport on desktop', () => {
+        const rule = css.match(/\.peak-details-dialog\s*\{([^}]*)\}/);
+        assertTrue(rule, 'Should have a .peak-details-dialog rule');
+        assertTrue(/max-width:\s*calc\(100vw - 2rem\)/.test(rule[1]));
+        assertTrue(/max-height:\s*calc\(100vh - 2rem\)/.test(rule[1]));
+        assertTrue(/overflow-y:\s*auto/.test(rule[1]), 'Tall content should scroll');
+    });
+
+    it('should fill a 360px-wide screen in the mobile breakpoint', () => {
+        const rule = mobile.match(/\.peak-details-dialog\s*\{([^}]*)\}/);
+        assertTrue(rule, 'Mobile breakpoint should size the dialog');
+        assertTrue(/width:\s*calc\(100vw - 1rem\)/.test(rule[1]));
+        assertTrue(/max-width:\s*calc\(100vw - 1rem\)/.test(rule[1]));
+    });
+
+    it('should let long names and values wrap instead of overflowing', () => {
+        assertTrue(/\.peak-details-title\s*\{[^}]*overflow-wrap:\s*anywhere/.test(css));
+        assertTrue(/\.details-row dd\s*\{[^}]*overflow-wrap:\s*anywhere/.test(css));
+        assertTrue(/\.details-row\s*\{[^}]*flex-wrap:\s*wrap/.test(css));
+        assertTrue(/\.peak-details-header\s*\{[^}]*flex-wrap:\s*wrap/.test(css));
+    });
+});
+
+registerBrowserTests({ describe, it, beforeAll, afterAll, assertEqual, assertTrue, assertFalse, loadPeaksData });
 
 // ---------------------------------------------------------------------------
 // Runner

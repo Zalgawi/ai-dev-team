@@ -7,15 +7,24 @@ import {
     parseStoredCompleted,
     serializeCompleted,
     createPeakCard,
+    createPeakDetails,
     createRegionProgressItem,
     escapeHtml,
 } from './peak-utils.js';
+import { createPeakDetailsController } from './peak-details-controller.js';
 
 const STORAGE_KEY = 'trail100_completed';
 const PEAKS_DATA_URL = '/data/peaks.json';
 
 let peaks = [];
 let completedPeaks = new Set();
+// Controller for the peak details dialog (created in setupEventListeners).
+let peakDetails = null;
+// Peak whose details view was last opened. Its card stays in the list even if
+// it stops matching the filters (e.g. unmarked from the details view while
+// filtered to "Completed"), so focus can return to its "View details" button.
+// Cleared whenever the user changes the filters.
+let pinnedPeakId = null;
 
 async function loadPeaks() {
     try {
@@ -58,7 +67,7 @@ function renderPeaks() {
     const regionFilter = document.getElementById('region-filter').value;
     const statusFilter = document.getElementById('status-filter').value;
 
-    const filteredPeaks = filterPeaks(peaks, completedPeaks, regionFilter, statusFilter);
+    const filteredPeaks = filterPeaks(peaks, completedPeaks, regionFilter, statusFilter, pinnedPeakId);
 
     if (filteredPeaks.length === 0) {
         container.innerHTML = '<div class="empty-state">No peaks match the current filters.</div>';
@@ -70,16 +79,42 @@ function renderPeaks() {
         .join('');
 }
 
-function handleToggleComplete(event) {
-    const button = event.target.closest('.toggle-button');
-    if (!button) return;
-    const peakId = button.dataset.peakId;
+// The user changed the filters: stop pinning the last opened peak and re-render.
+function applyFilters() {
+    pinnedPeakId = null;
+    renderPeaks();
+}
+
+function findCardButton(selector, peakId) {
+    return document.getElementById('peaks-container')
+        .querySelector(`${selector}[data-peak-id="${CSS.escape(peakId)}"]`);
+}
+
+// Flip a peak's completion and refresh every view that depends on it.
+function setPeakToggled(peakId) {
     completedPeaks = toggleCompleted(completedPeaks, peakId);
     saveCompletedStatus();
     renderPeaks();
     updateProgressSummary();
+}
+
+function handlePeaksContainerClick(event) {
+    const detailsButton = event.target.closest('.details-button');
+    if (detailsButton) {
+        pinnedPeakId = detailsButton.dataset.peakId;
+        peakDetails.open(pinnedPeakId);
+        return;
+    }
+    handleToggleComplete(event);
+}
+
+function handleToggleComplete(event) {
+    const button = event.target.closest('.toggle-button');
+    if (!button) return;
+    const peakId = button.dataset.peakId;
+    setPeakToggled(peakId);
     // Keep keyboard focus on the re-rendered button for the same peak.
-    const sameButton = document.querySelector(`.toggle-button[data-peak-id="${CSS.escape(peakId)}"]`);
+    const sameButton = findCardButton('.toggle-button', peakId);
     if (sameButton) sameButton.focus();
 }
 
@@ -100,14 +135,27 @@ function renderRegionProgress() {
             .join('');
 }
 
+function renderPeakDetailsHtml(peakId) {
+    const peak = peaks.find(p => p.id === peakId);
+    return peak ? createPeakDetails(peak, completedPeaks.has(peak.id)) : null;
+}
+
 function setupEventListeners() {
-    document.getElementById('peaks-container').addEventListener('click', handleToggleComplete);
-    document.getElementById('region-filter').addEventListener('change', renderPeaks);
-    document.getElementById('status-filter').addEventListener('change', renderPeaks);
+    document.getElementById('peaks-container').addEventListener('click', handlePeaksContainerClick);
+    document.getElementById('region-filter').addEventListener('change', applyFilters);
+    document.getElementById('status-filter').addEventListener('change', applyFilters);
     document.getElementById('reset-filters').addEventListener('click', () => {
         document.getElementById('region-filter').value = 'all';
         document.getElementById('status-filter').value = 'all';
-        renderPeaks();
+        applyFilters();
+    });
+
+    peakDetails = createPeakDetailsController({
+        dialog: document.getElementById('peak-details'),
+        renderDetails: renderPeakDetailsHtml,
+        togglePeak: setPeakToggled,
+        findOpener: peakId => findCardButton('.details-button', peakId),
+        fallbackFocus: () => document.getElementById('peaks-heading'),
     });
 }
 
