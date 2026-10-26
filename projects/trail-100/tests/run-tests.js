@@ -17,7 +17,6 @@ import {
 } from '../src/peak-utils.js';
 import { createPeakDetailsController } from '../src/peak-details-controller.js';
 import { createServer } from '../src/server.js';
-import { registerBrowserTests } from './browser-tests.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.join(__dirname, '..');
@@ -905,7 +904,6 @@ describe('Peak details responsive layout', () => {
     });
 });
 
-registerBrowserTests({ describe, it, beforeAll, afterAll, assertEqual, assertTrue, assertFalse, loadPeaksData });
 
 // ---------------------------------------------------------------------------
 // Runner

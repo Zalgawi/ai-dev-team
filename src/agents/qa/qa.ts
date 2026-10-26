@@ -61,6 +61,12 @@ npm test
 If the command reports zero tests, that is a QA FAILURE.
 Do not assume zero tests means success.
 
+If package.json defines a "test:e2e" script, also run:
+npm run test:e2e
+These are real-browser (Playwright) tests at desktop and 360px mobile
+sizes. Use them as the evidence for responsive layout, keyboard and
+browser-behaviour criteria. Any failure is a QA FAILURE.
+
 STEP 4 — Verify acceptance criteria:
 Compare the implementation and test results against every acceptance criterion in the task.
 
