@@ -81,3 +81,8 @@ The application must:
 ## Development
 
 This project uses vanilla JavaScript (ES6+) with no external dependencies to keep it simple and maintainable.
+## Testing
+
+- `npm test` runs the unit tests (pure functions, data checks, local server).
+- `npm run test:e2e` runs the Playwright browser tests at desktop (1280px) and mobile (360px) sizes. First-time setup: `npx playwright install chromium`.
+- `npm run screenshots` saves screenshots of the main screens to `screenshots/desktop/` and `screenshots/mobile/`.

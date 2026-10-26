@@ -6,10 +6,20 @@
   "main": "src/server.js",
   "scripts": {
     "start": "node src/server.js",
-    "test": "node tests/run-tests.js"
+    "test": "node tests/run-tests.js",
+    "test:e2e": "playwright test --grep-invert @screenshots",
+    "screenshots": "playwright test --grep @screenshots --reporter=list"
   },
-  "keywords": ["trail", "hiking", "mountains", "tracker"],
+  "keywords": [
+    "trail",
+    "hiking",
+    "mountains",
+    "tracker"
+  ],
   "author": "",
   "license": "ISC",
-  "dependencies": {}
+  "dependencies": {},
+  "devDependencies": {
+    "@playwright/test": "^1.64.1"
+  }
 }
