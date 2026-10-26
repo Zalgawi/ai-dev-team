@@ -1,0 +1,17 @@
+{
+  "id": "TASK-002",
+  "title": "Show progress by region",
+  "description": "Add a per-region progress breakdown to the dashboard so the user can see how far through each region of the Trail 100 they are. Regions come from the existing data/peaks.json; do not add or rename regions.",
+  "status": "todo",
+  "assignedTo": "developer",
+  "priority": "high",
+  "acceptanceCriteria": [
+    "The dashboard shows one entry per region found in data/peaks.json, sorted alphabetically",
+    "Each region entry shows the region name, completed / total peaks, and a completion percentage",
+    "Each region entry has an accessible progress indicator (role=progressbar with aria-valuenow, aria-valuemin, aria-valuemax and an accessible name)",
+    "Region progress updates immediately when a peak is marked or unmarked complete, without a page reload",
+    "The per-region calculation is a pure function in src/peak-utils.js with automated tests, including a region with zero completed peaks and a fully completed region",
+    "The region breakdown is readable on a 360px-wide mobile screen and on desktop",
+    "Existing functionality and tests keep passing, and npm test exits with code 0"
+  ]
+}

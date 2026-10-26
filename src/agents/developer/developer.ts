@@ -71,7 +71,7 @@ Work autonomously on the assigned task using your available tools.
 
 Before starting implementation, check whether .ai/qa-report.json exists.
 
-If .ai/qa-report.json exists and its outcome is "failed":
+If .ai/qa-report.json exists, its taskId matches your assigned task, and its outcome is "failed":
 - You are in QA FIX MODE.
 - Read the QA report completely.
 - Treat the reported issues as the highest-priority work.
@@ -80,7 +80,7 @@ If .ai/qa-report.json exists and its outcome is "failed":
 - Run the relevant tests after making your fixes.
 - Do not stop until you have made a genuine attempt to resolve the reported issues.
 
-If .ai/qa-report.json does not exist, you are in NORMAL DEVELOPMENT MODE.
+Otherwise (no report, a report for a different task, or a passed report), you are in NORMAL DEVELOPMENT MODE.
 
 When you are finished, provide a concise summary of:
 1. What you changed
@@ -103,14 +103,14 @@ Start by inspecting the project and reading:
 Then check whether this file exists:
 - .ai/qa-report.json
 
-If .ai/qa-report.json exists and its outcome is "failed":
+If .ai/qa-report.json exists, its taskId is ${context.taskId}, and its outcome is "failed":
 - Read the report carefully.
 - Treat the reported issues as the highest-priority information for this iteration.
 - Fix the reported defects.
 - Do not modify the QA report yourself.
 - Re-run the relevant tests after making fixes.
 
-If .ai/qa-report.json does not exist, proceed with the original task requirements.
+Otherwise, proceed with the original task requirements.
 
 Then implement or fix the task.
 Do not stop after merely describing what should be done.

@@ -2,7 +2,7 @@
   "id": "TASK-001",
   "title": "Build the Trail 100 peak tracker",
   "description": "Create the initial Trail 100 web application that allows users to view the 100 peaks and track which peaks they have completed.",
-  "status": "in_progress",
+  "status": "completed",
   "assignedTo": "developer",
   "priority": "high",
   "acceptanceCriteria": [

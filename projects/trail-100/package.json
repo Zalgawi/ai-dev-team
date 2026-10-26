@@ -6,14 +6,10 @@
   "main": "src/server.js",
   "scripts": {
     "start": "node src/server.js",
-    "build": "tsc",
     "test": "node tests/run-tests.js"
   },
   "keywords": ["trail", "hiking", "mountains", "tracker"],
   "author": "",
   "license": "ISC",
-  "devDependencies": {
-    "typescript": "5.0.0"
-  },
   "dependencies": {}
 }

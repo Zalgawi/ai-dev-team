@@ -2,7 +2,7 @@
     {
         "id":  "a-mhaighdean",
         "number":  1,
-        "name":  "Aâ€™ Mhaighdean",
+        "name":  "A’ Mhaighdean",
         "region":  "Fisherfield Forest",
         "heightM":  967
     },
@@ -51,7 +51,7 @@
     {
         "id":  "beinn-dearg-mor",
         "number":  8,
-        "name":  "Beinn Dearg MÃ²r",
+        "name":  "Beinn Dearg Mòr",
         "region":  "Fisherfield Forest",
         "heightM":  906
     },
@@ -506,7 +506,7 @@
     {
         "id":  "sgurr-a-mhaim",
         "number":  73,
-        "name":  "Sgurr aâ€™ Mhaim",
+        "name":  "Sgurr a’ Mhaim",
         "region":  "West Highlands",
         "heightM":  1099
     },
@@ -625,7 +625,7 @@
     {
         "id":  "the-devils-point",
         "number":  90,
-        "name":  "The Devilâ€™s Point",
+        "name":  "The Devil’s Point",
         "region":  "Cairngorms",
         "heightM":  1004
     },

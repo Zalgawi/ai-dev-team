@@ -31,6 +31,7 @@ export const llmTools: ToolName[] = [
 
 export const qaTools: ToolName[] = [
   "read_file",
+  "list_files",
   "run_command"
 ];
 
