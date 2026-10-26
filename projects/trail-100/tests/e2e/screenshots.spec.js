@@ -12,6 +12,8 @@ async function waitForGalleryPhotos(page) {
     }
 }
 
+const routePeak = () => peaks.find(p => media[p.id] && media[p.id].route && media[p.id].route.gpxUrl) || peaks[0];
+
 test.describe('@screenshots', () => {
     test('capture app screens', async ({ page }, testInfo) => {
         const shot = name => page.screenshot({
@@ -19,6 +21,7 @@ test.describe('@screenshots', () => {
             fullPage: name.endsWith('-full'),
         });
 
+        await page.emulateMedia({ colorScheme: 'light' });
         await openFreshApp(page);
         await page.evaluate(() => window.scrollTo(0, 0));
         await shot('01-home');
@@ -40,7 +43,7 @@ test.describe('@screenshots', () => {
         await page.locator('#peaks-heading').scrollIntoViewIfNeeded();
         await shot('05-gallery-page-2');
 
-        const withRoute = peaks.find(p => media[p.id] && media[p.id].route && media[p.id].route.gpxUrl) || peaks[0];
+        const withRoute = routePeak();
         await showPeak(page, withRoute);
         await page.getByRole('button', { name: `View details for ${withRoute.name}` }).click();
         const dialog = page.locator('#peak-details');
@@ -59,6 +62,49 @@ test.describe('@screenshots', () => {
             await expect(dialog).toBeVisible();
             await dialog.locator('.route-section').scrollIntoViewIfNeeded();
             await shot('08-peak-details-route-page-gpx');
+            await page.keyboard.press('Escape');
         }
+    });
+
+    test('capture app screens in dark mode', async ({ page }, testInfo) => {
+        const shot = name => page.screenshot({
+            path: `screenshots/${testInfo.project.name}/${name}.png`,
+            fullPage: name.endsWith('-full'),
+        });
+
+        await page.emulateMedia({ colorScheme: 'dark' });
+        await openFreshApp(page);
+        await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark');
+        await page.evaluate(() => window.scrollTo(0, 0));
+        await shot('09-dark-home');
+
+        for (const peak of peaks.slice(0, 12).filter((_, i) => i % 3 === 0)) {
+            await card(page, peak.id).locator('.toggle-button').click();
+        }
+        const regionToggle = page.locator('#region-progress-toggle');
+        if ((await regionToggle.getAttribute('aria-expanded')) !== 'true') await regionToggle.click();
+        await page.locator('#progress-summary').scrollIntoViewIfNeeded();
+        await shot('10-dark-progress');
+
+        await waitForGalleryPhotos(page);
+        await page.locator('#peaks-heading').scrollIntoViewIfNeeded();
+        await shot('11-dark-gallery');
+        await shot('12-dark-home-full');
+
+        const withRoute = routePeak();
+        await showPeak(page, withRoute);
+        await page.getByRole('button', { name: `View details for ${withRoute.name}` }).click();
+        const dialog = page.locator('#peak-details');
+        await expect(dialog).toBeVisible();
+        await expect.poll(() => dialog.locator('img').evaluate(el => el.complete && el.naturalWidth > 0)).toBe(true);
+        await shot('13-dark-peak-details');
+        await dialog.locator('.route-section').scrollIntoViewIfNeeded();
+        await shot('14-dark-peak-details-route-section');
+        await page.keyboard.press('Escape');
+
+        // Toggle back to light from the header to show the button in both states.
+        await page.evaluate(() => window.scrollTo(0, 0));
+        await page.locator('#theme-toggle').focus();
+        await shot('15-dark-theme-toggle-focused');
     });
 });

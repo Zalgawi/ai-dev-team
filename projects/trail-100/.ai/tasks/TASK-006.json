@@ -1,0 +1,20 @@
+{
+  "id": "TASK-006",
+  "title": "Night mode theme toggle",
+  "description": "Add a dark (night) theme and a toggle to switch between light and dark. By default the site follows the device's colour-scheme preference; once the user picks a theme with the toggle, that choice is remembered. Keep the existing outdoors look: the dark theme should feel like the same site at night, not a different design. No external libraries or web fonts.",
+  "status": "completed",
+  "assignedTo": "developer",
+  "priority": "medium",
+  "acceptanceCriteria": [
+    "Colours are defined as CSS custom properties with a light and a dark set; all page areas (hero, progress, region list, filters, cards, pagination, details dialog, route section, footer, form controls) use them, so nothing stays light in dark mode or dark in light mode.",
+    "A visible theme toggle button sits in the header on all screen sizes. It has an accessible name that says what it will do (e.g. 'Switch to dark theme' / 'Switch to light theme') or uses aria-pressed, and works with mouse, touch and keyboard.",
+    "With no saved choice, the theme follows prefers-color-scheme. Choosing a theme with the toggle saves it in localStorage and it is applied on later visits, overriding the device preference.",
+    "The saved theme is applied before first paint (no flash of the wrong theme on load), e.g. with a small inline script in <head> that sets an attribute on <html>.",
+    "If localStorage is unavailable or throws, the toggle still switches the theme for the current visit and the page does not error.",
+    "Text and interactive elements meet WCAG AA contrast (4.5:1 for normal text, 3:1 for large text and UI component boundaries) in both themes, and keyboard focus outlines remain clearly visible in both.",
+    "Photo cards, photo credits and the dialog backdrop remain readable in dark mode.",
+    "Theme logic that can be pure (resolving the effective theme from saved choice + system preference, and the next theme after a toggle) lives in src/peak-utils.js or a small module with unit tests.",
+    "Playwright tests cover: default follows emulated light and dark colorScheme; toggling switches the theme and updates the button's accessible name or aria-pressed; the choice persists after reload and overrides the emulated system preference; layout works at 360px and 1280px in dark mode. tests/e2e/screenshots.spec.js also captures key screens in dark mode.",
+    "Existing features and tests keep working; npm test and npm run test:e2e both pass."
+  ]
+}
