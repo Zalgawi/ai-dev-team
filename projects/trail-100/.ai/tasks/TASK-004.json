@@ -2,7 +2,7 @@
   "id": "TASK-004",
   "title": "Modern photo gallery with pagination, peak photos and Garmin route links",
   "description": "Redesign the app as a modern, outdoorsy website. Peaks are shown as a large photo-card gallery with pagination. Selecting a card opens the peak's details with a large photo, the photo credit, and a link to a walking route with a GPX file the user can load onto a Garmin watch. Photos and routes come from data/peak-media.json (keyed by peak id), which was researched and verified separately. Do NOT modify data/peaks.json or data/peak-media.json, do not add or invent images, routes or URLs, and do not hard-code any peak, image or route data in the UI. Some peaks have no route yet (route is null); the UI must handle that.",
-  "status": "todo",
+  "status": "completed",
   "assignedTo": "developer",
   "priority": "high",
   "dataNotes": [

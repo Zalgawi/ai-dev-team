@@ -1,7 +1,16 @@
 // Captures screenshots of the app for human review. Run with `npm run screenshots`;
 // excluded from `npm run test:e2e`. Images are written to screenshots/<project>/.
 import { test, expect } from '@playwright/test';
-import { peaks, openFreshApp, card } from './helpers.js';
+import { peaks, media, openFreshApp, showPeak, card } from './helpers.js';
+
+// Wait until every photo currently in the gallery has loaded.
+async function waitForGalleryPhotos(page) {
+    const imgs = page.locator('#peaks-container .peak-photo img');
+    for (const img of await imgs.all()) {
+        await img.scrollIntoViewIfNeeded();
+        await expect.poll(() => img.evaluate(el => el.complete && el.naturalWidth > 0)).toBe(true);
+    }
+}
 
 test.describe('@screenshots', () => {
     test('capture app screens', async ({ page }, testInfo) => {
@@ -11,18 +20,34 @@ test.describe('@screenshots', () => {
         });
 
         await openFreshApp(page);
+        await page.evaluate(() => window.scrollTo(0, 0));
         await shot('01-home');
 
         // Some progress so the dashboard isn't empty.
-        for (const peak of peaks.filter((_, i) => i % 7 === 0)) {
+        for (const peak of peaks.slice(0, 12).filter((_, i) => i % 3 === 0)) {
             await card(page, peak.id).locator('.toggle-button').click();
         }
         await page.locator('#progress-summary').scrollIntoViewIfNeeded();
         await shot('02-progress');
-        await shot('03-home-full');
 
-        await page.getByRole('button', { name: `View details for ${peaks[0].name}` }).click();
-        await expect(page.locator('#peak-details')).toBeVisible();
-        await shot('04-peak-details');
+        await waitForGalleryPhotos(page);
+        await page.locator('#peaks-heading').scrollIntoViewIfNeeded();
+        await shot('03-gallery');
+        await shot('04-home-full');
+
+        await page.locator('#pagination').getByRole('button', { name: 'Next page' }).click();
+        await waitForGalleryPhotos(page);
+        await page.locator('#peaks-heading').scrollIntoViewIfNeeded();
+        await shot('05-gallery-page-2');
+
+        const withRoute = peaks.find(p => media[p.id] && media[p.id].route) || peaks[0];
+        await showPeak(page, withRoute);
+        await page.getByRole('button', { name: `View details for ${withRoute.name}` }).click();
+        const dialog = page.locator('#peak-details');
+        await expect(dialog).toBeVisible();
+        await expect.poll(() => dialog.locator('img').evaluate(el => el.complete && el.naturalWidth > 0)).toBe(true);
+        await shot('06-peak-details-route');
+        await dialog.locator('.route-section').scrollIntoViewIfNeeded();
+        await shot('07-peak-details-route-section');
     });
 });
