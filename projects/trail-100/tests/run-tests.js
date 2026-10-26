@@ -3,12 +3,14 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import {
     calculateProgress,
+    calculateRegionProgress,
     toggleCompleted,
     filterPeaks,
     getRegions,
     parseStoredCompleted,
     serializeCompleted,
     createPeakCard,
+    createRegionProgressItem,
     escapeHtml,
 } from '../src/peak-utils.js';
 import { createServer } from '../src/server.js';
@@ -326,6 +328,188 @@ describe('Responsive layout & accessibility markup', () => {
 
     it('progress bar should expose progressbar semantics', () => {
         assertTrue(readSource('src/index.html').includes('role="progressbar"'));
+    });
+});
+
+describe('Region progress calculation', () => {
+    let peaks;
+    let regionCounts;
+    beforeAll(() => {
+        peaks = loadPeaksData();
+        regionCounts = {};
+        peaks.forEach(p => { regionCounts[p.region] = (regionCounts[p.region] || 0) + 1; });
+    });
+
+    const peaksIn = region => peaks.filter(p => p.region === region);
+    const byRegion = result => Object.fromEntries(result.map(r => [r.region, r]));
+
+    it('should return one entry per region in data/peaks.json, sorted alphabetically', () => {
+        const result = calculateRegionProgress(new Set(), peaks);
+        const names = result.map(r => r.region);
+        const expected = Object.keys(regionCounts).sort();
+        assertEqual(JSON.stringify(names), JSON.stringify(expected), 'Regions should match the dataset, sorted');
+        assertEqual(new Set(names).size, names.length, 'Each region should appear once');
+        assertEqual(JSON.stringify(names), JSON.stringify(getRegions(peaks)), 'Should match getRegions ordering');
+    });
+
+    it('should report the correct total peaks for each region (summing to 100)', () => {
+        const result = calculateRegionProgress(new Set(), peaks);
+        result.forEach(r => assertEqual(r.total, regionCounts[r.region], `Total for ${r.region}`));
+        assertEqual(result.reduce((sum, r) => sum + r.total, 0), 100, 'Region totals should sum to 100');
+    });
+
+    it('should report 0 completed and 0% for a region with zero completed peaks', () => {
+        const lake = peaksIn('Lake District');
+        const done = new Set(lake.map(p => p.id));
+        const snowdonia = byRegion(calculateRegionProgress(done, peaks))['Eryri (Snowdonia)'];
+        assertEqual(snowdonia.completed, 0);
+        assertEqual(snowdonia.total, regionCounts['Eryri (Snowdonia)']);
+        assertEqual(snowdonia.percentage, 0);
+        calculateRegionProgress(new Set(), peaks).forEach(r => {
+            assertEqual(r.completed, 0, `${r.region} completed with empty set`);
+            assertEqual(r.percentage, 0, `${r.region} percentage with empty set`);
+        });
+    });
+
+    it('should report 100% for a fully completed region without affecting other regions', () => {
+        const lake = peaksIn('Lake District');
+        const done = new Set(lake.map(p => p.id));
+        const result = byRegion(calculateRegionProgress(done, peaks));
+        assertEqual(result['Lake District'].completed, lake.length);
+        assertEqual(result['Lake District'].total, lake.length);
+        assertEqual(result['Lake District'].percentage, 100);
+        Object.values(result)
+            .filter(r => r.region !== 'Lake District')
+            .forEach(r => assertEqual(r.completed, 0, `${r.region} should be unaffected`));
+    });
+
+    it('should report 100% for every region when all peaks are completed', () => {
+        calculateRegionProgress(new Set(peaks.map(p => p.id)), peaks).forEach(r => {
+            assertEqual(r.completed, r.total, `${r.region} completed`);
+            assertEqual(r.percentage, 100, `${r.region} percentage`);
+        });
+    });
+
+    it('should calculate a rounded partial percentage', () => {
+        const lake = peaksIn('Lake District');
+        const done = new Set(lake.slice(0, 5).map(p => p.id));
+        const r = byRegion(calculateRegionProgress(done, peaks))['Lake District'];
+        assertEqual(r.completed, 5);
+        assertEqual(r.percentage, Math.round((5 / lake.length) * 100));
+    });
+
+    it('should ignore stored ids that are not in the dataset', () => {
+        const result = calculateRegionProgress(new Set(['not-a-real-peak']), peaks);
+        assertEqual(result.reduce((sum, r) => sum + r.completed, 0), 0);
+    });
+
+    it('should return an empty list for an empty dataset', () => {
+        assertEqual(calculateRegionProgress(new Set(), []).length, 0);
+    });
+
+    it('should be pure (not mutate its inputs)', () => {
+        const done = new Set([peaks[0].id]);
+        const copy = JSON.stringify(peaks);
+        calculateRegionProgress(done, peaks);
+        assertEqual(done.size, 1);
+        assertEqual(JSON.stringify(peaks), copy);
+    });
+
+    it('should update when a peak is marked and then unmarked complete', () => {
+        const peak = peaks[0];
+        const before = byRegion(calculateRegionProgress(new Set(), peaks))[peak.region];
+        const marked = toggleCompleted(new Set(), peak.id);
+        const afterMark = byRegion(calculateRegionProgress(marked, peaks))[peak.region];
+        assertEqual(afterMark.completed, before.completed + 1);
+        const unmarked = toggleCompleted(marked, peak.id);
+        const afterUnmark = byRegion(calculateRegionProgress(unmarked, peaks))[peak.region];
+        assertEqual(afterUnmark.completed, before.completed);
+    });
+});
+
+describe('Region progress rendering', () => {
+    let peaks;
+    beforeAll(() => { peaks = loadPeaksData(); });
+
+    it('should show the region name, completed / total and percentage', () => {
+        const html = createRegionProgressItem({ region: 'Lake District', completed: 5, total: 25, percentage: 20 });
+        assertTrue(html.includes('Lake District'));
+        assertTrue(html.includes('5 / 25 peaks'));
+        assertTrue(html.includes('20%'));
+    });
+
+    it('should render an accessible progressbar for every region', () => {
+        const done = new Set(peaks.slice(0, 10).map(p => p.id));
+        calculateRegionProgress(done, peaks).forEach(r => {
+            const html = createRegionProgressItem(r);
+            assertTrue(html.includes('role="progressbar"'), `${r.region} should have role=progressbar`);
+            assertTrue(html.includes(`aria-valuenow="${r.percentage}"`), `${r.region} aria-valuenow`);
+            assertTrue(html.includes('aria-valuemin="0"'), `${r.region} aria-valuemin`);
+            assertTrue(html.includes('aria-valuemax="100"'), `${r.region} aria-valuemax`);
+            assertTrue(html.includes(`aria-label="${escapeHtml(r.region)} completion"`), `${r.region} accessible name`);
+            assertTrue(html.includes(`${r.completed} / ${r.total} peaks`), `${r.region} count`);
+        });
+    });
+
+    it('should mark fully completed regions with a complete class', () => {
+        assertTrue(createRegionProgressItem({ region: 'Dartmoor', completed: 1, total: 1, percentage: 100 })
+            .includes('class="region-progress-item complete"'));
+        assertFalse(createRegionProgressItem({ region: 'Dartmoor', completed: 0, total: 1, percentage: 0 })
+            .includes('region-progress-item complete'));
+    });
+
+    it('should escape HTML in region names', () => {
+        const html = createRegionProgressItem({ region: '<b>X</b>', completed: 0, total: 1, percentage: 0 });
+        assertFalse(html.includes('<b>'));
+        assertTrue(html.includes('&lt;b&gt;X&lt;/b&gt;'));
+    });
+
+    it('index.html should contain a labelled region progress section', () => {
+        const html = readSource('src/index.html');
+        assertTrue(html.includes('id="region-progress-list"'));
+        assertTrue(html.includes('aria-labelledby="region-progress-heading"'));
+        assertTrue(html.includes('id="region-progress-heading"'));
+    });
+
+    it('app.js should re-render region progress whenever overall progress updates', () => {
+        const js = readSource('src/app.js');
+        const fn = js.match(/function updateProgressSummary\(\)\s*\{([\s\S]*?)\n\}/);
+        assertTrue(fn, 'updateProgressSummary should exist');
+        assertTrue(fn[1].includes('renderRegionProgress()'), 'updateProgressSummary should call renderRegionProgress');
+        const toggle = js.match(/function handleToggleComplete\([^)]*\)\s*\{([\s\S]*?)\n\}/);
+        assertTrue(toggle && toggle[1].includes('updateProgressSummary()'), 'Toggling should update progress');
+        assertTrue(js.includes('calculateRegionProgress(completedPeaks, peaks)'));
+    });
+});
+
+describe('Region progress responsive layout', () => {
+    let css;
+    beforeAll(() => { css = readSource('src/style.css'); });
+
+    it('should remove default list styling and use a fluid grid on desktop', () => {
+        const rule = css.match(/\.region-progress-list\s*\{([^}]*)\}/);
+        assertTrue(rule, 'Should have a .region-progress-list rule');
+        assertTrue(/list-style:\s*none/.test(rule[1]), 'List bullets should be removed');
+        assertTrue(/display:\s*grid/.test(rule[1]), 'Should be a grid');
+        const min = rule[1].match(/grid-template-columns:\s*repeat\(auto-fill,\s*minmax\((\d+)px,\s*1fr\)\)/);
+        assertTrue(min, 'Desktop should use an auto-fill grid');
+        // 360px screen - 2 x 1rem main padding - 2 x 1.5rem card padding = 280px available.
+        assertTrue(Number(min[1]) <= 280, 'Minimum column width should fit a 360px-wide screen');
+    });
+
+    it('should collapse to a single column in the mobile breakpoint', () => {
+        const match = css.match(/@media \(max-width: 600px\)\s*\{([\s\S]*)\}\s*$/);
+        assertTrue(match, 'Should have a max-width: 600px media query');
+        assertTrue(/\.region-progress-list\s*\{\s*grid-template-columns:\s*1fr;/.test(match[1]), 'Region list should be single column on mobile');
+    });
+
+    it('should let region names and counts wrap rather than overflow on narrow screens', () => {
+        const header = css.match(/\.region-progress-header\s*\{([^}]*)\}/);
+        assertTrue(header, 'Should have a .region-progress-header rule');
+        assertTrue(/display:\s*flex/.test(header[1]));
+        assertTrue(/flex-wrap:\s*wrap/.test(header[1]), 'Header should wrap on narrow screens');
+        const name = css.match(/\.region-name\s*\{([^}]*)\}/);
+        assertTrue(name && /overflow-wrap:\s*anywhere/.test(name[1]), 'Long region names should wrap');
     });
 });
 

@@ -18,6 +18,18 @@ export function calculateProgress(completedIds, peaks) {
     return { completed, remaining, total, percentage };
 }
 
+// Per-region progress, one entry per region present in the dataset, sorted
+// alphabetically by region name (same ordering as getRegions).
+export function calculateRegionProgress(completedIds, peaks) {
+    return getRegions(peaks).map(region => {
+        const regionPeaks = peaks.filter(p => p.region === region);
+        const total = regionPeaks.length;
+        const completed = regionPeaks.filter(p => completedIds.has(p.id)).length;
+        const percentage = total > 0 ? Math.round((completed / total) * 100) : 0;
+        return { region, completed, total, percentage };
+    });
+}
+
 // Returns a new Set with the peak's completion status flipped.
 export function toggleCompleted(completedIds, peakId) {
     const next = new Set(completedIds);
@@ -56,6 +68,22 @@ export function parseStoredCompleted(raw) {
 
 export function serializeCompleted(completedIds) {
     return JSON.stringify([...completedIds]);
+}
+
+export function createRegionProgressItem({ region, completed, total, percentage }) {
+    const name = escapeHtml(region);
+    const itemClass = total > 0 && completed === total ? 'region-progress-item complete' : 'region-progress-item';
+    return `
+        <li class="${itemClass}">
+            <div class="region-progress-header">
+                <span class="region-name">${name}</span>
+                <span class="region-count">${completed} / ${total} peaks · ${percentage}%</span>
+            </div>
+            <div class="progress-bar region-progress-bar" role="progressbar" aria-label="${name} completion" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${percentage}" aria-valuetext="${percentage}% (${completed} of ${total} peaks)">
+                <div class="progress-fill" style="width: ${percentage}%"></div>
+            </div>
+        </li>
+    `;
 }
 
 export function createPeakCard(peak, isCompleted) {
