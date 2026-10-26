@@ -3,34 +3,45 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#1f3d2b">
     <title>Trail 100 Tracker</title>
     <link rel="stylesheet" href="/src/style.css">
 </head>
 <body>
-    <header>
-        <h1>Trail 100 Tracker</h1>
-        <p>Tracking progress through the Live for the Outdoors Trail 100 challenge</p>
+    <header class="hero">
+        <div class="hero-inner">
+            <p class="hero-eyebrow">Live for the Outdoors · Trail 100 challenge</p>
+            <h1>Trail 100 Tracker</h1>
+            <p class="hero-tagline">Tracking progress through the Live for the Outdoors Trail 100 challenge — 100 UK peaks to explore, climb and tick off.</p>
+            <p class="hero-cta"><a class="hero-link" href="#peaks-grid">Explore the peaks</a></p>
+        </div>
+        <svg class="hero-ridge" viewBox="0 0 1440 160" preserveAspectRatio="none" aria-hidden="true" focusable="false">
+            <path class="ridge-back" d="M0 160V96l120-46 90 30 140-70 110 52 90-26 150 74 120-44 140 58 110-40 130 48 120-60 120 42v86z"/>
+            <path class="ridge-front" d="M0 160v-34l150-30 130 36 170-52 140 44 160-26 150 40 180-48 140 34 220-24v60z"/>
+        </svg>
     </header>
 
     <main>
-        <section id="progress-summary">
-            <div class="progress-container">
-                <h2>Overall Progress</h2>
-                <div class="progress-bar" id="overall-progress-bar" role="progressbar" aria-label="Overall completion" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
-                    <div class="progress-fill" id="progress-fill"></div>
+        <div class="dashboard">
+            <section id="progress-summary" class="panel">
+                <div class="progress-container">
+                    <h2>Overall Progress</h2>
+                    <div class="progress-bar" id="overall-progress-bar" role="progressbar" aria-label="Overall completion" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+                        <div class="progress-fill" id="progress-fill"></div>
+                    </div>
+                    <p id="progress-text" aria-live="polite">0% complete (0/100 peaks, 100 remaining)</p>
                 </div>
-                <p id="progress-text" aria-live="polite">0% complete (0/100 peaks, 100 remaining)</p>
-            </div>
-        </section>
+            </section>
 
-        <section id="region-progress" aria-labelledby="region-progress-heading">
-            <div class="progress-container">
-                <h2 id="region-progress-heading">Progress by Region</h2>
-                <ul id="region-progress-list" class="region-progress-list"></ul>
-            </div>
-        </section>
+            <section id="region-progress" class="panel" aria-labelledby="region-progress-heading">
+                <div class="progress-container">
+                    <h2 id="region-progress-heading">Progress by Region</h2>
+                    <ul id="region-progress-list" class="region-progress-list"></ul>
+                </div>
+            </section>
+        </div>
 
-        <section id="filters">
+        <section id="filters" class="panel">
             <h2>Filter Peaks</h2>
             <div class="filter-group">
                 <label for="region-filter">Region:</label>
@@ -49,11 +60,15 @@
             <button type="button" id="reset-filters">Reset Filters</button>
         </section>
 
-        <section id="peaks-grid">
-            <h2 id="peaks-heading" tabindex="-1">Peaks</h2>
+        <section id="peaks-grid" aria-labelledby="peaks-heading">
+            <div class="gallery-header">
+                <h2 id="peaks-heading" tabindex="-1">Peaks</h2>
+                <p id="gallery-status" class="gallery-status" aria-live="polite"></p>
+            </div>
             <div id="peaks-container" class="peaks-grid">
                 <div class="loading">Loading peaks...</div>
             </div>
+            <div id="pagination"></div>
         </section>
     </main>
 
@@ -61,6 +76,7 @@
 
     <footer>
         <p>&copy; 2026 Trail 100 Tracker. Data sourced from Live for the Outdoors Trail 100 challenge.</p>
+        <p>Peak photos are credited in each peak's details, with their licence and source.</p>
     </footer>
 
     <script type="module" src="/src/app.js"></script>

@@ -13,7 +13,18 @@ import {
     createRegionProgressItem,
     createPeakDetails,
     hasGridRef,
+    hasPhoto,
+    hasRoute,
     escapeHtml,
+    PAGE_SIZE,
+    getPageCount,
+    clampPage,
+    paginate,
+    pageForIndex,
+    createPagination,
+    createCardPhoto,
+    createDetailsPhoto,
+    createRouteSection,
 } from '../src/peak-utils.js';
 import { createPeakDetailsController } from '../src/peak-details-controller.js';
 import { createServer } from '../src/server.js';
@@ -566,6 +577,18 @@ describe('Local server', () => {
         await res2.arrayBuffer();
     });
 
+    it('should serve peak media data and local peak photos with an image content type', async () => {
+        const res = await fetch(`${baseUrl}/data/peak-media.json`);
+        assertEqual(res.status, 200);
+        const media = await res.json();
+        const entry = Object.values(media).find(m => m && m.image && m.image.src);
+        assertTrue(entry, 'At least one photo to check');
+        const img = await fetch(`${baseUrl}${entry.image.src}`);
+        assertEqual(img.status, 200);
+        assertTrue(img.headers.get('content-type').startsWith('image/'), 'Photo served as an image');
+        await img.arrayBuffer();
+    });
+
     it('app.js should load the dataset from data/peaks.json', () => {
         assertTrue(readSource('src/app.js').includes("'/data/peaks.json'"));
     });
@@ -901,6 +924,400 @@ describe('Peak details responsive layout', () => {
         assertTrue(/\.details-row dd\s*\{[^}]*overflow-wrap:\s*anywhere/.test(css));
         assertTrue(/\.details-row\s*\{[^}]*flex-wrap:\s*wrap/.test(css));
         assertTrue(/\.peak-details-header\s*\{[^}]*flex-wrap:\s*wrap/.test(css));
+    });
+});
+
+
+// ---------------------------------------------------------------------------
+// TASK-004: photo gallery, pagination, peak photos and routes
+// ---------------------------------------------------------------------------
+function loadMediaData() {
+    return JSON.parse(fs.readFileSync(path.join(ROOT, 'data', 'peak-media.json'), 'utf-8'));
+}
+
+const anchors = html => [...html.matchAll(/<a\b[^>]*>/g)].map(m => m[0]);
+
+describe('Pagination helpers', () => {
+    const items = Array.from({ length: 100 }, (_, i) => i + 1);
+
+    it('PAGE_SIZE should be 12', () => {
+        assertEqual(PAGE_SIZE, 12);
+    });
+
+    it('getPageCount should round up and always return at least 1', () => {
+        assertEqual(getPageCount(100, 12), 9);
+        assertEqual(getPageCount(96, 12), 8);
+        assertEqual(getPageCount(97, 12), 9);
+        assertEqual(getPageCount(12, 12), 1);
+        assertEqual(getPageCount(13, 12), 2);
+        assertEqual(getPageCount(1, 12), 1);
+        assertEqual(getPageCount(0, 12), 1);
+        assertEqual(getPageCount(100), 9, 'Defaults to PAGE_SIZE');
+    });
+
+    it('clampPage should keep pages within 1..pageCount', () => {
+        assertEqual(clampPage(1, 9), 1);
+        assertEqual(clampPage(5, 9), 5);
+        assertEqual(clampPage(9, 9), 9);
+        assertEqual(clampPage(10, 9), 9);
+        assertEqual(clampPage(999, 9), 9);
+        assertEqual(clampPage(0, 9), 1);
+        assertEqual(clampPage(-3, 9), 1);
+        assertEqual(clampPage(NaN, 9), 1);
+        assertEqual(clampPage('abc', 9), 1);
+        assertEqual(clampPage(undefined, 9), 1);
+        assertEqual(clampPage('3', 9), 3);
+        assertEqual(clampPage(3.7, 9), 3);
+        assertEqual(clampPage(4, 0), 1, 'Zero pages behaves like one page');
+    });
+
+    it('paginate should slice the first, middle and last pages', () => {
+        const first = paginate(items, 1, 12);
+        assertEqual(JSON.stringify(first.items), JSON.stringify(items.slice(0, 12)));
+        assertEqual(first.page, 1);
+        assertEqual(first.pageCount, 9);
+        assertEqual(first.start, 1);
+        assertEqual(first.end, 12);
+        assertEqual(first.totalItems, 100);
+
+        const second = paginate(items, 2, 12);
+        assertEqual(JSON.stringify(second.items), JSON.stringify(items.slice(12, 24)));
+        assertEqual(second.start, 13);
+        assertEqual(second.end, 24);
+
+        const last = paginate(items, 9, 12);
+        assertEqual(JSON.stringify(last.items), JSON.stringify([97, 98, 99, 100]));
+        assertEqual(last.start, 97);
+        assertEqual(last.end, 100);
+    });
+
+    it('paginate should clamp out-of-range pages', () => {
+        assertEqual(paginate(items, 50, 12).page, 9);
+        assertEqual(JSON.stringify(paginate(items, 50, 12).items), JSON.stringify([97, 98, 99, 100]));
+        assertEqual(paginate(items, 0, 12).page, 1);
+        assertEqual(paginate(items, -2, 12).items[0], 1);
+        // Filtering down to fewer results moves a high page back into range.
+        const filtered = items.slice(0, 5);
+        const result = paginate(filtered, 4, 12);
+        assertEqual(result.page, 1);
+        assertEqual(result.pageCount, 1);
+        assertEqual(result.items.length, 5);
+    });
+
+    it('paginate should handle an empty list', () => {
+        const result = paginate([], 3, 12);
+        assertEqual(result.items.length, 0);
+        assertEqual(result.page, 1);
+        assertEqual(result.pageCount, 1);
+        assertEqual(result.start, 0);
+        assertEqual(result.end, 0);
+    });
+
+    it('paginate should cover every item exactly once across pages and not mutate input', () => {
+        const copy = JSON.stringify(items);
+        const seen = [];
+        const { pageCount } = paginate(items, 1, 12);
+        for (let p = 1; p <= pageCount; p++) seen.push(...paginate(items, p, 12).items);
+        assertEqual(JSON.stringify(seen), copy);
+        assertEqual(JSON.stringify(items), copy);
+    });
+
+    it('pageForIndex should find the page containing an item', () => {
+        assertEqual(pageForIndex(0), 1);
+        assertEqual(pageForIndex(11), 1);
+        assertEqual(pageForIndex(12), 2);
+        assertEqual(pageForIndex(99), 9);
+    });
+
+    it('page count should reflect filtered peaks', () => {
+        const peaks = loadPeaksData();
+        const region = getRegions(peaks)[0];
+        const filtered = filterPeaks(peaks, new Set(), region, 'all');
+        assertEqual(paginate(filtered, 1).pageCount, Math.max(1, Math.ceil(filtered.length / 12)));
+    });
+});
+
+describe('Pagination rendering (createPagination)', () => {
+    const numbered = html => [...html.matchAll(/<button[^>]*class="page-button page-number[^"]*"[^>]*>/g)].map(m => m[0]);
+
+    it('should render Previous, Next and one numbered button per page', () => {
+        const html = createPagination(1, 9);
+        assertTrue(html.includes('<nav class="pagination" aria-label="Peak gallery pages">'));
+        assertEqual(numbered(html).length, 9);
+        assertTrue(/<button type="button" class="page-button page-prev"[^>]*>[\s\S]*Previous/.test(html));
+        assertTrue(/<button type="button" class="page-button page-next"[^>]*>[\s\S]*Next/.test(html));
+    });
+
+    it('should mark only the current page with aria-current="page"', () => {
+        const html = createPagination(4, 9);
+        assertEqual((html.match(/aria-current="page"/g) || []).length, 1);
+        assertTrue(/data-page="4" aria-label="Page 4" aria-current="page">4</.test(html));
+    });
+
+    it('should disable Previous on the first page and Next on the last', () => {
+        const first = createPagination(1, 9);
+        assertTrue(/class="page-button page-prev"[^>]*disabled/.test(first), 'Previous disabled on page 1');
+        assertFalse(/class="page-button page-next"[^>]*disabled/.test(first), 'Next enabled on page 1');
+        const last = createPagination(9, 9);
+        assertFalse(/class="page-button page-prev"[^>]*disabled/.test(last), 'Previous enabled on last page');
+        assertTrue(/class="page-button page-next"[^>]*disabled/.test(last), 'Next disabled on last page');
+        const middle = createPagination(5, 9);
+        assertFalse(/disabled/.test(middle));
+        assertTrue(/page-prev" data-page="4"/.test(middle));
+        assertTrue(/page-next" data-page="6"/.test(middle));
+    });
+
+    it('should clamp an out-of-range current page', () => {
+        const html = createPagination(20, 3);
+        assertTrue(/data-page="3" aria-label="Page 3" aria-current="page"/.test(html));
+        assertEqual(numbered(html).length, 3);
+    });
+});
+
+describe('Peak media data (data/peak-media.json)', () => {
+    let peaks;
+    let media;
+    beforeAll(() => { peaks = loadPeaksData(); media = loadMediaData(); });
+
+    it('should only contain entries for peaks in data/peaks.json', () => {
+        const ids = new Set(peaks.map(p => p.id));
+        Object.keys(media).forEach(id => assertTrue(ids.has(id), `${id} is not a Trail 100 peak`));
+    });
+
+    it('every image src should point to an existing local file under src/assets/peaks/', () => {
+        Object.entries(media).forEach(([id, entry]) => {
+            if (!hasPhoto(entry)) return;
+            assertTrue(entry.image.src.startsWith('/src/assets/peaks/'), `${id} image should be local`);
+            assertTrue(fs.existsSync(path.join(ROOT, entry.image.src)), `${id} image file should exist`);
+        });
+    });
+
+    it('routes should be either null or complete (tests do not assume how many exist)', () => {
+        Object.entries(media).forEach(([id, entry]) => {
+            if (entry.route === null) return;
+            assertTrue(hasRoute(entry), `${id} route should have url and gpxUrl`);
+        });
+    });
+});
+
+describe('Photo card rendering', () => {
+    let peaks;
+    let media;
+    beforeAll(() => { peaks = loadPeaksData(); media = loadMediaData(); });
+
+    it('should render a lazy-loaded photo with descriptive alt text from the media data', () => {
+        peaks.forEach(peak => {
+            const entry = media[peak.id];
+            if (!hasPhoto(entry)) return;
+            const html = createPeakCard(peak, false, entry);
+            assertTrue(html.includes(`src="${escapeHtml(entry.image.src)}"`), `${peak.id} src`);
+            assertTrue(html.includes(`alt="${escapeHtml(entry.image.alt)}"`), `${peak.id} alt`);
+            assertTrue(html.includes('loading="lazy"'), `${peak.id} lazy`);
+            assertTrue(html.includes('class="peak-photo"'), `${peak.id} fixed-ratio frame`);
+        });
+    });
+
+    it('should still show number, name, region, height, status and both controls', () => {
+        const peak = peaks[0];
+        const html = createPeakCard(peak, true, media[peak.id]);
+        assertTrue(html.includes(`#${peak.number}`));
+        assertTrue(html.includes(escapeHtml(peak.name)));
+        assertTrue(html.includes(escapeHtml(peak.region)));
+        assertTrue(html.includes(`${peak.heightM}m`));
+        assertTrue(html.includes('✓ Completed'));
+        assertTrue(html.includes('class="toggle-button mark-remaining"'));
+        assertTrue(html.includes('class="details-button"'));
+    });
+
+    it('should fall back to a peak-based alt text when none is provided', () => {
+        const html = createCardPhoto(peaks[0], { image: { src: '/src/assets/peaks/x.jpg' } });
+        assertTrue(html.includes(`alt="${escapeHtml(`${peaks[0].name}, ${peaks[0].region}`)}"`));
+    });
+
+    it('should keep the photo frame but render no image when there is no photo', () => {
+        for (const entry of [null, undefined, {}, { image: null }, { image: { src: '' } }]) {
+            const html = createPeakCard(peaks[0], false, entry);
+            assertFalse(html.includes('<img'), 'No image element');
+            assertTrue(html.includes('peak-photo no-photo'), 'Placeholder frame keeps the layout');
+        }
+    });
+
+    it('should escape HTML in media data', () => {
+        const html = createCardPhoto(peaks[0], { image: { src: '/a.jpg" onerror="x', alt: '<b>alt</b>' } });
+        assertFalse(html.includes('onerror="x'));
+        assertFalse(html.includes('<b>'));
+    });
+
+    it('style.css should give the card photo a fixed aspect ratio', () => {
+        const css = readSource('src/style.css');
+        assertTrue(/\.peak-photo\s*\{[^}]*aspect-ratio:\s*4 \/ 3/.test(css));
+        assertTrue(/\.peak-photo img\s*\{[^}]*object-fit:\s*cover/.test(css));
+    });
+});
+
+describe('Details photo rendering (createDetailsPhoto)', () => {
+    let peaks;
+    let media;
+    beforeAll(() => { peaks = loadPeaksData(); media = loadMediaData(); });
+
+    it('should show the large photo, credit, linked licence and source link', () => {
+        const peak = peaks.find(p => media[p.id] && media[p.id].image.licenceUrl);
+        const image = media[peak.id].image;
+        const html = createDetailsPhoto(peak, media[peak.id]);
+        assertTrue(html.includes(`src="${escapeHtml(image.src)}"`));
+        assertTrue(html.includes(`alt="${escapeHtml(image.alt)}"`));
+        assertTrue(html.includes(`Photo: ${escapeHtml(image.credit)}`));
+        assertTrue(html.includes(`href="${escapeHtml(image.licenceUrl)}"`), 'Licence links to licenceUrl');
+        assertTrue(html.includes(`>${escapeHtml(image.licence)}<`), 'Licence name is the link text');
+        assertTrue(html.includes(`href="${escapeHtml(image.sourceUrl)}"`), 'Links to the photo source page');
+        anchors(html).forEach(a => {
+            assertTrue(a.includes('target="_blank"'), 'External link opens in new tab');
+            assertTrue(a.includes('rel="noopener noreferrer"'), 'External link has rel=noopener noreferrer');
+        });
+    });
+
+    it('should show the licence as plain text when there is no licence URL', () => {
+        const peak = peaks[0];
+        const entry = { image: { src: '/src/assets/peaks/x.jpg', alt: 'A', credit: 'C', licence: 'Public domain', licenceUrl: null, sourceUrl: 'https://example.org/file', source: 'Wikimedia Commons' } };
+        const html = createDetailsPhoto(peak, entry);
+        assertTrue(html.includes('Licence: Public domain'));
+        assertEqual(anchors(html).length, 1, 'Only the source link');
+        assertFalse(html.includes('href="null"'));
+        assertFalse(/null|undefined/.test(html));
+    });
+
+    it('should render nothing when there is no photo', () => {
+        assertEqual(createDetailsPhoto(peaks[0], null), '');
+        assertEqual(createDetailsPhoto(peaks[0], { image: null, route: null }), '');
+    });
+});
+
+describe('Route section rendering (createRouteSection)', () => {
+    let peaks;
+    let media;
+    let withRoute;
+    let withoutRoute;
+    beforeAll(() => {
+        peaks = loadPeaksData();
+        media = loadMediaData();
+        withRoute = peaks.find(p => hasRoute(media[p.id]));
+        withoutRoute = peaks.find(p => media[p.id] && media[p.id].route === null);
+    });
+
+    const sampleRoute = { image: null, route: { title: 'Sample ridge walk', url: 'https://example.org/route', gpxUrl: 'https://example.org/route.gpx', source: 'Example Walks' } };
+
+    it('should show title, source, route link, GPX download and Garmin instructions', () => {
+        const html = createRouteSection(sampleRoute);
+        assertTrue(html.includes('Sample ridge walk'));
+        assertTrue(html.includes('Route source: Example Walks'));
+        assertTrue(/<a class="route-link" href="https:\/\/example.org\/route"[^>]*>View route page/.test(html));
+        assertTrue(/<a class="gpx-link" href="https:\/\/example.org\/route.gpx"[^>]*>Download GPX/.test(html));
+        assertTrue(html.includes('Garmin Connect'));
+        assertTrue(/Courses/.test(html) && /Import/.test(html), 'Explains importing the GPX as a course');
+        assertFalse(html.includes('not available'));
+    });
+
+    it('should open every route link in a new tab with rel="noopener noreferrer"', () => {
+        const links = anchors(createRouteSection(sampleRoute));
+        assertEqual(links.length, 2);
+        links.forEach(a => {
+            assertTrue(a.includes('target="_blank"'));
+            assertTrue(a.includes('rel="noopener noreferrer"'));
+        });
+    });
+
+    it('should render a real dataset route (when one exists) from the media data', () => {
+        if (!withRoute) return; // Route coverage may change; nothing to check.
+        const route = media[withRoute.id].route;
+        const html = createRouteSection(media[withRoute.id]);
+        assertTrue(html.includes(escapeHtml(route.title)));
+        assertTrue(html.includes(`href="${escapeHtml(route.url)}"`));
+        assertTrue(html.includes(`href="${escapeHtml(route.gpxUrl)}"`));
+    });
+
+    it('should say a verified route is not available yet, with no links, when route is null', () => {
+        const variants = [{ image: null, route: null }, null, undefined, { route: { title: 'x', url: '', gpxUrl: '' } }];
+        if (withoutRoute) variants.push(media[withoutRoute.id]);
+        variants.forEach(entry => {
+            const html = createRouteSection(entry);
+            assertTrue(html.includes('A verified walking route is not available for this peak yet.'));
+            assertFalse(html.includes('<a'), 'No links');
+            assertFalse(html.includes('href'), 'No placeholder hrefs');
+            assertFalse(/Download GPX|undefined|null/.test(html));
+        });
+    });
+
+    it('should escape HTML in route data', () => {
+        const html = createRouteSection({ route: { title: '<script>', url: 'https://e.org/"x', gpxUrl: 'https://e.org/g.gpx', source: '<i>S</i>' } });
+        assertFalse(/<script>|<i>/.test(html));
+        assertTrue(html.includes('href="https://e.org/&quot;x"'));
+    });
+
+    it('createPeakDetails should include the photo and route section for a peak with a route', () => {
+        const peak = peaks[0];
+        const entry = { image: { src: '/src/assets/peaks/x.jpg', alt: 'Alt', credit: 'Cred', licence: 'CC BY 2.0', licenceUrl: 'https://creativecommons.org/licenses/by/2.0', sourceUrl: 'https://example.org/f', source: 'Wikimedia Commons' }, route: sampleRoute.route };
+        const html = createPeakDetails(peak, false, entry);
+        assertTrue(html.includes('class="peak-details-photo"'));
+        assertTrue(html.includes('Photo: Cred'));
+        assertTrue(html.includes('Download GPX'));
+        const labels = [...html.matchAll(/<dt>([^<]*)<\/dt>/g)].map(m => m[1]);
+        assertEqual(JSON.stringify(labels), JSON.stringify(['Peak number', 'Region', 'Height', 'Status']));
+        // The toggle comes straight after the Close button in tab order.
+        const order = [...html.matchAll(/class="(details-close-button|toggle-button details-toggle-button|route-link)[" ]/g)].map(m => m[1]);
+        assertEqual(JSON.stringify(order), JSON.stringify(['details-close-button', 'toggle-button details-toggle-button', 'route-link']));
+    });
+
+    it('createPeakDetails should show the no-route message for a peak without a route', () => {
+        const html = createPeakDetails(peaks[0], false, { image: null, route: null });
+        assertTrue(html.includes('not available for this peak yet'));
+        assertFalse(html.includes('Download GPX'));
+        assertFalse(html.includes('<a'));
+    });
+
+    it('createPeakDetails should render every dataset peak with its media without errors', () => {
+        peaks.forEach(p => {
+            const html = createPeakDetails(p, false, media[p.id]);
+            assertTrue(html.includes(`data-peak-id="${escapeHtml(p.id)}"`));
+            assertEqual(html.includes('Download GPX'), hasRoute(media[p.id]), `${p.id} route state`);
+            assertFalse(/href="(null|undefined|)"/.test(html), `${p.id} has no broken links`);
+        });
+    });
+});
+
+describe('Gallery wiring and design constraints', () => {
+    it('app.js should load media from data/peak-media.json and paginate the filtered peaks', () => {
+        const js = readSource('src/app.js');
+        assertTrue(js.includes("'/data/peak-media.json'"));
+        assertTrue(js.includes('paginate(filteredPeaks, currentPage, PAGE_SIZE)'));
+        const apply = js.match(/function applyFilters\(\)\s*\{([\s\S]*?)\n\}/);
+        assertTrue(apply && apply[1].includes('currentPage = 1'), 'Changing a filter returns to page 1');
+        const goTo = js.match(/function goToPage\([^)]*\)\s*\{([\s\S]*?)\n\}/);
+        assertTrue(goTo && goTo[1].includes("getElementById('peaks-heading')") && goTo[1].includes('.focus('), 'Changing page moves focus to the gallery');
+    });
+
+    it('UI code should not hard-code image or route URLs', () => {
+        for (const file of ['src/app.js', 'src/peak-utils.js', 'src/index.html']) {
+            const src = readSource(file);
+            assertFalse(/assets\/peaks\/[\w-]+\.(jpg|png)/.test(src), `${file} should not reference peak images`);
+            assertFalse(/\.gpx\b/.test(src.replace(/GPX/g, '')), `${file} should not reference GPX files`);
+            assertFalse(/walkingenglishman|wikimedia\.org/i.test(src), `${file} should not hard-code media URLs`);
+        }
+    });
+
+    it('should not add external CSS/JS frameworks or web fonts', () => {
+        const html = readSource('src/index.html');
+        const css = readSource('src/style.css');
+        assertFalse(/<link[^>]+href="https?:/.test(html), 'No external stylesheets');
+        assertFalse(/<script[^>]+src="https?:/.test(html), 'No external scripts');
+        assertFalse(/@import|@font-face|url\(\s*['"]?https?:/.test(css), 'No imported CSS or web fonts');
+        assertEqual(JSON.stringify(JSON.parse(readSource('package.json')).dependencies || {}), '{}', 'No runtime dependencies');
+    });
+
+    it('index.html should have a hero header, gallery status and pagination container', () => {
+        const html = readSource('src/index.html');
+        assertTrue(html.includes('<header class="hero">'));
+        assertTrue(html.includes('id="gallery-status"'));
+        assertTrue(html.includes('<div id="pagination"></div>'));
     });
 });
 

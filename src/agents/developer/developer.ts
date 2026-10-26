@@ -116,7 +116,8 @@ Then implement or fix the task.
 Do not stop after merely describing what should be done.
 Actually make the necessary changes to the project.
           `.trim()
-      }
+      },
+      30
     );
 
     console.log(

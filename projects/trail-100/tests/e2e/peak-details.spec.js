@@ -1,6 +1,6 @@
 // Peak details dialog (TASK-003) in a real browser.
 import { test, expect } from '@playwright/test';
-import { peaks, openFreshApp, card, regionCount } from './helpers.js';
+import { peaks, openFreshApp, showPeak, card, regionCount } from './helpers.js';
 
 const peakA = peaks[0];
 const peakB = peaks[10];
@@ -115,6 +115,7 @@ test('returns focus to the opener after unmarking while filtered to Completed', 
 
 test('fits the screen without horizontal scrolling and with usable buttons', async ({ page }) => {
     const longest = peaks.reduce((a, b) => (b.name.length > a.name.length ? b : a));
+    await showPeak(page, longest);
     await detailsButton(page, longest).click();
     await expect(dialog(page)).toBeVisible();
 

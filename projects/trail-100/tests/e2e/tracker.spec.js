@@ -1,13 +1,15 @@
 // Core tracker flows (TASK-001 and TASK-002) in a real browser.
 import { test, expect } from '@playwright/test';
-import { peaks, openFreshApp, card, regionCount } from './helpers.js';
+import { peaks, openFreshApp, showPeak, card, regionCount, PAGE_SIZE, pageCountFor } from './helpers.js';
 
 test.beforeEach(async ({ page }) => {
     await openFreshApp(page);
 });
 
-test('shows all 100 peaks with name, region and height', async ({ page }) => {
+test('shows all 100 peaks (across gallery pages) with name, region and height', async ({ page }) => {
+    await expect(page.locator('#gallery-status')).toContainText(`of ${peaks.length} peaks`);
     for (const peak of [peaks[0], peaks[49], peaks[99]]) {
+        await showPeak(page, peak);
         const peakCard = card(page, peak.id);
         await expect(peakCard).toContainText(peak.name);
         await expect(peakCard).toContainText(peak.region);
@@ -34,6 +36,16 @@ test('marks and unmarks a peak, updating overall and region progress', async ({ 
     await expect(regionCount(page, peak.region)).toContainText(`0 / ${regionTotal} peaks`);
 });
 
+test('marks a peak on a later page without leaving that page', async ({ page }) => {
+    const peak = peaks[PAGE_SIZE * 2];
+    await showPeak(page, peak);
+    const toggle = card(page, peak.id).locator('.toggle-button');
+    await toggle.click();
+    await expect(card(page, peak.id)).toHaveClass(/completed/);
+    await expect(page.locator('#pagination [aria-current="page"]')).toHaveText('3');
+    await expect(card(page, peak.id).locator('.toggle-button')).toBeFocused();
+});
+
 test('remembers completed peaks after a reload', async ({ page }) => {
     await card(page, peaks[5].id).locator('.toggle-button').click();
     await page.reload();
@@ -46,14 +58,17 @@ test('filters by region and status, and resets filters', async ({ page }) => {
     const inRegion = peaks.filter(p => p.region === region).length;
 
     await page.getByLabel('Region:').selectOption(region);
-    await expect(page.locator('#peaks-container .peak-card')).toHaveCount(inRegion);
+    await expect(page.locator('#peaks-container .peak-card')).toHaveCount(Math.min(PAGE_SIZE, inRegion));
+    await expect(page.locator('#gallery-status')).toContainText(`of ${inRegion} peaks`);
 
     await card(page, peaks[0].id).locator('.toggle-button').click();
     await page.getByLabel('Status:').selectOption('completed');
     await expect(page.locator('#peaks-container .peak-card')).toHaveCount(1);
+    await expect(page.locator('#pagination .pagination')).toHaveCount(0);
 
     await page.getByRole('button', { name: 'Reset Filters' }).click();
-    await expect(page.locator('#peaks-container .peak-card')).toHaveCount(peaks.length);
+    await expect(page.locator('#peaks-container .peak-card')).toHaveCount(PAGE_SIZE);
+    await expect(page.locator('#pagination .page-number')).toHaveCount(pageCountFor(peaks.length));
 });
 
 test('lists every region with an accessible progress bar', async ({ page }) => {

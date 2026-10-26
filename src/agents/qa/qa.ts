@@ -112,7 +112,7 @@ You must not modify the project.
 `.trim(),
         prompt: `Verify task ${context.taskId} following the process above.`
       },
-      7,
+      10,
       qaTools
     );
 
