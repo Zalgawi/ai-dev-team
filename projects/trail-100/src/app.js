@@ -1,11 +1,13 @@
 import {
     calculateProgress,
+    calculateRegionProgress,
     toggleCompleted,
     filterPeaks,
     getRegions,
     parseStoredCompleted,
     serializeCompleted,
     createPeakCard,
+    createRegionProgressItem,
     escapeHtml,
 } from './peak-utils.js';
 
@@ -83,11 +85,19 @@ function handleToggleComplete(event) {
 
 function updateProgressSummary() {
     const { completed, remaining, total, percentage } = calculateProgress(completedPeaks, peaks);
-    const bar = document.querySelector('.progress-bar');
+    const bar = document.getElementById('overall-progress-bar');
     bar.setAttribute('aria-valuenow', String(percentage));
     document.getElementById('progress-fill').style.width = `${percentage}%`;
     document.getElementById('progress-text').textContent =
         `${percentage}% complete (${completed}/${total} peaks, ${remaining} remaining)`;
+    renderRegionProgress();
+}
+
+function renderRegionProgress() {
+    document.getElementById('region-progress-list').innerHTML =
+        calculateRegionProgress(completedPeaks, peaks)
+            .map(createRegionProgressItem)
+            .join('');
 }
 
 function setupEventListeners() {

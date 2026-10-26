@@ -2,7 +2,7 @@
   "id": "TASK-002",
   "title": "Show progress by region",
   "description": "Add a per-region progress breakdown to the dashboard so the user can see how far through each region of the Trail 100 they are. Regions come from the existing data/peaks.json; do not add or rename regions.",
-  "status": "todo",
+  "status": "completed",
   "assignedTo": "developer",
   "priority": "high",
   "acceptanceCriteria": [

@@ -16,10 +16,17 @@
         <section id="progress-summary">
             <div class="progress-container">
                 <h2>Overall Progress</h2>
-                <div class="progress-bar" role="progressbar" aria-label="Overall completion" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+                <div class="progress-bar" id="overall-progress-bar" role="progressbar" aria-label="Overall completion" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
                     <div class="progress-fill" id="progress-fill"></div>
                 </div>
                 <p id="progress-text" aria-live="polite">0% complete (0/100 peaks, 100 remaining)</p>
+            </div>
+        </section>
+
+        <section id="region-progress" aria-labelledby="region-progress-heading">
+            <div class="progress-container">
+                <h2 id="region-progress-heading">Progress by Region</h2>
+                <ul id="region-progress-list" class="region-progress-list"></ul>
             </div>
         </section>
 

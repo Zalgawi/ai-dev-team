@@ -247,6 +247,50 @@ footer {
     font-size: 0.9rem;
 }
 
+/* Progress by region */
+.region-progress-list {
+    list-style: none;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 0.75rem 1.5rem;
+}
+
+.region-progress-item {
+    min-width: 0;
+}
+
+.region-progress-header {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 0 0.5rem;
+}
+
+.region-name {
+    font-weight: bold;
+    overflow-wrap: anywhere;
+}
+
+.region-count {
+    color: var(--muted-color);
+    font-size: 0.9rem;
+    white-space: nowrap;
+}
+
+.region-progress-bar {
+    height: 12px;
+    margin: 0.35rem 0 0;
+}
+
+.region-progress-item.complete .region-name {
+    color: var(--completed-color);
+}
+
+.region-progress-item.complete .progress-fill {
+    background-color: var(--completed-color);
+}
+
 @media (max-width: 600px) {
     header h1 {
         font-size: 1.8rem;
@@ -257,6 +301,10 @@ footer {
     }
 
     .peaks-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .region-progress-list {
         grid-template-columns: 1fr;
     }
 
