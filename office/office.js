@@ -642,6 +642,8 @@
     const o = await api("/api/office");
     app.team = o.team; app.demo = o.demo; app.git = o.git; app.snapshot = o.snapshot;
     app.maxIterations = o.team.maxIterations;
+    app.mediaRules = o.media;
+    $("mediaInput").accept = o.media.accept.join(",");
     for (const id of ["manager", "senior", "junior", "qa"]) {
       const m = o.team.members[id];
       agents[id].name = m.name; agents[id].model = m.model ? `Claude ${m.model}` : "Claude";
@@ -664,6 +666,8 @@
   async function loadProject() {
     $("reqFor").textContent = app.project ? `→ ${app.project}` : "";
     $("tasksFor").textContent = app.project || "";
+    $("mediaFor").textContent = app.project || "";
+    loadMedia();
     if (!app.project) { app.detail = null; renderProject(); return; }
     store.set("office.project", app.project);
     try { app.detail = await api(`/api/projects/${encodeURIComponent(app.project)}`); app.detail.project = app.project; }
@@ -798,8 +802,9 @@
     if (!request) { $("reqErr").textContent = "Describe what the team should build, then send it."; $("reqText").focus(); return; }
     $("reqErr").textContent = "";
     try {
-      await api(`/api/projects/${encodeURIComponent(app.project)}/requests`, { method: "POST", body: JSON.stringify({ request, size: $("reqSize").value }) });
+      await api(`/api/projects/${encodeURIComponent(app.project)}/requests`, { method: "POST", body: JSON.stringify({ request, size: $("reqSize").value, media: [...attached] }) });
       $("reqText").value = "";
+      attached.clear(); renderMedia();
       setStatus(`Sent to the Manager for ${app.project}.`);
     } catch (err) { $("reqErr").textContent = err.message; }
   });
@@ -865,6 +870,153 @@
       await loadProjects();
       setStatus(`Deleted ${gone}.`);
     } catch (err) { $("delErr").textContent = err.message; }
+  });
+
+  // ---------- media library ----------
+  let media = [];
+  const attached = new Set();
+  const KIND_ICON = { video: "▶", image: "▣", audio: "♪", pdf: "PDF", font: "Aa", text: "TXT" };
+  const fmtSize = b => b < 1024 ** 2 ? `${Math.max(1, Math.round(b / 1024))} KB` : b < 1024 ** 3 ? `${(b / 1024 ** 2).toFixed(1)} MB` : `${(b / 1024 ** 3).toFixed(2)} GB`;
+  const fmtTime = s => `${Math.floor(s / 60)}:${String(Math.round(s % 60)).padStart(2, "0")}`;
+  const mediaUrl = id => `/api/projects/${encodeURIComponent(app.project)}/media/${encodeURIComponent(id)}`;
+  const facts = m => [m.kind, m.width && m.height ? `${m.width}×${m.height}` : "", m.duration ? fmtTime(m.duration) : "", fmtSize(m.size)].filter(Boolean).join(" · ");
+
+  async function loadMedia() {
+    if (!app.project) { media = []; renderMedia(); return; }
+    try { media = await api(`/api/projects/${encodeURIComponent(app.project)}/media`); }
+    catch (err) { media = []; setStatus(err.message, true); }
+    for (const id of [...attached]) if (!media.some(m => m.id === id)) attached.delete(id);
+    renderMedia();
+  }
+  function thumb(m) {
+    if (m.kind === "image") return `<img src="${mediaUrl(m.id)}" alt="" loading="lazy">`;
+    if (m.kind === "video") return `<video src="${mediaUrl(m.id)}#t=0.5" preload="metadata" muted aria-hidden="true"></video>`;
+    return `<span class="icon" aria-hidden="true">${KIND_ICON[m.kind] || "?"}</span>`;
+  }
+  function renderMedia() {
+    $("drop").classList.toggle("off", !app.project);
+    $("mediaInput").disabled = !app.project;
+    $("mediaList").innerHTML = !app.project ? `<li class="empty">Create a project to upload files.</li>`
+      : !media.length ? `<li class="empty">No files yet.</li>`
+      : media.map(m => `<li class="mitem">
+          <button type="button" class="thumb" data-view="${esc(m.id)}" aria-label="Preview ${esc(m.id)}">${thumb(m)}</button>
+          <div class="mbody">
+            <button type="button" class="mname" data-view="${esc(m.id)}">${esc(m.id)}</button>
+            <span class="mfacts">${esc(facts(m))}</span>
+            <label class="sr-only" for="note-${esc(m.id)}">What's in ${esc(m.id)}</label>
+            <input type="text" id="note-${esc(m.id)}" data-note="${esc(m.id)}" value="${esc(m.note || "")}" placeholder="What's in it? e.g. me talking about the route" maxlength="2000">
+            <div class="macts">
+              <label class="check"><input type="checkbox" data-attach="${esc(m.id)}" ${attached.has(m.id) ? "checked" : ""}> Use in next request</label>
+              <button type="button" class="btn ghost small danger" data-del="${esc(m.id)}">Delete</button>
+            </div>
+          </div>
+        </li>`).join("");
+    const names = [...attached];
+    $("reqMedia").hidden = !names.length;
+    $("reqMedia").textContent = names.length ? `Attached: ${names.join(", ")}` : "";
+  }
+
+  // Reads size and length in the browser so the team knows what each file is.
+  function probe(file) {
+    return new Promise(resolve => {
+      const url = URL.createObjectURL(file);
+      const done = info => { URL.revokeObjectURL(url); resolve(info); };
+      if (file.type.startsWith("image/")) {
+        const img = new Image();
+        img.onload = () => done({ width: img.naturalWidth, height: img.naturalHeight });
+        img.onerror = () => done({});
+        img.src = url;
+      } else if (file.type.startsWith("video/") || file.type.startsWith("audio/")) {
+        const el = document.createElement(file.type.startsWith("video/") ? "video" : "audio");
+        el.preload = "metadata";
+        el.onloadedmetadata = () => done({ duration: el.duration, ...(el.videoWidth ? { width: el.videoWidth, height: el.videoHeight } : {}) });
+        el.onerror = () => done({});
+        el.src = url;
+      } else done({});
+    });
+  }
+
+  function uploadOne(file) {
+    const row = document.createElement("li");
+    row.innerHTML = `<span class="uname">${esc(file.name)}</span><progress max="100" value="0" aria-label="Uploading ${esc(file.name)}"></progress><span class="ustate">0%</span>`;
+    $("uploads").appendChild(row);
+    const bar = row.querySelector("progress"), state = row.querySelector(".ustate");
+    const fail = msg => { row.classList.add("bad"); state.textContent = msg; setTimeout(() => row.remove(), 8000); };
+
+    if (app.mediaRules && file.size > app.mediaRules.maxBytes) return Promise.resolve(fail(`Too large (max ${fmtSize(app.mediaRules.maxBytes)})`));
+
+    return new Promise(resolve => {
+      const xhr = new XMLHttpRequest();
+      xhr.open("POST", `/api/projects/${encodeURIComponent(app.project)}/media`);
+      xhr.setRequestHeader("x-office", "1");
+      xhr.setRequestHeader("x-file-name", encodeURIComponent(file.name));
+      xhr.upload.onprogress = e => { if (e.lengthComputable) { const p = Math.round(e.loaded / e.total * 100); bar.value = p; state.textContent = `${p}%`; } };
+      xhr.onerror = () => { fail("Upload failed"); resolve(); };
+      xhr.onload = async () => {
+        let body = {};
+        try { body = JSON.parse(xhr.responseText); } catch { /* not JSON */ }
+        if (xhr.status !== 201) { fail(body.error || `Failed (${xhr.status})`); return resolve(); }
+        state.textContent = "Done";
+        const info = await probe(file);
+        if (Object.keys(info).length) {
+          try { await api(mediaUrl(body.id), { method: "PATCH", body: JSON.stringify(info) }); } catch { /* sizes are optional */ }
+        }
+        setTimeout(() => row.remove(), 1500);
+        resolve();
+      };
+      xhr.send(file);
+    });
+  }
+  async function uploadAll(files) {
+    if (!app.project || !files.length) return;
+    await Promise.all([...files].map(uploadOne));
+    await loadMedia();
+  }
+
+  async function viewMedia(id) {
+    const m = media.find(x => x.id === id);
+    if (!m) return;
+    $("mediaName").textContent = m.id;
+    $("mediaMeta").textContent = [facts(m), m.originalName !== m.id ? `uploaded as ${m.originalName}` : ""].filter(Boolean).join(" · ");
+    const url = mediaUrl(m.id), body = $("mediaBody");
+    body.innerHTML = m.kind === "video" ? `<video src="${url}" controls playsinline></video>`
+      : m.kind === "image" ? `<img src="${url}" alt="${esc(m.note || m.id)}">`
+      : m.kind === "audio" ? `<audio src="${url}" controls></audio>`
+      : m.kind === "pdf" ? `<p><a class="btn" href="${url}" target="_blank" rel="noopener">Open the PDF in a new tab</a></p>`
+      : m.kind === "text" ? `<pre class="paper">Loading…</pre>`
+      : `<p class="fine">No preview for ${esc(m.kind)} files.</p>`;
+    $("mediaDlg").showModal();
+    if (m.kind === "text") {
+      try { body.querySelector("pre").textContent = await (await fetch(url)).text(); } catch (err) { body.querySelector("pre").textContent = err.message; }
+    }
+  }
+  $("mediaDlg").addEventListener("close", () => { $("mediaBody").innerHTML = ""; });
+
+  $("mediaInput").addEventListener("change", e => { uploadAll(e.target.files); e.target.value = ""; });
+  const drop = $("mediaCard");
+  drop.addEventListener("dragover", e => { if (!app.project) return; e.preventDefault(); $("drop").classList.add("over"); });
+  drop.addEventListener("dragleave", e => { if (!drop.contains(e.relatedTarget)) $("drop").classList.remove("over"); });
+  drop.addEventListener("drop", e => { e.preventDefault(); $("drop").classList.remove("over"); uploadAll(e.dataTransfer.files); });
+
+  $("mediaList").addEventListener("click", async e => {
+    const view = e.target.closest("[data-view]");
+    if (view) return viewMedia(view.dataset.view);
+    const del = e.target.closest("[data-del]");
+    if (!del) return;
+    if (!window.confirm(`Delete ${del.dataset.del}? It isn't in git, so it can't be recovered.`)) return;
+    try { await api(mediaUrl(del.dataset.del), { method: "DELETE" }); attached.delete(del.dataset.del); await loadMedia(); }
+    catch (err) { setStatus(err.message, true); }
+  });
+  $("mediaList").addEventListener("change", async e => {
+    const box = e.target.closest("[data-attach]");
+    if (box) { box.checked ? attached.add(box.dataset.attach) : attached.delete(box.dataset.attach); renderMedia(); return; }
+    const note = e.target.closest("[data-note]");
+    if (!note) return;
+    try {
+      const updated = await api(mediaUrl(note.dataset.note), { method: "PATCH", body: JSON.stringify({ note: note.value }) });
+      media = media.map(m => (m.id === updated.id ? updated : m));
+      setStatus(`Saved the note for ${updated.id}.`);
+    } catch (err) { setStatus(err.message, true); }
   });
 
   // ---------- theme ----------

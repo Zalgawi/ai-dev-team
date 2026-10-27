@@ -65,8 +65,20 @@
           </div>
           <button class="btn flex0" type="submit">Send to Manager</button>
         </div>
+        <p class="fine" id="reqMedia" hidden></p>
         <p class="err" id="reqErr" role="alert"></p>
       </form>
+    </section>
+
+    <section class="card" aria-labelledby="h-media" id="mediaCard">
+      <h2 id="h-media">Media <small id="mediaFor"></small></h2>
+      <div class="drop" id="drop">
+        <input type="file" id="mediaInput" multiple class="sr-only">
+        <label for="mediaInput"><b>Drop files here</b> or <u>choose files</u></label>
+        <p class="fine">Clips, images, audio, PDFs, fonts and notes for the team. They stay on this PC and are never pushed to GitHub.</p>
+      </div>
+      <ul class="uploads" id="uploads" aria-live="polite"></ul>
+      <ul class="media" id="mediaList"></ul>
     </section>
 
     <section class="card" aria-labelledby="h-appr">
@@ -139,6 +151,14 @@
       <button class="btn danger-fill" type="submit">Delete project</button>
     </div>
   </form>
+</dialog>
+
+<dialog id="mediaDlg" aria-labelledby="mediaName">
+  <div class="dhead">
+    <div><h3 id="mediaName"></h3><p id="mediaMeta"></p></div>
+    <button class="btn ghost flex0" type="button" data-close>Close</button>
+  </div>
+  <div class="mview" id="mediaBody"></div>
 </dialog>
 
 <dialog id="stopDlg" aria-labelledby="stopTitle">

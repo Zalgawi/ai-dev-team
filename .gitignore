@@ -1,3 +1,5 @@
 .env
 node_modules/
 .office-demo/
+# Uploaded and rendered media stays on this machine (public repo, large files).
+projects/*/media/

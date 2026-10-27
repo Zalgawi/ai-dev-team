@@ -2,6 +2,8 @@ import {
   createSdkMcpServer,
   tool
 } from "@anthropic-ai/claude-agent-sdk";
+import { stat } from "node:fs/promises";
+import * as path from "node:path";
 import { z } from "zod";
 
 import {
@@ -11,6 +13,7 @@ import {
 } from "../tools/filesystem.js";
 
 import { runCommand } from "../tools/terminal.js";
+import { isBinaryMedia, mediaKind } from "../office/media.js";
 
 // Name of the in-process MCP server that exposes the project tools.
 // Claude sees each tool as `mcp__<server>__<tool>`.
@@ -88,9 +91,14 @@ function buildToolDefinitions(projectPath: string, signal?: AbortSignal) {
           )
       },
       async (args) =>
-        safely("read_file", () =>
-          readProjectFile(projectPath, args.filePath)
-        )
+        safely("read_file", async () => {
+          // Uploaded videos, images and PDFs aren't text; point to their descriptions.
+          if (isBinaryMedia(args.filePath)) {
+            const { size } = await stat(path.join(projectPath, args.filePath));
+            return `${args.filePath} is a binary ${mediaKind(args.filePath)} file (${(size / 1024 ** 2).toFixed(1)} MB) and can't be read as text. Uploaded files are described in media/library.json.`;
+          }
+          return readProjectFile(projectPath, args.filePath);
+        })
     ),
 
     list_files: tool(
