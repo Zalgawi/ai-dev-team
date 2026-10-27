@@ -27,6 +27,13 @@ Agents may open pull requests.
 
 Agents must not merge pull requests without explicit human approval.
 
+Pull requests that change something visible (a page, the Agent Office, a
+design, a video, a PDF) must include screenshots of the result in the PR
+description, at desktop and mobile sizes where layout matters. Upload them
+with `scripts/pr-screenshots.sh <pr-branch> <image>...` and paste the
+Markdown it prints. The repo is public, so never include uploaded personal
+media, secrets or private data in screenshots.
+
 ---
 
 ## Development
