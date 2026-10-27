@@ -5,7 +5,8 @@ const execAsync = promisify(exec);
 
 export async function runCommand(
   command: string,
-  cwd: string
+  cwd: string,
+  signal?: AbortSignal
 ): Promise<{
   stdout: string;
   stderr: string;
@@ -16,7 +17,8 @@ export async function runCommand(
       cwd,
       maxBuffer: 10 * 1024 * 1024,
       timeout: 60_000,
-      killSignal: "SIGTERM"
+      killSignal: "SIGTERM",
+      ...(signal ? { signal } : {})
     });
 
     return {

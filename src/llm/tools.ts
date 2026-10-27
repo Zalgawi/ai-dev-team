@@ -75,7 +75,7 @@ async function safely(
   }
 }
 
-function buildToolDefinitions(projectPath: string) {
+function buildToolDefinitions(projectPath: string, signal?: AbortSignal) {
   return {
     read_file: tool(
       "read_file",
@@ -146,7 +146,8 @@ function buildToolDefinitions(projectPath: string) {
         safely("run_command", async () => {
           const result = await runCommand(
             args.command,
-            projectPath
+            projectPath,
+            signal
           );
 
           return JSON.stringify({
@@ -162,9 +163,10 @@ function buildToolDefinitions(projectPath: string) {
 // Builds an MCP server exposing only the requested tools, bound to one project.
 export function createToolServer(
   projectPath: string,
-  tools: ToolName[]
+  tools: ToolName[],
+  signal?: AbortSignal
 ) {
-  const definitions = buildToolDefinitions(projectPath);
+  const definitions = buildToolDefinitions(projectPath, signal);
 
   return createSdkMcpServer({
     name: TOOL_SERVER_NAME,

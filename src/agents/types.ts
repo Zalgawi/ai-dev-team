@@ -14,6 +14,10 @@ export interface AgentContext {
   projectPath: string;
   taskId?: string;
   iteration: number;
+  // Called with a short description of each tool the agent uses.
+  onActivity?: (activity: string) => void;
+  // Aborted when the human presses the stop button.
+  signal?: AbortSignal;
 }
 
 export interface AgentResult {

@@ -5,8 +5,11 @@
   "type": "module",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "tsx src/index.ts"
+    "test": "tsx --test \"src/**/*.test.ts\"",
+    "typecheck": "tsc --noEmit",
+    "start": "tsx src/index.ts",
+    "office": "tsx src/office/server.ts",
+    "office:demo": "tsx src/office/server.ts --demo"
   },
   "keywords": [],
   "author": "",
