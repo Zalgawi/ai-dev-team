@@ -65,6 +65,8 @@ export interface MediaItem {
   kind: MediaKind;
   size: number;
   uploadedAt: string;
+  // Set when the team made the file (e.g. "Designer").
+  madeBy?: string;
   // What's in it, in the human's words. Agents rely on this for things
   // they can't perceive themselves, such as what's said in a clip.
   note?: string;
@@ -97,6 +99,47 @@ export function toMediaName(original: string): string {
 
 const ID_PATTERN = /^[a-z0-9][a-z0-9-]*\.[a-z0-9]+$/;
 
+async function readLibraryFile(dir: string): Promise<MediaItem[]> {
+  try {
+    const parsed = JSON.parse(await readFile(path.join(dir, LIBRARY_FILE), "utf-8")) as { items?: MediaItem[] };
+    return Array.isArray(parsed.items) ? parsed.items : [];
+  } catch {
+    return [];
+  }
+}
+
+async function writeLibraryFile(dir: string, items: MediaItem[]): Promise<void> {
+  const body = {
+    about: "Files for this project: uploads from the human, and files the team made (madeBy). Binary files can't be opened with read_file; use these descriptions, or view_image for images.",
+    items
+  };
+  await writeFile(path.join(dir, LIBRARY_FILE), `${JSON.stringify(body, null, 2)}\n`, "utf-8");
+}
+
+// Adds (or refreshes) a file the team made in media/, e.g. a rendered design,
+// so it shows up in the Office's media panel next to the uploads.
+export async function registerGenerated(
+  projectPath: string,
+  id: string,
+  details: { madeBy: string; note: string; width?: number; height?: number; duration?: number }
+): Promise<MediaItem> {
+  if (!ID_PATTERN.test(id)) throw new Error(`Invalid media file name: ${id}`);
+
+  const dir = path.join(projectPath, MEDIA_DIR);
+  const { size } = await stat(path.join(dir, id));
+  const items = await readLibraryFile(dir);
+  const item: MediaItem = {
+    id,
+    originalName: id,
+    kind: mediaKind(id)!,
+    size,
+    uploadedAt: new Date().toISOString(),
+    ...details
+  };
+  await writeLibraryFile(dir, [...items.filter((m) => m.id !== id), item]);
+  return item;
+}
+
 export class MediaStore {
   // Serialises library.json writes per project.
   private locks = new Map<string, Promise<unknown>>();
@@ -119,21 +162,12 @@ export class MediaStore {
     return next;
   }
 
-  private async readLibrary(dir: string): Promise<MediaItem[]> {
-    try {
-      const parsed = JSON.parse(await readFile(path.join(dir, LIBRARY_FILE), "utf-8")) as { items?: MediaItem[] };
-      return Array.isArray(parsed.items) ? parsed.items : [];
-    } catch {
-      return [];
-    }
+  private readLibrary(dir: string): Promise<MediaItem[]> {
+    return readLibraryFile(dir);
   }
 
-  private async writeLibrary(dir: string, items: MediaItem[]): Promise<void> {
-    const body = {
-      about: "Files uploaded by the human for this project. Binary files can't be opened with read_file; use these descriptions.",
-      items
-    };
-    await writeFile(path.join(dir, LIBRARY_FILE), `${JSON.stringify(body, null, 2)}\n`, "utf-8");
+  private writeLibrary(dir: string, items: MediaItem[]): Promise<void> {
+    return writeLibraryFile(dir, items);
   }
 
   async list(project: string): Promise<MediaItem[]> {

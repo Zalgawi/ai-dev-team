@@ -1,6 +1,7 @@
 import { EventEmitter } from "node:events";
 
 import type { Agent } from "../agents/types.js";
+import { DesignerAgent } from "../agents/designer/designer.js";
 import { DeveloperAgent } from "../agents/developer/developer.js";
 import { QAAgent } from "../agents/qa/qa.js";
 import { ManagerAgent } from "../manager/manager.js";
@@ -275,9 +276,12 @@ export class TeamRunner extends EventEmitter {
     const junior: Agent = demo
       ? new DemoDeveloper(members.junior.name, demo)
       : new DeveloperAgent(members.junior.name, members.junior.model);
+    const designer: Agent = demo
+      ? new DemoDeveloper(members.designer.name, demo)
+      : new DesignerAgent(members.designer.name, members.designer.model);
     const qa: Agent = demo ? new DemoQA(demo) : new QAAgent(members.qa.model);
 
-    return { senior, junior, qa };
+    return { senior, junior, designer, qa };
   }
 
   private async plan(job: Job, projectPath: string, taskId: string, signal: AbortSignal): Promise<TaskPlan> {
@@ -322,14 +326,14 @@ export class TeamRunner extends EventEmitter {
         this.publish({ type: "agent-start", agent: "manager", iteration: 0 }, job);
 
         const plan = await this.plan(job, projectPath, taskId, signal);
-        const size = job.size && job.size !== "auto" ? job.size : plan.size;
+        const choice = job.size && job.size !== "auto" ? job.size : plan.role === "designer" ? "design" : plan.size;
 
         task = {
           id: taskId,
           title: plan.title,
           description: plan.description,
           status: "in_progress",
-          assignedTo: size === "large" ? "senior-developer" : "junior-developer",
+          assignedTo: choice === "design" ? "designer" : choice === "large" ? "senior-developer" : "junior-developer",
           priority: plan.priority,
           request: job.request ?? "",
           ...(job.media?.length
@@ -348,13 +352,14 @@ export class TeamRunner extends EventEmitter {
         this.publish({ type: "task-updated", task }, job);
       }
 
-      const { senior, junior, qa } = this.buildTeam();
+      const { senior, junior, designer, qa } = this.buildTeam();
       let runEnd = "failed";
 
       const orchestrator = new Orchestrator(new ManagerAgent(), senior, qa, {
         developers: {
           "senior-developer": senior,
           "junior-developer": junior,
+          designer,
           developer: senior
         },
         onEvent: (event) => {

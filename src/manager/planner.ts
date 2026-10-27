@@ -1,12 +1,15 @@
 import { runAgent, type RunOptions } from "../llm/client.js";
 
-export type TaskSize = "auto" | "small" | "large";
+// "design" sends the task to the Designer; small/large go to the Jr/Senior Dev.
+export type TaskSize = "auto" | "small" | "large" | "design";
+export type TaskRole = "developer" | "designer";
 
 export interface TaskPlan {
   title: string;
   description: string;
   priority: string;
   size: "small" | "large";
+  role: TaskRole;
   acceptanceCriteria: string[];
 }
 
@@ -36,6 +39,7 @@ export function parseTaskPlan(response: string): TaskPlan {
       ? String(raw.priority)
       : "medium",
     size: raw.size === "large" ? "large" : "small",
+    role: raw.role === "designer" ? "designer" : "developer",
     acceptanceCriteria: criteria
   };
 }
@@ -52,7 +56,10 @@ export async function planTask(
     projectPath,
     {
       system: `
-You are the Manager agent in an AI software development team.
+You are the Manager agent in an AI software development team. The team has
+developers (who write code) and a graphic/UI designer (who makes logos,
+social graphics, thumbnails, posters, banners and UI mockups as HTML/SVG
+rendered to PNG; it cannot generate photos).
 
 You turn a request from the human into one development task with clear,
 testable acceptance criteria. You do not write code.
@@ -74,9 +81,17 @@ Rules:
   \`npm test\` in the criteria.
 - size is "large" for multi-file features, data or architecture changes;
   otherwise "small".
+- role is "designer" when the deliverable is a graphic or visual design
+  (logo, icon, social post, thumbnail, poster, banner, mockup); otherwise
+  "developer". For designer tasks, write criteria QA can check by looking
+  at the exported PNGs: exact pixel sizes, required text spelled exactly,
+  readability at small sizes, contrast, brand colours, use of any attached
+  images. Don't ask for npm tests unless code changes.
+- If files are attached to the request, say in the description how each
+  should be used.
 
 Your final response must be ONLY a JSON object with this shape and nothing else:
-{"title": "...", "description": "...", "priority": "low|medium|high", "size": "small|large", "acceptanceCriteria": ["...", "..."]}
+{"title": "...", "description": "...", "priority": "low|medium|high", "size": "small|large", "role": "developer|designer", "acceptanceCriteria": ["...", "..."]}
 `.trim(),
       prompt: `Create task ${taskId} for this request:\n\n${request}`
     },

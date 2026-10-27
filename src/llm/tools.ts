@@ -2,7 +2,7 @@ import {
   createSdkMcpServer,
   tool
 } from "@anthropic-ai/claude-agent-sdk";
-import { stat } from "node:fs/promises";
+import { mkdir, readFile, stat } from "node:fs/promises";
 import * as path from "node:path";
 import { z } from "zod";
 
@@ -13,7 +13,8 @@ import {
 } from "../tools/filesystem.js";
 
 import { runCommand } from "../tools/terminal.js";
-import { isBinaryMedia, mediaKind } from "../office/media.js";
+import { isBinaryMedia, mediaKind, registerGenerated, toMediaName } from "../office/media.js";
+import { imageSize, insideProject, renderToPng, viewableImage } from "../tools/images.js";
 
 // Name of the in-process MCP server that exposes the project tools.
 // Claude sees each tool as `mcp__<server>__<tool>`.
@@ -23,20 +24,26 @@ export type ToolName =
   | "read_file"
   | "list_files"
   | "write_file"
-  | "run_command";
+  | "run_command"
+  | "view_image"
+  | "render_design";
 
 export const llmTools: ToolName[] = [
   "read_file",
   "list_files",
   "write_file",
-  "run_command"
+  "run_command",
+  "view_image"
 ];
 
 export const qaTools: ToolName[] = [
   "read_file",
   "list_files",
-  "run_command"
+  "run_command",
+  "view_image"
 ];
+
+export const designerTools: ToolName[] = [...llmTools, "render_design"];
 
 function textResult(text: string, isError = false) {
   return {
@@ -80,6 +87,70 @@ async function safely(
 
 function buildToolDefinitions(projectPath: string, signal?: AbortSignal) {
   return {
+    view_image: tool(
+      "view_image",
+      "Look at an image in the project (PNG, JPEG, GIF, WebP or SVG), e.g. an uploaded photo, a rendered design or a screenshot. Returns the picture and its pixel size.",
+      {
+        filePath: z.string().describe("Path to the image relative to the project root, e.g. media/logo.png.")
+      },
+      async (args) => {
+        try {
+          const file = insideProject(projectPath, args.filePath);
+          const view = await viewableImage(file);
+          const facts = [
+            view.size ? `${args.filePath}: ${view.size.width}×${view.size.height} px` : args.filePath,
+            view.note ?? ""
+          ].filter(Boolean).join(". ");
+          console.log(`   ✓ Tool completed`);
+          return {
+            content: [
+              { type: "image" as const, data: view.data, mimeType: view.mimeType },
+              { type: "text" as const, text: facts }
+            ]
+          };
+        } catch (error) {
+          return textResult(`Tool view_image failed: ${error instanceof Error ? error.message : String(error)}`, true);
+        }
+      }
+    ),
+
+    render_design: tool(
+      "render_design",
+      "Render an HTML or SVG design file to a PNG at an exact pixel size. Final renders are saved as media/design-<name>.png and added to the media library so the human sees them in the Office. Set draft to true for check renders (e.g. a small-size readability test): they go to .ai/renders/<name>.png and stay out of the media library. Look at every result with view_image.",
+      {
+        source: z.string().describe("The .html or .svg design file, relative to the project root, e.g. design/youtube-thumbnail.html."),
+        name: z.string().describe("Short name for the export, e.g. youtube-thumbnail. Saved as media/design-<name>.png."),
+        width: z.number().int().describe("Width in pixels, e.g. 1280."),
+        height: z.number().int().describe("Height in pixels, e.g. 720."),
+        draft: z.boolean().optional().describe("true for a check render that isn't a deliverable.")
+      },
+      async (args) =>
+        safely("render_design", async () => {
+          const source = insideProject(projectPath, args.source);
+
+          if (args.draft) {
+            const drafts = path.join(projectPath, ".ai", "renders");
+            await mkdir(drafts, { recursive: true });
+            const id = toMediaName(`${args.name}.png`);
+            await renderToPng(source, path.join(drafts, id), { width: args.width, height: args.height });
+            return `Saved draft .ai/renders/${id} (${args.width}×${args.height} px). Check it with view_image.`;
+          }
+
+          const id = toMediaName(`design-${args.name.replace(/^design-/, "")}.png`);
+          const media = path.join(projectPath, "media");
+          await mkdir(media, { recursive: true });
+          const out = path.join(media, id);
+          await renderToPng(source, out, { width: args.width, height: args.height });
+          const real = imageSize(await readFile(out));
+          await registerGenerated(projectPath, id, {
+            madeBy: "Designer",
+            note: `Rendered from ${args.source}`,
+            ...(real ?? {})
+          });
+          return `Saved media/${id} (${real ? `${real.width}×${real.height}` : `${args.width}×${args.height}`} px) and added it to the media library. Check it with view_image.`;
+        })
+    ),
+
     read_file: tool(
       "read_file",
       "Read a text file from the current project.",

@@ -1,4 +1,4 @@
-import { readFile, writeFile, readdir } from "node:fs/promises";
+import { mkdir, readFile, writeFile, readdir } from "node:fs/promises";
 import * as path from "node:path";
 
 export async function readProjectFile(
@@ -15,8 +15,15 @@ export async function writeProjectFile(
   filePath: string,
   content: string
 ): Promise<void> {
-  const fullPath = path.join(projectPath, filePath);
+  const root = path.resolve(projectPath);
+  const fullPath = path.resolve(root, filePath);
 
+  if (!fullPath.startsWith(root + path.sep)) {
+    throw new Error(`${filePath} is outside the project.`);
+  }
+
+  // Create missing folders (e.g. design/) instead of failing.
+  await mkdir(path.dirname(fullPath), { recursive: true });
   await writeFile(fullPath, content, "utf-8");
 }
 
