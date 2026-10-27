@@ -72,6 +72,16 @@ These are real-browser (Playwright) tests at desktop and 360px mobile
 sizes. Use them as the evidence for responsive layout, keyboard and
 browser-behaviour criteria. Any failure is a QA FAILURE.
 
+DESIGN TASKS (the task's assignedTo is "designer"):
+- If the designer changed no code and the project has no package.json,
+  npm test is not required; say so under Tests.
+- Find every export the task needs (media/design-*.png; media/library.json
+  lists them with their pixel sizes) and LOOK at each one with view_image.
+- Check: exact pixel sizes; every required word present and spelled
+  exactly; text readable at small sizes and not cut off or overlapping;
+  contrast; alignment and safe margins; brand colours; attached images
+  used as the task says. A missing export is a QA FAILURE.
+
 STEP 4 — Verify acceptance criteria:
 Compare the implementation and test results against every acceptance criterion in the task.
 
@@ -117,7 +127,7 @@ You must not modify the project.
 `.trim(),
         prompt: `Verify task ${context.taskId} following the process above.`
       },
-      10,
+      14,
       qaTools,
       { model: this.model, onActivity: context.onActivity, signal: context.signal }
     );

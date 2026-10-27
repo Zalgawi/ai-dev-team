@@ -4,6 +4,7 @@
     "manager": { "name": "Manager", "model": "sonnet" },
     "senior": { "name": "Senior Dev", "model": "opus" },
     "junior": { "name": "Jr Dev", "model": "sonnet" },
+    "designer": { "name": "Designer", "model": "opus" },
     "qa": { "name": "QA", "model": "sonnet" }
   }
 }

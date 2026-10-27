@@ -41,6 +41,8 @@ The Media panel takes uploads for the selected project: videos, images, audio, P
 
 ## The team
 
+The **Designer** makes logos, social graphics, YouTube thumbnails, posters, banners and UI mockups. It designs in HTML/SVG (sources in `design/`, committed), renders exact-size PNGs into `media/design-*.png` (local, shown in the Media panel) and looks at every render with a `view_image` tool before handing it to QA. QA looks at the exports too. It can't generate photos, so attach your own images when a design needs them. The Manager sends visual work to the Designer, or you can pick "Designer" under "Who builds it". Rendering uses Playwright's Chromium (`npx playwright install chromium` on a new machine).
+
 `team.json` sets each member's name and Claude model (`opus`, `sonnet`, or a full model ID), plus the maximum number of dev/QA rounds.
 
 ## Git

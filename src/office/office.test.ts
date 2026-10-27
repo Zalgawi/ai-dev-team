@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { mkdtemp, readdir, readFile, rm } from "node:fs/promises";
+import { mkdir, mkdtemp, readdir, readFile, rm, writeFile } from "node:fs/promises";
 import * as http from "node:http";
 import { tmpdir } from "node:os";
 import * as path from "node:path";
@@ -8,7 +8,9 @@ import * as vm from "node:vm";
 
 import { parseTaskPlan } from "../manager/planner.js";
 import { DEFAULT_TEAM, REPO_ROOT, type TeamConfig } from "../team.js";
-import { toMediaName } from "./media.js";
+import { closeImageBrowser, imageSize, insideProject, renderToPng, viewableImage } from "../tools/images.js";
+import { writeProjectFile } from "../tools/filesystem.js";
+import { registerGenerated, toMediaName } from "./media.js";
 import { ProjectError, ProjectStore, toProjectName } from "./projects.js";
 import { TeamRunner, type OfficeEvent } from "./runner.js";
 import { startOfficeServer } from "./server.js";
@@ -265,6 +267,87 @@ describe("office browser scripts", () => {
       assert.ok(s.click <= 30);
     }
     assert.deepEqual([...rules.normalise({ coins: 5, total: 2, owned: [1, 2] }).owned], [1, 2, 0, 0, 0, 0]);
+  });
+});
+
+describe("designer", () => {
+  it("routes design requests to the Designer", async () => {
+    assert.equal(parseTaskPlan('{"title":"Logo","role":"designer","acceptanceCriteria":["1024×1024 PNG"]}').role, "designer");
+    assert.equal(parseTaskPlan('{"title":"API","acceptanceCriteria":["x"]}').role, "developer");
+
+    const store = new ProjectStore(path.join(root, "designer1"));
+    await store.create("brand", "");
+    const runner = new TeamRunner(store, team(1), { demo: { stepMs: 1, random: () => 0 } });
+    const { events, done } = collect(runner);
+    await runner.enqueueRequest("brand", "Make a YouTube thumbnail for the launch video");
+    await done;
+
+    assert.equal((await store.readTask("brand", "TASK-001"))?.assignedTo, "designer");
+    assert.ok(events.some((e) => e.type === "agent-start" && e.agent === "designer"));
+
+    // Picking the Designer by hand overrides the Manager.
+    const again = collect(runner);
+    await runner.enqueueRequest("brand", "Add a footer", "design");
+    await again.done;
+    assert.equal((await store.readTask("brand", "TASK-002"))?.assignedTo, "designer");
+  });
+
+  it("reads image sizes from headers", () => {
+    const png = Buffer.alloc(24);
+    png.writeUInt32BE(0x89504e47, 0); png.writeUInt32BE(1080, 16); png.writeUInt32BE(1920, 20);
+    assert.deepEqual(imageSize(png), { width: 1080, height: 1920 });
+
+    const gif = Buffer.from("GIF89a\x40\x01\xf0\x00", "latin1");
+    assert.deepEqual(imageSize(gif), { width: 320, height: 240 });
+
+    // Minimal JPEG: SOI, an APP0 segment, then SOF0 with 720×1280.
+    const jpeg = Buffer.from([0xff, 0xd8, 0xff, 0xe0, 0x00, 0x04, 0x00, 0x00, 0xff, 0xc0, 0x00, 0x11, 0x08, 0x05, 0x00, 0x02, 0xd0, 0x03, 0, 0, 0, 0, 0, 0]);
+    assert.deepEqual(imageSize(jpeg), { width: 720, height: 1280 });
+
+    assert.equal(imageSize(Buffer.from("not an image")), null);
+  });
+
+  it("write_file creates folders and stays inside the project", async () => {
+    const project = path.join(root, "writes");
+    await mkdir(project, { recursive: true });
+    await writeProjectFile(project, "design/new/logo.svg", "<svg/>");
+    assert.equal(await readFile(path.join(project, "design", "new", "logo.svg"), "utf-8"), "<svg/>");
+    await assert.rejects(writeProjectFile(project, "../escape.txt", "x"));
+  });
+
+  it("keeps tool paths inside the project", () => {
+    const project = path.join(root, "p");
+    assert.equal(insideProject(project, "design/a.svg"), path.join(project, "design", "a.svg"));
+    assert.throws(() => insideProject(project, "../secret.png"));
+    assert.throws(() => insideProject(project, path.join(root, "elsewhere.png")));
+  });
+
+  it("renders a design to an exact-size PNG and registers it in the media library", async () => {
+    const project = path.join(root, "render");
+    await mkdir(path.join(project, "design"), { recursive: true });
+    await mkdir(path.join(project, "media"), { recursive: true });
+    await writeFile(path.join(project, "design", "thumb.html"),
+      '<body style="margin:0;background:#123;color:#fff;font:bold 120px sans-serif;display:grid;place-items:center;height:100vh">LAUNCH</body>');
+
+    try {
+      const out = path.join(project, "media", "design-thumb.png");
+      await renderToPng(path.join(project, "design", "thumb.html"), out, { width: 1280, height: 720 });
+      assert.deepEqual(imageSize(await readFile(out)), { width: 1280, height: 720 });
+
+      const item = await registerGenerated(project, "design-thumb.png", { madeBy: "Designer", note: "Rendered from design/thumb.html", width: 1280, height: 720 });
+      assert.equal(item.kind, "image");
+      const library = JSON.parse(await readFile(path.join(project, "media", "library.json"), "utf-8"));
+      assert.deepEqual(library.items.map((m: { id: string; madeBy: string }) => [m.id, m.madeBy]), [["design-thumb.png", "Designer"]]);
+
+      // What an agent sees: the real size, scaled down when large.
+      const view = await viewableImage(out);
+      assert.equal(view.mimeType, "image/png");
+      assert.deepEqual(view.size, { width: 1280, height: 720 });
+
+      await assert.rejects(renderToPng(path.join(project, "design", "thumb.html"), out, { width: 5000, height: 10 }));
+    } finally {
+      await closeImageBrowser();
+    }
   });
 });
 
