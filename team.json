@@ -1,0 +1,9 @@
+{
+  "maxIterations": 5,
+  "members": {
+    "manager": { "name": "Manager", "model": "sonnet" },
+    "senior": { "name": "Senior Dev", "model": "opus" },
+    "junior": { "name": "Jr Dev", "model": "sonnet" },
+    "qa": { "name": "QA", "model": "sonnet" }
+  }
+}

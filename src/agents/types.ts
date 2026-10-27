@@ -14,6 +14,8 @@ export interface AgentContext {
   projectPath: string;
   taskId?: string;
   iteration: number;
+  // Called with a short description of each tool the agent uses.
+  onActivity?: (activity: string) => void;
 }
 
 export interface AgentResult {

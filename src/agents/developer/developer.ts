@@ -7,7 +7,14 @@ import type {
 import { runAgent } from "../../llm/client.js";
 
 export class DeveloperAgent implements Agent {
-  name = "Developer";
+  name: string;
+  private model: string | undefined;
+
+  // model is a Claude model name or alias (e.g. "opus", "sonnet").
+  constructor(name = "Developer", model?: string) {
+    this.name = name;
+    this.model = model;
+  }
 
   async run(
     context: AgentContext
@@ -117,7 +124,9 @@ Do not stop after merely describing what should be done.
 Actually make the necessary changes to the project.
           `.trim()
       },
-      30
+      30,
+      undefined,
+      { model: this.model, onActivity: context.onActivity }
     );
 
     console.log(

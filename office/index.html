@@ -1,0 +1,132 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Agent Office</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&family=Pixelify+Sans:wght@500;700&display=swap">
+<link rel="stylesheet" href="/office.css">
+</head>
+<body>
+<header class="top">
+  <div class="brand">
+    <h1>Agent Office</h1>
+    <span class="mode" id="mode">Connecting…</span>
+  </div>
+  <div class="projbar">
+    <label class="lbl inline" for="projectSelect">Project</label>
+    <select id="projectSelect"></select>
+    <button class="btn ghost" type="button" id="newProjectBtn">New project</button>
+    <button class="btn ghost danger" type="button" id="deleteProjectBtn">Delete</button>
+  </div>
+</header>
+
+<p class="status" id="status" role="status"></p>
+
+<main class="layout">
+  <section class="stage" aria-label="Office floor">
+    <div class="screen">
+      <canvas id="office" role="img" aria-label="Pixel office where the team carries task files between desks. The team panel below describes what each agent is doing."></canvas>
+      <p class="hint" id="queueLine">The team is idle.</p>
+    </div>
+    <div class="roster" id="roster"></div>
+    <div class="detail" id="detail"></div>
+  </section>
+
+  <aside class="panel">
+    <section class="card" aria-labelledby="h-req">
+      <h2 id="h-req">New request <small id="reqFor"></small></h2>
+      <form id="reqForm" class="formgrid" novalidate>
+        <div>
+          <label class="lbl" for="reqText">What should the team build?</label>
+          <textarea id="reqText" placeholder="e.g. Let me export my completed peaks as a CSV"></textarea>
+        </div>
+        <div class="row">
+          <div>
+            <label class="lbl" for="reqSize">Who builds it</label>
+            <select id="reqSize">
+              <option value="auto">Let the Manager decide</option>
+              <option value="small">Jr Dev (small task)</option>
+              <option value="large">Senior Dev (large task)</option>
+            </select>
+          </div>
+          <button class="btn flex0" type="submit">Send to Manager</button>
+        </div>
+        <p class="err" id="reqErr" role="alert"></p>
+      </form>
+    </section>
+
+    <section class="card" aria-labelledby="h-appr">
+      <h2 id="h-appr">Needs you <small>human approval</small></h2>
+      <div id="approvals"></div>
+    </section>
+
+    <section class="card" aria-labelledby="h-tasks">
+      <h2 id="h-tasks">Tasks <small id="tasksFor"></small></h2>
+      <ul class="tasks" id="tasks"></ul>
+    </section>
+
+    <section class="card" aria-labelledby="h-state">
+      <h2 id="h-state">.ai/state.json <small id="stateFor"></small></h2>
+      <pre class="json" id="stateJson">{}</pre>
+    </section>
+
+    <section class="card" aria-labelledby="h-log">
+      <h2 id="h-log">Handoffs <small>open any file</small></h2>
+      <ul class="log" id="log" aria-live="polite"></ul>
+    </section>
+  </aside>
+</main>
+
+<dialog id="docDlg" aria-labelledby="docName">
+  <div class="dhead">
+    <div><h3 id="docName"></h3><p id="docMeta"></p></div>
+    <button class="btn ghost flex0" type="button" data-close>Close</button>
+  </div>
+  <div class="paper" id="docBody"></div>
+</dialog>
+
+<dialog id="newDlg" aria-labelledby="newTitle">
+  <form id="newForm" class="dform" novalidate>
+    <div class="dhead"><h3 id="newTitle">New project</h3></div>
+    <div class="dbody">
+      <div>
+        <label class="lbl" for="newName">Name</label>
+        <input type="text" id="newName" placeholder="recipe-box" autocomplete="off">
+        <p class="fine">Lowercase letters, numbers and dashes. Creates projects/&lt;name&gt; with PRD.md, AGENTS.md and .ai/.</p>
+      </div>
+      <div>
+        <label class="lbl" for="newDesc">What is it?</label>
+        <textarea id="newDesc" placeholder="A small web app for saving recipes and planning the week's meals."></textarea>
+      </div>
+      <p class="err" id="newErr" role="alert"></p>
+    </div>
+    <div class="dfoot">
+      <button class="btn ghost" type="button" data-close>Cancel</button>
+      <button class="btn" type="submit">Create project</button>
+    </div>
+  </form>
+</dialog>
+
+<dialog id="delDlg" aria-labelledby="delTitle">
+  <form id="delForm" class="dform" novalidate>
+    <div class="dhead"><h3 id="delTitle">Delete project</h3></div>
+    <div class="dbody">
+      <p>This permanently deletes the <b id="delName"></b> folder and everything in it. Anything not committed to git can't be recovered.</p>
+      <div>
+        <label class="lbl" for="delConfirm">Type the project name to confirm</label>
+        <input type="text" id="delConfirm" autocomplete="off">
+      </div>
+      <p class="err" id="delErr" role="alert"></p>
+    </div>
+    <div class="dfoot">
+      <button class="btn ghost" type="button" data-close>Cancel</button>
+      <button class="btn danger-fill" type="submit">Delete project</button>
+    </div>
+  </form>
+</dialog>
+
+<script src="/office.js"></script>
+</body>
+</html>

@@ -15,16 +15,23 @@ import {
 // Runs on the Claude Code installation's login (claude.ai subscription or
 // whatever `claude auth status` reports), so no API key is needed.
 // Set CLAUDE_MODEL to override the Claude Code default model.
-const model = process.env.CLAUDE_MODEL;
+// A per-agent model (RunOptions.model) takes precedence.
+const defaultModel = process.env.CLAUDE_MODEL;
 
 export interface AgentPrompt {
   system: string;
   prompt: string;
 }
 
+export interface RunOptions {
+  model?: string | undefined;
+  onActivity?: ((activity: string) => void) | undefined;
+}
+
 function baseOptions(
   projectPath: string,
-  system: string
+  system: string,
+  model: string | undefined
 ): Options {
   return {
     cwd: projectPath,
@@ -38,8 +45,18 @@ function baseOptions(
   };
 }
 
+// Short, human-readable description of a tool call, e.g. "read_file PRD.md".
+function describeToolUse(name: string, input: unknown): string {
+  const shortName = name.replace(`mcp__${TOOL_SERVER_NAME}__`, "");
+  const args = (input ?? {}) as Record<string, unknown>;
+  const detail = args.filePath ?? args.command ?? "";
+
+  return `${shortName} ${String(detail)}`.trim().slice(0, 160);
+}
+
 async function collectResult(
-  run: ReturnType<typeof query>
+  run: ReturnType<typeof query>,
+  onActivity?: (activity: string) => void
 ): Promise<{ result: SDKResultMessage; sessionId: string }> {
   // One model response can arrive as several assistant messages sharing an id.
   const seenResponses = new Set<string>();
@@ -57,6 +74,8 @@ async function collectResult(
           console.log(
             `🔧 Tool requested: ${block.name.replace(`mcp__${TOOL_SERVER_NAME}__`, "")}`
           );
+
+          onActivity?.(describeToolUse(block.name, block.input));
         }
       }
     }
@@ -76,13 +95,14 @@ export async function runAgent(
   projectPath: string,
   { system, prompt }: AgentPrompt,
   maxIterations = 12,
-  tools: ToolName[] = llmTools
+  tools: ToolName[] = llmTools,
+  { model = defaultModel, onActivity }: RunOptions = {}
 ): Promise<string> {
   const { result, sessionId } = await collectResult(
     query({
       prompt,
       options: {
-        ...baseOptions(projectPath, system),
+        ...baseOptions(projectPath, system, model),
         // Disable Claude Code's built-in tools; only the project tools are available.
         tools: [],
         mcpServers: {
@@ -91,7 +111,8 @@ export async function runAgent(
         allowedTools: tools.map(qualifiedToolName),
         maxTurns: maxIterations
       }
-    })
+    }),
+    onActivity
   );
 
   if (result.subtype === "success") {
@@ -118,7 +139,7 @@ export async function runAgent(
       prompt:
         "You have reached your tool-use limit. Do not call any more tools. Based only on the evidence gathered so far, provide your final response now. Be explicit about any uncertainty or unverified acceptance criteria.",
       options: {
-        ...baseOptions(projectPath, system),
+        ...baseOptions(projectPath, system, model),
         resume: sessionId,
         tools: [],
         maxTurns: 1

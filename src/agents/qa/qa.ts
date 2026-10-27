@@ -10,6 +10,11 @@ import { writeProjectFile } from "../../tools/filesystem.js";
 
 export class QAAgent implements Agent {
   name = "QA";
+  private model: string | undefined;
+
+  constructor(model?: string) {
+    this.model = model;
+  }
 
   async run(
     context: AgentContext
@@ -113,7 +118,8 @@ You must not modify the project.
         prompt: `Verify task ${context.taskId} following the process above.`
       },
       10,
-      qaTools
+      qaTools,
+      { model: this.model, onActivity: context.onActivity }
     );
 
     console.log("\n🤖 QA final response:");
@@ -189,7 +195,8 @@ return {
   agent: this.name,
   status: "failed",
   summary: response,
-  qaOutcome: "failed"
+  qaOutcome: "failed",
+  issues
 };
   }
 }
