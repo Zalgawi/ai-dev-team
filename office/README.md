@@ -43,6 +43,14 @@ The Media panel takes uploads for the selected project: videos, images, audio, P
 
 The **Designer** makes logos, social graphics, YouTube thumbnails, posters, banners and UI mockups. It designs in HTML/SVG (sources in `design/`, committed), renders exact-size PNGs into `media/design-*.png` (local, shown in the Media panel) and looks at every render with a `view_image` tool before handing it to QA. QA looks at the exports too. It can't generate photos, so attach your own images when a design needs them. The Manager sends visual work to the Designer, or you can pick "Designer" under "Who builds it". Rendering uses Playwright's Chromium (`npx playwright install chromium` on a new machine).
 
+The **Video Editor** turns uploaded footage, either one long raw video or several clips, into finished social videos. By default these are vertical 1080×1920 H.264 MP4s, about -14 LUFS, under 60 s unless you say otherwise.
+- **Your instructions** are the request (the brief for that edit) and the **edit notes** on each clip in the Media panel, one per line with that clip's own timestamps, e.g. `0:05–0:20 keep: summit view`, `1:10 cut: cough`, `2:10–2:40 use as the ending`.
+- **Before rendering**, it writes an edit plan to `video/<name>-edit.md` (committed).
+- **Files:** work files go to `.ai/renders/` and the final video to `media/video-<name>.mp4`. Both stay local and the final shows in the Media panel.
+- **What it can and can't do:** it sees footage as frame contact sheets and finds pauses and loudness with ffmpeg, but it can't hear. Put what's said in your notes, and any captions in the brief.
+- **QA** checks the export's format, length and loudness, and looks at frames at every cut against the plan and your notes.
+- **Requirements:** ffmpeg and ffprobe come from the `ffmpeg-static` and `ffprobe-static` packages. If `npm ci` skipped the download, run `node node_modules/ffmpeg-static/install.js`. Uploaded videos are measured with ffprobe, so `.mov` and `.mkv` get their real length and size too.
+
 `team.json` sets each member's name and Claude model (`opus`, `sonnet`, or a full model ID), plus the maximum number of dev/QA rounds.
 
 ## Git

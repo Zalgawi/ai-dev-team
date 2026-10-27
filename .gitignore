@@ -3,3 +3,11 @@ node_modules/
 .office-demo/
 # Uploaded and rendered media stays on this machine (public repo, large files).
 projects/*/media/
+# Agents' work renders, and a safety net so footage never reaches the public repo.
+projects/*/.ai/renders/
+projects/**/*.mp4
+projects/**/*.mov
+projects/**/*.m4v
+projects/**/*.mkv
+projects/**/*.webm
+projects/**/*.avi

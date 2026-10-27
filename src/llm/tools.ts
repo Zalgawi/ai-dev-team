@@ -14,7 +14,19 @@ import {
 
 import { runCommand } from "../tools/terminal.js";
 import { isBinaryMedia, mediaKind, registerGenerated, toMediaName } from "../office/media.js";
-import { imageSize, insideProject, renderToPng, viewableImage } from "../tools/images.js";
+import { contactSheet, imageSize, insideProject, renderToPng, viewableImage } from "../tools/images.js";
+import {
+  analyze,
+  checkFfmpegArgs,
+  checkOutput,
+  FFMPEG,
+  grabFrames,
+  parseTimecode,
+  probe,
+  runBinary,
+  spreadTimes,
+  timecode
+} from "../tools/video.js";
 
 // Name of the in-process MCP server that exposes the project tools.
 // Claude sees each tool as `mcp__<server>__<tool>`.
@@ -26,7 +38,11 @@ export type ToolName =
   | "write_file"
   | "run_command"
   | "view_image"
-  | "render_design";
+  | "render_design"
+  | "probe_media"
+  | "analyze_media"
+  | "video_frames"
+  | "run_ffmpeg";
 
 export const llmTools: ToolName[] = [
   "read_file",
@@ -36,14 +52,20 @@ export const llmTools: ToolName[] = [
   "view_image"
 ];
 
+// Read-only video checks, for QA as well as the editor.
+const videoChecks: ToolName[] = ["probe_media", "analyze_media", "video_frames"];
+
 export const qaTools: ToolName[] = [
   "read_file",
   "list_files",
   "run_command",
-  "view_image"
+  "view_image",
+  ...videoChecks
 ];
 
 export const designerTools: ToolName[] = [...llmTools, "render_design"];
+
+export const videoEditorTools: ToolName[] = [...designerTools, ...videoChecks, "run_ffmpeg"];
 
 function textResult(text: string, isError = false) {
   return {
@@ -112,6 +134,105 @@ function buildToolDefinitions(projectPath: string, signal?: AbortSignal) {
           return textResult(`Tool view_image failed: ${error instanceof Error ? error.message : String(error)}`, true);
         }
       }
+    ),
+
+    probe_media: tool(
+      "probe_media",
+      "Read a video or audio file's details: duration, resolution (as displayed, after phone rotation), frame rate, codecs and whether it has sound.",
+      { filePath: z.string().describe("Path relative to the project root, e.g. media/raw-hike.mov.") },
+      async (args) =>
+        safely("probe_media", async () => {
+          const p = await probe(insideProject(projectPath, args.filePath));
+          return JSON.stringify({ ...p, durationTimecode: timecode(p.duration) }, null, 2);
+        })
+    ),
+
+    analyze_media: tool(
+      "analyze_media",
+      "Analyse a video or audio file: scene changes (picture cuts), pauses in the audio (silences, usually gaps between sentences: cut inside these so nobody is cut off mid-word) and loudness (LUFS). You can't hear audio, so use this plus the human's notes. Long files take a while.",
+      { filePath: z.string().describe("Path relative to the project root.") },
+      async (args) =>
+        safely("analyze_media", async () => {
+          const a = await analyze(insideProject(projectPath, args.filePath), signal);
+          const scenes = a.scenes.slice(0, 80).map(timecode);
+          const silences = a.silences.slice(0, 120).map((s) => `${timecode(s.start)}–${timecode(s.end)}`);
+          return [
+            `Duration ${timecode(a.probe.duration)} (${a.probe.duration}s). Video: ${a.probe.video ? `${a.probe.video.width}×${a.probe.video.height} @ ${a.probe.video.fps}fps` : "none"}. Audio: ${a.probe.audio ? "yes" : "none"}.`,
+            `Scene changes (${a.scenes.length}): ${scenes.join(", ") || "none"}${a.scenes.length > 80 ? ", …" : ""}`,
+            `Pauses/silences ≥0.5s below -35 dB (${a.silences.length}): ${silences.join(", ") || "none"}${a.silences.length > 120 ? ", …" : ""}`,
+            `Loudness: ${a.loudness ? `${a.loudness.integratedLufs} LUFS integrated, true peak ${a.loudness.truePeakDb} dBTP (social target about -14 LUFS, peak below -1 dBTP)` : "no audio"}`
+          ].join("\n");
+        })
+    ),
+
+    video_frames: tool(
+      "video_frames",
+      "Look at a video: returns one contact-sheet image of frames labelled with their timecodes. Give exact times (e.g. to check the moments in the human's notes or your cut points) or a count for evenly spread frames. Up to 16 frames.",
+      {
+        filePath: z.string().describe("Video path relative to the project root."),
+        times: z.array(z.string()).optional().describe("Timecodes such as \"0:05\", \"1:23.5\" or \"83\"."),
+        count: z.number().int().optional().describe("Evenly spread frames when no times are given (default 9).")
+      },
+      async (args) => {
+        try {
+          const file = insideProject(projectPath, args.filePath);
+          const info = await probe(file);
+          if (!info.video) return textResult(`${args.filePath} has no video stream.`, true);
+          const times = (args.times?.length ? args.times.map(parseTimecode) : spreadTimes(info.duration, args.count ?? 9))
+            .slice(0, 16)
+            .map((t) => Math.min(Math.max(0, t), Math.max(0, info.duration - 0.05)));
+          const frames = await grabFrames(file, times, signal);
+          if (!frames.length) return textResult("Couldn't extract any frames.", true);
+          const sheet = await contactSheet(frames.map((f) => ({ label: timecode(f.time), data: f.data })));
+          console.log(`   ✓ Tool completed`);
+          return {
+            content: [
+              { type: "image" as const, data: sheet, mimeType: "image/jpeg" },
+              { type: "text" as const, text: `${args.filePath}: ${info.video.width}×${info.video.height}, ${timecode(info.duration)}. Frames at ${frames.map((f) => timecode(f.time)).join(", ")}.` }
+            ]
+          };
+        } catch (error) {
+          return textResult(`Tool video_frames failed: ${error instanceof Error ? error.message : String(error)}`, true);
+        }
+      }
+    ),
+
+    run_ffmpeg: tool(
+      "run_ffmpeg",
+      "Run ffmpeg from the project root (no shell, up to 30 minutes). Give every argument except the output in args (paths relative to the project), and the output path separately. Final videos go to media/<name>.mp4 and are added to the media library; work files go to .ai/renders/.",
+      {
+        args: z.array(z.string()).describe("ffmpeg arguments without the output file, e.g. [\"-ss\",\"12.5\",\"-to\",\"20\",\"-i\",\"media/raw.mp4\",\"-c:v\",\"libx264\",...]"),
+        output: z.string().describe("Output path: media/<name>.mp4 for a final video, or .ai/renders/<file> for work files.")
+      },
+      async (args) =>
+        safely("run_ffmpeg", async () => {
+          checkFfmpegArgs(projectPath, args.args);
+          const { full, final } = checkOutput(projectPath, args.output);
+          const id = path.basename(full);
+          if (final && toMediaName(id) !== id) throw new Error(`Name the final file like media/${toMediaName(id)}.`);
+          await mkdir(path.dirname(full), { recursive: true });
+
+          const started = Date.now();
+          const result = await runBinary(FFMPEG, ["-hide_banner", "-nostdin", "-y", ...args.args, full], { cwd: projectPath, signal });
+          const secs = Math.round((Date.now() - started) / 1000);
+          if (result.code !== 0) {
+            throw new Error(`ffmpeg exited with ${result.code} after ${secs}s:\n${result.stderr.trim().slice(-2500)}`);
+          }
+
+          const info = await probe(full).catch(() => null);
+          const facts = info
+            ? `${info.video ? `${info.video.width}×${info.video.height} @ ${info.video.fps}fps, ` : ""}${timecode(info.duration)}, ${(info.sizeBytes / 1024 ** 2).toFixed(1)} MB, audio ${info.audio ? "yes" : "none"}`
+            : "unreadable output";
+          if (final && info) {
+            await registerGenerated(projectPath, id, {
+              madeBy: "Video Editor",
+              note: "Exported by the Video Editor",
+              ...(info.video ? { width: info.video.width, height: info.video.height } : {}),
+              duration: info.duration
+            });
+          }
+          return `Done in ${secs}s: ${args.output} (${facts}).${final ? " Added to the media library." : ""}`;
+        })
     ),
 
     render_design: tool(

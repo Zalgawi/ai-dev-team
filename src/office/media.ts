@@ -5,6 +5,7 @@ import * as path from "node:path";
 import { randomBytes } from "node:crypto";
 import type { Readable } from "node:stream";
 
+import { probe } from "../tools/video.js";
 import { ProjectError, type ProjectStore } from "./projects.js";
 
 // Files the human uploads for the team to work with: clips, images, audio,
@@ -227,7 +228,8 @@ export class MediaStore {
           originalName: path.basename(originalName).slice(0, 200),
           kind: mediaKind(id)!,
           size,
-          uploadedAt: new Date().toISOString()
+          uploadedAt: new Date().toISOString(),
+          ...(await probeDetails(path.join(dir, id)))
         };
         await this.writeLibrary(dir, [...items, item]);
         return item;
@@ -243,8 +245,10 @@ export class MediaStore {
     const dir = await this.dir(project);
 
     const clean: MediaPatch = {};
-    if (typeof patch.note === "string") clean.note = patch.note.trim().slice(0, 2000);
+    if (typeof patch.note === "string") clean.note = patch.note.trim().slice(0, 8000);
+    // Sizes measured by the browser only fill gaps; ffprobe's are better.
     for (const key of ["width", "height", "duration"] as const) {
+      if (item[key]) continue;
       const value = patch[key];
       if (typeof value === "number" && Number.isFinite(value) && value > 0) clean[key] = Math.round(value * 100) / 100;
     }
@@ -304,6 +308,22 @@ export class MediaStore {
 
     res.writeHead(200, { ...headers, "content-length": String(size) });
     createReadStream(file).pipe(res);
+  }
+}
+
+// Duration and display size for videos and audio, from ffprobe. Best effort:
+// a file ffprobe can't read is still kept.
+async function probeDetails(file: string): Promise<Partial<MediaItem>> {
+  const kind = mediaKind(file);
+  if (kind !== "video" && kind !== "audio") return {};
+  try {
+    const info = await probe(file);
+    return {
+      ...(info.duration ? { duration: info.duration } : {}),
+      ...(info.video ? { width: info.video.width, height: info.video.height } : {})
+    };
+  } catch {
+    return {};
   }
 }
 

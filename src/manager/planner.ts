@@ -1,8 +1,8 @@
 import { runAgent, type RunOptions } from "../llm/client.js";
 
 // "design" sends the task to the Designer; small/large go to the Jr/Senior Dev.
-export type TaskSize = "auto" | "small" | "large" | "design";
-export type TaskRole = "developer" | "designer";
+export type TaskSize = "auto" | "small" | "large" | "design" | "video";
+export type TaskRole = "developer" | "designer" | "video-editor";
 
 export interface TaskPlan {
   title: string;
@@ -39,7 +39,7 @@ export function parseTaskPlan(response: string): TaskPlan {
       ? String(raw.priority)
       : "medium",
     size: raw.size === "large" ? "large" : "small",
-    role: raw.role === "designer" ? "designer" : "developer",
+    role: raw.role === "designer" || raw.role === "video-editor" ? raw.role : "developer",
     acceptanceCriteria: criteria
   };
 }
@@ -59,7 +59,9 @@ export async function planTask(
 You are the Manager agent in an AI software development team. The team has
 developers (who write code) and a graphic/UI designer (who makes logos,
 social graphics, thumbnails, posters, banners and UI mockups as HTML/SVG
-rendered to PNG; it cannot generate photos).
+rendered to PNG; it cannot generate photos) and a video editor (who
+edits uploaded footage into finished videos with ffmpeg; it can see frames
+but can't hear, so it follows the human's notes for what is said).
 
 You turn a request from the human into one development task with clear,
 testable acceptance criteria. You do not write code.
@@ -87,11 +89,23 @@ Rules:
   at the exported PNGs: exact pixel sizes, required text spelled exactly,
   readability at small sizes, contrast, brand colours, use of any attached
   images. Don't ask for npm tests unless code changes.
+- role is "video-editor" when the deliverable is an edited video made from
+  uploaded footage (reels, shorts, TikToks, trailers, highlight cuts). Its
+  criteria: output format (default vertical 1080×1920, H.264/AAC MP4),
+  target length, the order and moments to use or cut as the request and the
+  clip notes say, any on-screen text spelled exactly, loudness about
+  -14 LUFS, and an edit plan in video/<name>-edit.md. Don't ask for npm
+  tests unless code changes.
+- Output locations are fixed by the team's tools; use them exactly and
+  never name other paths for media files: final videos are
+  media/video-<name>.mp4, design exports are media/design-<name>.png
+  (media/ stays off git), edit plans are video/<name>-edit.md, design
+  sources are in design/.
 - If files are attached to the request, say in the description how each
-  should be used.
+  should be used, and copy any timestamped instructions from their notes.
 
 Your final response must be ONLY a JSON object with this shape and nothing else:
-{"title": "...", "description": "...", "priority": "low|medium|high", "size": "small|large", "role": "developer|designer", "acceptanceCriteria": ["...", "..."]}
+{"title": "...", "description": "...", "priority": "low|medium|high", "size": "small|large", "role": "developer|designer|video-editor", "acceptanceCriteria": ["...", "..."]}
 `.trim(),
       prompt: `Create task ${taskId} for this request:\n\n${request}`
     },

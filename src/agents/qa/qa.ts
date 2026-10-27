@@ -72,6 +72,13 @@ These are real-browser (Playwright) tests at desktop and 360px mobile
 sizes. Use them as the evidence for responsive layout, keyboard and
 browser-behaviour criteria. Any failure is a QA FAILURE.
 
+OUTPUT LOCATIONS: the team's tools always save final videos as
+media/video-<name>.mp4 and design exports as media/design-<name>.png
+(media/ is kept out of git on purpose). If a criterion names a different
+path for such a file, verify the media/ file instead and mention the
+mismatch under Issues as a note, but do not fail the task for location
+alone.
+
 DESIGN TASKS (the task's assignedTo is "designer"):
 - If the designer changed no code and the project has no package.json,
   npm test is not required; say so under Tests.
@@ -81,6 +88,21 @@ DESIGN TASKS (the task's assignedTo is "designer"):
   exactly; text readable at small sizes and not cut off or overlapping;
   contrast; alignment and safe margins; brand colours; attached images
   used as the task says. A missing export is a QA FAILURE.
+
+VIDEO TASKS (the task's assignedTo is "video-editor"):
+- npm test is not required unless code changed; say so under Tests.
+- Find the final video (media/video-*.mp4; media/library.json lists it).
+  A missing video is a QA FAILURE.
+- probe_media it: resolution, frame rate, duration, codecs, audio present.
+- analyze_media it: loudness near the target (default about -14 LUFS,
+  true peak under -1 dBTP).
+- video_frames: an even spread, plus the start, the end and each cut point
+  listed in the editor's plan (video/<name>-edit.md). Check the shots match
+  the plan and the human's notes (media/library.json), framing fills 9:16
+  without black bars unless intended, on-screen text is spelled exactly
+  and inside safe areas.
+- Compare the plan with the clip notes: every "keep"/"cut"/"use as" note
+  must be followed.
 
 STEP 4 — Verify acceptance criteria:
 Compare the implementation and test results against every acceptance criterion in the task.
@@ -127,7 +149,7 @@ You must not modify the project.
 `.trim(),
         prompt: `Verify task ${context.taskId} following the process above.`
       },
-      14,
+      18,
       qaTools,
       { model: this.model, onActivity: context.onActivity, signal: context.signal }
     );

@@ -62,14 +62,16 @@ export async function demoPlan(
 
   const title = request.trim().replace(/\s+/g, " ").slice(0, 80);
   const large = /data|api|offline|sync|account|refactor|architecture|map/i.test(request);
+  // A thumbnail "for a video" is still a design, so design words win.
   const design = /logo|icon|thumbnail|poster|banner|graphic|mockup|social post|design/i.test(request);
+  const video = !design && /video|reel|tiktok|shorts|clip|edit|footage|trailer/i.test(request);
 
   return {
     title,
     description: request.trim(),
     priority: "medium",
     size: large ? "large" : "small",
-    role: design ? "designer" : "developer",
+    role: video ? "video-editor" : design ? "designer" : "developer",
     acceptanceCriteria: [
       `${title} works with mouse, touch and keyboard.`,
       "Layout works at 360px and 1280px.",
