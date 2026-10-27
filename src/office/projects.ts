@@ -17,6 +17,8 @@ export interface TaskFile {
   priority: string;
   acceptanceCriteria: string[];
   request?: string;
+  // Uploaded files the human attached to the request (see media.ts).
+  media?: { file: string; kind: string; note?: string }[];
   humanFeedback?: { time: string; notes: string }[];
   [key: string]: unknown;
 }
@@ -100,7 +102,7 @@ export class ProjectStore {
     return full;
   }
 
-  private async requireProject(name: string): Promise<string> {
+  async requireProject(name: string): Promise<string> {
     const full = this.projectPath(name);
 
     if (!(await exists(full))) {

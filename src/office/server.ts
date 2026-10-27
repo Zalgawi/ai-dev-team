@@ -11,6 +11,7 @@ import * as path from "node:path";
 import { fileURLToPath } from "node:url";
 
 import { loadTeam, REPO_ROOT, type TeamConfig } from "../team.js";
+import { ACCEPTED_EXTENSIONS, MediaStore, type MediaPatch } from "./media.js";
 import { ProjectError, ProjectStore, toProjectName } from "./projects.js";
 import { TeamRunner, type OfficeEvent } from "./runner.js";
 import type { TaskSize } from "../manager/planner.js";
@@ -36,6 +37,8 @@ export interface OfficeServerOptions {
   demo: boolean;
   demoStepMs?: number;
   git: boolean;
+  // Largest upload accepted, in bytes (default 2 GB).
+  maxUploadBytes?: number;
 }
 
 function sendJson(res: ServerResponse, status: number, body: unknown): void {
@@ -71,6 +74,7 @@ export async function startOfficeServer(options: OfficeServerOptions): Promise<{
   }
 
   const store = new ProjectStore(options.projectsDir);
+  const media = new MediaStore(store, options.maxUploadBytes);
   const runner = new TeamRunner(store, options.team, {
     demo: options.demo ? { ...(options.demoStepMs ? { stepMs: options.demoStepMs } : {}) } : false,
     git: options.git
@@ -131,7 +135,13 @@ export async function startOfficeServer(options: OfficeServerOptions): Promise<{
       }
 
       if (resource === "office" && method === "GET") {
-        return sendJson(res, 200, { team: options.team, demo: options.demo, git: options.git && !options.demo, snapshot: runner.snapshot() });
+        return sendJson(res, 200, {
+          team: options.team,
+          demo: options.demo,
+          git: options.git && !options.demo,
+          snapshot: runner.snapshot(),
+          media: { accept: ACCEPTED_EXTENSIONS, maxBytes: media.maxBytes }
+        });
       }
 
       // The big red button: end the task the team is working on right now.
@@ -175,7 +185,34 @@ export async function startOfficeServer(options: OfficeServerOptions): Promise<{
       if (project && sub === "requests" && method === "POST") {
         const body = await readBody(req);
         const size = ["small", "large"].includes(String(body.size)) ? (body.size as TaskSize) : "auto";
-        return sendJson(res, 202, await runner.enqueueRequest(project, String(body.request ?? ""), size));
+        const wanted = Array.isArray(body.media) ? body.media.map(String) : [];
+        const library = wanted.length ? await media.list(project) : [];
+        const attached = wanted.map((id) => {
+          const item = library.find((m) => m.id === id);
+          if (!item) throw new ProjectError(`There is no media file called "${id}".`, 404);
+          return item;
+        });
+        return sendJson(res, 202, await runner.enqueueRequest(project, String(body.request ?? ""), size, attached));
+      }
+
+      // /api/projects/:name/media[/:file]
+      if (project && sub === "media") {
+        const id = taskId;
+        if (!id && method === "GET") return sendJson(res, 200, await media.list(project));
+        if (!id && method === "POST") {
+          const name = decodeURIComponent(String(req.headers["x-file-name"] ?? ""));
+          if (!name) throw new ProjectError("Missing file name.");
+          return sendJson(res, 201, await media.save(project, name, req));
+        }
+        if (id && method === "GET") {
+          await media.send(project, id, req, res);
+          return;
+        }
+        if (id && method === "PATCH") return sendJson(res, 200, await media.update(project, id, (await readBody(req)) as MediaPatch));
+        if (id && method === "DELETE") {
+          await media.remove(project, id);
+          return sendJson(res, 200, { deleted: id });
+        }
       }
 
       // /api/projects/:name/file?path=.ai/...
@@ -225,7 +262,8 @@ if (isMain) {
     projectsDir,
     team,
     demo,
-    git: process.env.OFFICE_GIT !== "off"
+    git: process.env.OFFICE_GIT !== "off",
+    ...(process.env.OFFICE_MAX_UPLOAD_MB ? { maxUploadBytes: Number(process.env.OFFICE_MAX_UPLOAD_MB) * 1024 ** 2 } : {})
   });
 
   if (demo) {

@@ -17,6 +17,7 @@ import {
   isProtectedBranch
 } from "../tools/git.js";
 import { DemoDeveloper, DemoQA, demoPlan, type DemoOptions } from "./demo.js";
+import { describeMedia, type MediaItem } from "./media.js";
 import { ProjectError, type ProjectStore, type TaskFile } from "./projects.js";
 
 export interface Job {
@@ -26,6 +27,7 @@ export interface Job {
   taskId?: string;
   request?: string;
   size?: TaskSize;
+  media?: MediaItem[];
 }
 
 type OfficeOnlyEvent =
@@ -135,7 +137,8 @@ export class TeamRunner extends EventEmitter {
   async enqueueRequest(
     project: string,
     request: string,
-    size: TaskSize = "auto"
+    size: TaskSize = "auto",
+    media: MediaItem[] = []
   ): Promise<Job> {
     await this.store.get(project);
 
@@ -143,7 +146,14 @@ export class TeamRunner extends EventEmitter {
       throw new ProjectError("Describe what the team should build.");
     }
 
-    return this.enqueue({ id: this.nextJobId++, kind: "request", project, request: request.trim(), size });
+    return this.enqueue({
+      id: this.nextJobId++,
+      kind: "request",
+      project,
+      request: request.trim(),
+      size,
+      ...(media.length ? { media } : {})
+    });
   }
 
   async enqueueRun(project: string, taskId: string): Promise<Job> {
@@ -274,11 +284,17 @@ export class TeamRunner extends EventEmitter {
     const onActivity = (activity: string) =>
       this.publish({ type: "agent-activity", agent: "manager", activity }, job);
 
+    // The Manager sees the attached files' descriptions with the request.
+    const attached = describeMedia(job.media ?? []);
+    const request = attached
+      ? `${job.request ?? ""}\n\nFiles attached to this request (in the project's media/ folder; binary files can't be opened with read_file):\n${attached}`
+      : job.request ?? "";
+
     if (this.options.demo) {
-      return demoPlan(job.request ?? "", { onActivity, signal }, this.options.demo);
+      return demoPlan(request, { onActivity, signal }, this.options.demo);
     }
 
-    return planTask(projectPath, taskId, job.request ?? "", {
+    return planTask(projectPath, taskId, request, {
       model: this.team.members.manager.model,
       onActivity,
       signal
@@ -316,6 +332,9 @@ export class TeamRunner extends EventEmitter {
           assignedTo: size === "large" ? "senior-developer" : "junior-developer",
           priority: plan.priority,
           request: job.request ?? "",
+          ...(job.media?.length
+            ? { media: job.media.map((m) => ({ file: `media/${m.id}`, kind: m.kind, ...(m.note ? { note: m.note } : {}) })) }
+            : {}),
           acceptanceCriteria: plan.acceptanceCriteria
         };
 

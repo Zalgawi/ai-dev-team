@@ -31,6 +31,14 @@ Demo mode keeps its projects in `.office-demo/projects` (git-ignored), so it nev
 
 Add an entry to `office/themes.js` (page label, world recolour map, optional floor/wall/decor drawing, outfits, room names, game names) and a `:root[data-theme="<id>"]` block of CSS variables in `office/office.css`.
 
+## Media
+
+The Media panel takes uploads for the selected project: videos, images, audio, PDFs, fonts and text files, up to 2 GB each (set `OFFICE_MAX_UPLOAD_MB` to change this). Drag files onto the panel or choose them.
+
+- Files go into `projects/<name>/media/`, which is git-ignored. Uploads and renders stay on this PC and are never pushed. Deleting a file, or the project, can't be undone.
+- `media/library.json` lists each file with its type, size, dimensions or length, and your note. Write a note saying what's in each file, especially what's said in a clip, because the agents can't hear audio.
+- Tick "Use in next request" to attach files. The Manager sees their descriptions, and the task file lists them under `media`.
+
 ## The team
 
 `team.json` sets each member's name and Claude model (`opus`, `sonnet`, or a full model ID), plus the maximum number of dev/QA rounds.

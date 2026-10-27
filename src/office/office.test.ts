@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { mkdtemp, readFile, rm } from "node:fs/promises";
+import { mkdtemp, readdir, readFile, rm } from "node:fs/promises";
 import * as http from "node:http";
 import { tmpdir } from "node:os";
 import * as path from "node:path";
@@ -8,6 +8,7 @@ import * as vm from "node:vm";
 
 import { parseTaskPlan } from "../manager/planner.js";
 import { DEFAULT_TEAM, REPO_ROOT, type TeamConfig } from "../team.js";
+import { toMediaName } from "./media.js";
 import { ProjectError, ProjectStore, toProjectName } from "./projects.js";
 import { TeamRunner, type OfficeEvent } from "./runner.js";
 import { startOfficeServer } from "./server.js";
@@ -264,6 +265,88 @@ describe("office browser scripts", () => {
       assert.ok(s.click <= 30);
     }
     assert.deepEqual([...rules.normalise({ coins: 5, total: 2, owned: [1, 2] }).owned], [1, 2, 0, 0, 0, 0]);
+  });
+});
+
+describe("media uploads", () => {
+  it("names files safely", () => {
+    assert.equal(toMediaName("My Clip (1).MOV"), "my-clip-1.mov");
+    assert.equal(toMediaName("../../etc/passwd.png"), "passwd.png");
+    assert.equal(toMediaName("???.mp4"), "file.mp4");
+    assert.throws(() => toMediaName("run.exe"), (e: ProjectError) => e.status === 415);
+    assert.throws(() => toMediaName("noext"), (e: ProjectError) => e.status === 415);
+  });
+
+  it("uploads, lists, streams, describes, attaches and deletes media", async () => {
+    const port = 40000 + Math.floor(Math.random() * 20000);
+    const projectsDir = path.join(root, "media-server");
+    const { server, runner } = await startOfficeServer({
+      port, projectsDir, team: team(1), demo: true, demoStepMs: 1, git: false, maxUploadBytes: 64
+    });
+
+    try {
+      const base = `http://localhost:${port}`;
+      const json = { "content-type": "application/json", "x-office": "1" };
+      await fetch(`${base}/api/projects`, { method: "POST", headers: json, body: JSON.stringify({ name: "reel", description: "" }) });
+
+      const upload = (name: string, body: string) =>
+        fetch(`${base}/api/projects/reel/media`, { method: "POST", headers: { "x-office": "1", "x-file-name": encodeURIComponent(name) }, body });
+
+      const first = await upload("Beach Clip.MP4", "0123456789");
+      assert.equal(first.status, 201);
+      assert.deepEqual(
+        { ...((await first.json()) as Record<string, unknown>), uploadedAt: "" },
+        { id: "beach-clip.mp4", originalName: "Beach Clip.MP4", kind: "video", size: 10, uploadedAt: "" }
+      );
+      assert.equal(((await (await upload("beach clip.mp4", "abc")).json()) as { id: string }).id, "beach-clip-2.mp4");
+
+      // Rejected: no office header, wrong type, too large, empty.
+      assert.equal((await fetch(`${base}/api/projects/reel/media`, { method: "POST", headers: { "x-file-name": "a.png" }, body: "x" })).status, 403);
+      assert.equal((await upload("virus.exe", "x")).status, 415);
+      assert.equal((await upload("big.mp4", "x".repeat(65))).status, 413);
+      assert.equal((await upload("empty.png", "")).status, 400);
+
+      const list = (await (await fetch(`${base}/api/projects/reel/media`)).json()) as { id: string }[];
+      assert.deepEqual(list.map((m) => m.id), ["beach-clip.mp4", "beach-clip-2.mp4"]);
+      const leftovers = (await readdir(path.join(projectsDir, "reel", "media"))).filter((f) => f.endsWith(".part"));
+      assert.deepEqual(leftovers, []);
+
+      // Whole file, a byte range, and a bad range.
+      const whole = await fetch(`${base}/api/projects/reel/media/beach-clip.mp4`);
+      assert.equal(whole.headers.get("content-type"), "video/mp4");
+      assert.match(String(whole.headers.get("content-security-policy")), /sandbox/);
+      assert.equal(await whole.text(), "0123456789");
+      const part = await fetch(`${base}/api/projects/reel/media/beach-clip.mp4`, { headers: { range: "bytes=2-4" } });
+      assert.equal(part.status, 206);
+      assert.equal(await part.text(), "234");
+      assert.equal((await fetch(`${base}/api/projects/reel/media/beach-clip.mp4`, { headers: { range: "bytes=50-" } })).status, 416);
+      assert.equal((await fetch(`${base}/api/projects/reel/media/..%2F.ai%2Fstate.json`)).status, 400);
+
+      const patched = await fetch(`${base}/api/projects/reel/media/beach-clip.mp4`, {
+        method: "PATCH", headers: json, body: JSON.stringify({ note: " Waves at sunset, no talking ", duration: 12.345, width: -1 })
+      });
+      assert.deepEqual(
+        ((({ note, duration, width }) => ({ note, duration, width }))((await patched.json()) as Record<string, unknown>)),
+        { note: "Waves at sunset, no talking", duration: 12.35, width: undefined }
+      );
+
+      // Attaching media to a request puts it in the task file and the Manager's brief.
+      const { done } = collect(runner);
+      const bad = await fetch(`${base}/api/projects/reel/requests`, { method: "POST", headers: json, body: JSON.stringify({ request: "Cut a reel", media: ["nope.mp4"] }) });
+      assert.equal(bad.status, 404);
+      await fetch(`${base}/api/projects/reel/requests`, { method: "POST", headers: json, body: JSON.stringify({ request: "Cut a reel", media: ["beach-clip.mp4"] }) });
+      await done;
+      const task = JSON.parse(await readFile(path.join(projectsDir, "reel", ".ai", "tasks", "TASK-001.json"), "utf-8"));
+      assert.deepEqual(task.media, [{ file: "media/beach-clip.mp4", kind: "video", note: "Waves at sunset, no talking" }]);
+      assert.equal(task.request, "Cut a reel");
+      assert.match(task.description, /media\/beach-clip\.mp4 \(video, 12\.35s/);
+
+      assert.equal((await fetch(`${base}/api/projects/reel/media/beach-clip-2.mp4`, { method: "DELETE", headers: json })).status, 200);
+      assert.equal((await fetch(`${base}/api/projects/reel/media/beach-clip-2.mp4`)).status, 404);
+    } finally {
+      server.closeAllConnections();
+      server.close();
+    }
   });
 });
 
