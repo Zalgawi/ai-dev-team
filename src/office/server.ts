@@ -184,7 +184,7 @@ export async function startOfficeServer(options: OfficeServerOptions): Promise<{
       // /api/projects/:name/requests
       if (project && sub === "requests" && method === "POST") {
         const body = await readBody(req);
-        const size = ["small", "large", "design"].includes(String(body.size)) ? (body.size as TaskSize) : "auto";
+        const size = ["small", "large", "design", "video"].includes(String(body.size)) ? (body.size as TaskSize) : "auto";
         const wanted = Array.isArray(body.media) ? body.media.map(String) : [];
         const library = wanted.length ? await media.list(project) : [];
         const attached = wanted.map((id) => {

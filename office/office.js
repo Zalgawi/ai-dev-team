@@ -23,6 +23,8 @@
                about: "Takes the small tasks, with the same workflow as the Senior Dev." },
     designer: { color: "#f07ab4", shirt: "#c95590", pants: "#3a2d40", hair: "#6b2fa0", skin: "#e3a982", style: "side", hat: "beret", hatColor: "#2b2533",
                about: "Makes logos, social graphics, thumbnails, posters and UI mockups. Designs in HTML/SVG, renders exact-size PNGs into Media, and looks at every render to fix what's off before handing it to QA." },
+    editor:  { color: "#ef9a4a", shirt: "#c4702e", pants: "#2c2c3a", hair: "#3a2416", skin: "#c98d64", style: "short", phones: true, hat: "cap", hatColor: "#2b2533",
+               about: "Edits your uploaded footage (one long raw video or many clips) into finished social videos with ffmpeg. Follows your request and the timestamped notes on each clip, writes an edit plan, renders 9:16 MP4s into Media and checks frames and loudness before QA." },
     qa:      { color: "#f0c254", shirt: "#c99a2e", pants: "#3a3328", hair: "#d8d0c0", skin: "#b9805c", style: "bun", glasses: true,
                about: "Verifies every change independently: runs npm test and the browser tests, checks each acceptance criterion and writes qa-report.json. Read-only: never fixes or approves its own work." }
   };
@@ -47,10 +49,10 @@
     furniture.push({ kind, x, y, w, h, ...extra });
     for (let i = 0; i < w; i++) for (let j = 0; j < h; j++) blocked[y + j][x + i] = true;
   }
-  const SEATS = { you: { x: 5, y: 3 }, manager: { x: 15, y: 3 }, senior: { x: 4, y: 10 }, junior: { x: 4, y: 14 }, designer: { x: 9, y: 10 }, qa: { x: 24, y: 10 } };
-  const VISIT = { you: { x: 7, y: 3 }, manager: { x: 17, y: 3 }, senior: { x: 6, y: 10 }, junior: { x: 6, y: 14 }, designer: { x: 11, y: 10 }, qa: { x: 26, y: 10 } };
+  const SEATS = { you: { x: 5, y: 3 }, manager: { x: 15, y: 3 }, senior: { x: 4, y: 10 }, junior: { x: 4, y: 14 }, designer: { x: 9, y: 10 }, editor: { x: 26, y: 2 }, qa: { x: 24, y: 10 } };
+  const VISIT = { you: { x: 7, y: 3 }, manager: { x: 17, y: 3 }, senior: { x: 6, y: 10 }, junior: { x: 6, y: 14 }, designer: { x: 11, y: 10 }, editor: { x: 24, y: 2 }, qa: { x: 26, y: 10 } };
   // Team members who build things and hand them to QA.
-  const MAKERS = ["senior", "junior", "designer"];
+  const MAKERS = ["senior", "junior", "designer", "editor"];
   const SPOT = { rackDev: { x: 14, y: 12 }, rackQa: { x: 15, y: 12 }, bench: { x: 27, y: 12 }, coffee: { x: 27, y: 2 }, board: { x: 23, y: 2 }, cooler: { x: 13, y: 9 } };
   for (const id in SEATS) place("desk", SEATS[id].x - 1, SEATS[id].y + 1, 3, 1, { owner: id });
   place("rack", 14, 10, 2, 1); place("board", 22, 1, 4, 1); place("coffee", 28, 1); place("sofa", 22, 5, 3, 1); place("bench", 27, 13, 2, 1);
@@ -201,7 +203,7 @@
   const docFor = (e, name, path, content) => ({ name, path, content, project: e.project, taskId: e.taskId });
   const assigneeOf = e => {
     const task = (app.detail?.tasks || []).find(x => x.id === e.taskId);
-    const map = { "senior-developer": "senior", "junior-developer": "junior", designer: "designer", developer: "senior" };
+    const map = { "senior-developer": "senior", "junior-developer": "junior", designer: "designer", "video-editor": "editor", developer: "senior" };
     return (task && map[task.assignedTo]) || e.member || "senior";
   };
   const jobDev = new Map();
@@ -501,6 +503,9 @@
       if (a.dir !== "up") r(cx - 3, by - 16, 6, 1, dark);
     } else if (a.hat === "med") {
       r(cx - 5, by - 21, 10, 4, c); r(cx - 5, by - 17, 1, 3, c); r(cx + 4, by - 17, 1, 3, c);
+    } else if (a.hat === "cap") {
+      r(cx - 4, by - 22, 8, 3, c); r(cx - 5, by - 20, 10, 1, c);
+      if (a.dir !== "up") r(cx + (a.dir === "left" ? -7 : 2), by - 20, 5, 1, c);
     } else if (a.hat === "beret") {
       r(cx - 5, by - 21, 10, 3, c); r(cx + 2, by - 22, 4, 1, c); r(cx - 1, by - 23, 2, 1, c);
     } else if (a.hat === "coif") {
@@ -649,7 +654,7 @@
     app.maxIterations = o.team.maxIterations;
     app.mediaRules = o.media;
     $("mediaInput").accept = o.media.accept.join(",");
-    for (const id of ["manager", "senior", "junior", "designer", "qa"]) {
+    for (const id of ["manager", "senior", "junior", "designer", "editor", "qa"]) {
       const m = o.team.members[id];
       if (!m) continue;
       agents[id].name = m.name; agents[id].model = m.model ? `Claude ${m.model}` : "Claude";
@@ -909,8 +914,9 @@
           <div class="mbody">
             <button type="button" class="mname" data-view="${esc(m.id)}">${esc(m.id)}</button>
             <span class="mfacts">${esc(facts(m))}</span>
-            <label class="sr-only" for="note-${esc(m.id)}">What's in ${esc(m.id)}</label>
-            <input type="text" id="note-${esc(m.id)}" data-note="${esc(m.id)}" value="${esc(m.note || "")}" placeholder="What's in it? e.g. me talking about the route" maxlength="2000">
+            <label class="sr-only" for="note-${esc(m.id)}">${m.kind === "video" || m.kind === "audio" ? "Edit notes" : "What's in it"} for ${esc(m.id)}</label>
+            <textarea id="note-${esc(m.id)}" data-note="${esc(m.id)}" rows="${Math.min(8, Math.max(2, (m.note || "").split("\n").length + 1))}" maxlength="8000" placeholder="${m.kind === "video" || m.kind === "audio" ? "Edit notes, one per line, e.g.&#10;0:05–0:20 keep: summit view&#10;1:10 cut: cough&#10;2:10–2:40 use as the ending" : "What's in it? e.g. me at the summit cairn"}">${esc(m.note || "")}</textarea>
+            ${m.madeBy ? `<span class="mfacts">Made by ${esc(m.madeBy)}</span>` : ""}
             <div class="macts">
               <label class="check"><input type="checkbox" data-attach="${esc(m.id)}" ${attached.has(m.id) ? "checked" : ""}> Use in next request</label>
               <button type="button" class="btn ghost small danger" data-del="${esc(m.id)}">Delete</button>

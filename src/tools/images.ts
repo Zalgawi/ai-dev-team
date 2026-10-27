@@ -154,3 +154,30 @@ export async function viewableImage(file: string): Promise<ViewableImage> {
     await page.close();
   }
 }
+
+// Lays frames out in a labelled grid so an agent can see a whole clip in one
+// image. Returns a base64 JPEG.
+export async function contactSheet(frames: { label: string; data: string }[]): Promise<string> {
+  const cols = frames.length <= 2 ? frames.length : frames.length <= 6 ? 3 : 4;
+  const cell = cols >= 4 ? 240 : 320;
+  const width = cols * (cell + 8) + 8;
+  const esc = (t: string) => t.replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]!);
+  const html = `<style>
+    body{margin:0;background:#111;font:600 15px system-ui,sans-serif;color:#fff}
+    .g{display:grid;grid-template-columns:repeat(${cols},${cell}px);gap:8px;padding:8px}
+    figure{margin:0;position:relative}
+    img{width:${cell}px;display:block}
+    figcaption{position:absolute;left:4px;top:4px;background:rgba(0,0,0,.75);padding:2px 6px;border-radius:3px}
+  </style><div class="g">${frames
+    .map((f) => `<figure><img src="data:image/jpeg;base64,${f.data}"><figcaption>${esc(f.label)}</figcaption></figure>`)
+    .join("")}</div>`;
+
+  const page = await (await getBrowser()).newPage({ viewport: { width, height: 200 } });
+  try {
+    await page.setContent(html);
+    await page.waitForFunction(() => [...document.images].every((i) => i.complete));
+    return (await page.screenshot({ fullPage: true, type: "jpeg", quality: 80 })).toString("base64");
+  } finally {
+    await page.close();
+  }
+}
