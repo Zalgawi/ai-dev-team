@@ -135,7 +135,7 @@ window.OfficeThemes = (() => {
       editor:   { shirt: "#3b4f7a", pants: "#2b2b3a", phones: false, hat: "cap", hatColor: "#7a1f1f" },
       qa:      { shirt: "#2f6b2f", pants: "#28572a", hat: "coif", hatColor: "#5a4630" }
     },
-    zones: ["YOUR KEEP", "MANAGER", "CUTTING ROOM", "DEV GUILD", "BANK", "QA RANGE", "CRAFTING"],
+    zones: ["YOUR KEEP", "MANAGER", "THEATRE", "DEV GUILD", "BANK", "QA RANGE", "CRAFTING"],
     zoneColor: "rgba(0,0,0,0.5)",
     boardText: "#3f2914",
     speech: "overhead",

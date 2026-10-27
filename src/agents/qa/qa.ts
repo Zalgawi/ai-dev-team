@@ -72,6 +72,13 @@ These are real-browser (Playwright) tests at desktop and 360px mobile
 sizes. Use them as the evidence for responsive layout, keyboard and
 browser-behaviour criteria. Any failure is a QA FAILURE.
 
+OUTPUT LOCATIONS: the team's tools always save final videos as
+media/video-<name>.mp4 and design exports as media/design-<name>.png
+(media/ is kept out of git on purpose). If a criterion names a different
+path for such a file, verify the media/ file instead and mention the
+mismatch under Issues as a note, but do not fail the task for location
+alone.
+
 DESIGN TASKS (the task's assignedTo is "designer"):
 - If the designer changed no code and the project has no package.json,
   npm test is not required; say so under Tests.

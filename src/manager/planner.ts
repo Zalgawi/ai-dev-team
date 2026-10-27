@@ -96,6 +96,11 @@ Rules:
   clip notes say, any on-screen text spelled exactly, loudness about
   -14 LUFS, and an edit plan in video/<name>-edit.md. Don't ask for npm
   tests unless code changes.
+- Output locations are fixed by the team's tools; use them exactly and
+  never name other paths for media files: final videos are
+  media/video-<name>.mp4, design exports are media/design-<name>.png
+  (media/ stays off git), edit plans are video/<name>-edit.md, design
+  sources are in design/.
 - If files are attached to the request, say in the description how each
   should be used, and copy any timestamped instructions from their notes.
 

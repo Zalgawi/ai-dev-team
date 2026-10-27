@@ -8,7 +8,8 @@ import * as vm from "node:vm";
 
 import { parseTaskPlan } from "../manager/planner.js";
 import { DEFAULT_TEAM, REPO_ROOT, type TeamConfig } from "../team.js";
-import { closeImageBrowser, imageSize, insideProject, renderToPng, viewableImage } from "../tools/images.js";
+import { closeImageBrowser, contactSheet, imageSize, insideProject, renderToPng, viewableImage } from "../tools/images.js";
+import { analyze, checkFfmpegArgs, checkOutput, FFMPEG, grabFrames, parseTimecode, probe, runBinary, timecode } from "../tools/video.js";
 import { writeProjectFile } from "../tools/filesystem.js";
 import { registerGenerated, toMediaName } from "./media.js";
 import { ProjectError, ProjectStore, toProjectName } from "./projects.js";
@@ -345,6 +346,74 @@ describe("designer", () => {
       assert.deepEqual(view.size, { width: 1280, height: 720 });
 
       await assert.rejects(renderToPng(path.join(project, "design", "thumb.html"), out, { width: 5000, height: 10 }));
+    } finally {
+      await closeImageBrowser();
+    }
+  });
+});
+
+describe("video editor", () => {
+  it("routes video requests to the Video Editor", async () => {
+    assert.equal(parseTaskPlan('{"title":"Reel","role":"video-editor","acceptanceCriteria":["1080×1920"]}').role, "video-editor");
+
+    const store = new ProjectStore(path.join(root, "editor1"));
+    await store.create("reels", "");
+    const runner = new TeamRunner(store, team(1), { demo: { stepMs: 1, random: () => 0 } });
+    const { events, done } = collect(runner);
+    await runner.enqueueRequest("reels", "Edit my footage into a 30 second reel");
+    await done;
+    assert.equal((await store.readTask("reels", "TASK-001"))?.assignedTo, "video-editor");
+    assert.ok(events.some((e) => e.type === "agent-start" && e.agent === "editor"));
+  });
+
+  it("reads timecodes and guards ffmpeg arguments", () => {
+    assert.equal(parseTimecode("1:23.5"), 83.5);
+    assert.equal(parseTimecode("01:02:03"), 3723);
+    assert.equal(timecode(83.46), "1:23.5");
+    assert.throws(() => parseTimecode("soon"));
+
+    const project = path.join(root, "guard");
+    checkFfmpegArgs(project, ["-ss", "5", "-i", "media/a.mp4", "-vf", "scale=1080:-2,crop=1080:1920"]);
+    checkFfmpegArgs(project, ["-vf", "drawtext=fontfile=C\\:/Windows/Fonts/arial.ttf:text=Hi"]);
+    for (const bad of [["-i", "../x.mp4"], ["-i", "C:/Users/someone/secret.mp4"], ["-i", "https://example.com/a.mp4"], ["-f", "concat", "-safe", "0"], ["-i", "/etc/passwd"]]) {
+      assert.throws(() => checkFfmpegArgs(project, bad), Error, bad.join(" "));
+    }
+    assert.equal(checkOutput(project, "media/video-reel.mp4").final, true);
+    assert.equal(checkOutput(project, ".ai/renders/seg01.mp4").final, false);
+    assert.throws(() => checkOutput(project, "video/reel.mp4"));
+    assert.throws(() => checkOutput(project, "media/sub/reel.mp4"));
+  });
+
+  it("probes, analyses and samples a real clip", async () => {
+    const dir = path.join(root, "clip");
+    await mkdir(dir, { recursive: true });
+    const clip = path.join(dir, "test.mp4");
+    // 4 s landscape: a tone, 1.5 s of silence, a tone; a hard cut at 2 s.
+    const made = await runBinary(FFMPEG, [
+      "-hide_banner", "-y",
+      "-f", "lavfi", "-i", "color=c=red:s=640x360:d=2:r=30",
+      "-f", "lavfi", "-i", "color=c=blue:s=640x360:d=2:r=30",
+      "-f", "lavfi", "-i", "sine=f=440:d=4",
+      "-filter_complex", "[0:v][1:v]concat=n=2:v=1[v];[2:a]volume='if(between(t,1.2,2.7),0,1)':eval=frame[a]",
+      "-map", "[v]", "-map", "[a]", "-c:v", "libx264", "-pix_fmt", "yuv420p", "-c:a", "aac", clip
+    ]);
+    assert.equal(made.code, 0, made.stderr.slice(-500));
+
+    try {
+      const info = await probe(clip);
+      assert.ok(Math.abs(info.duration - 4) < 0.2, String(info.duration));
+      assert.deepEqual([info.video?.width, info.video?.height, info.video?.fps], [640, 360, 30]);
+      assert.ok(info.audio);
+
+      const a = await analyze(clip);
+      assert.ok(a.scenes.some((t) => Math.abs(t - 2) < 0.2), `scenes ${a.scenes}`);
+      assert.ok(a.silences.some((s) => s.start > 1 && s.start < 1.5 && s.end > 2.4 && s.end < 3), JSON.stringify(a.silences));
+      assert.ok(a.loudness && Number.isFinite(a.loudness.integratedLufs));
+
+      const frames = await grabFrames(clip, [0.5, 3]);
+      assert.equal(frames.length, 2);
+      const sheet = await contactSheet(frames.map((f) => ({ label: timecode(f.time), data: f.data })));
+      assert.ok((imageSize(Buffer.from(sheet, "base64"))?.width ?? 0) > 600);
     } finally {
       await closeImageBrowser();
     }
