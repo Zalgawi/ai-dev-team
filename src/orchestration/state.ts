@@ -5,7 +5,7 @@ export interface ProjectState {
   project: string;
   phase: string;
   iteration: number;
-  status: "idle" | "running" | "completed" | "failed" | "blocked";
+  status: "idle" | "running" | "completed" | "failed" | "blocked" | "stopped";
   currentTask: string | null;
   agents: {
     manager: string;

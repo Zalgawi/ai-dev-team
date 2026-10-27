@@ -7,6 +7,8 @@ import type {
   AgentResult
 } from "../agents/types.js";
 
+import { AgentStoppedError } from "../llm/client.js";
+
 import type { TeamEvent, TeamEventListener } from "./events.js";
 import { readState, writeState } from "./state.js";
 
@@ -99,11 +101,43 @@ export class Orchestrator {
     }
   }
 
+  // Runs the task until QA passes, the round limit is hit, or the human
+  // stops it (context.signal). A stopped run ends with run-end "stopped".
   async run(
     context: AgentContext,
     maxIterations = 5
   ): Promise<AgentResult[]> {
     const results: AgentResult[] = [];
+
+    try {
+      return await this.runLoop(context, maxIterations, results);
+    } catch (error) {
+      if (!(error instanceof AgentStoppedError) && !context.signal?.aborted) throw error;
+
+      console.log("\n🛑 Stopped by the human.");
+
+      const state = await readState(context.projectPath);
+      state.status = "stopped";
+      state.phase = "stopped";
+      state.agents.developer = "idle";
+      state.agents.qa = "idle";
+      if (state.qa.status === "running") state.qa.status = "not_started";
+      await writeState(context.projectPath, state);
+
+      this.emit({ type: "run-end", status: "stopped", iteration: state.iteration });
+      return results;
+    }
+  }
+
+  private stopIfAsked(context: AgentContext): void {
+    if (context.signal?.aborted) throw new AgentStoppedError();
+  }
+
+  private async runLoop(
+    context: AgentContext,
+    maxIterations: number,
+    results: AgentResult[]
+  ): Promise<AgentResult[]> {
     const state = await readState(context.projectPath);
 
     console.log("\n📊 Project state loaded:");
@@ -171,6 +205,7 @@ export class Orchestrator {
         state
       );
 
+      this.stopIfAsked(context);
       console.log("\n💻 Developer starting...");
       this.emit({ type: "agent-start", agent: developerKey, iteration });
 
@@ -218,6 +253,7 @@ export class Orchestrator {
         return results;
       }
 
+      this.stopIfAsked(context);
       console.log("\n🧪 QA starting...");
 
       state.phase = "qa";

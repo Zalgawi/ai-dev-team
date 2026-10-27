@@ -4,6 +4,10 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Agent Office</title>
+<script>
+  // Apply the saved theme before first paint.
+  try { var t = localStorage.getItem("office.theme"); if (t) document.documentElement.dataset.theme = t; } catch (e) {}
+</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&family=Pixelify+Sans:wght@500;700&display=swap">
 <link rel="stylesheet" href="/office.css">
@@ -15,6 +19,8 @@
     <span class="mode" id="mode">Connecting…</span>
   </div>
   <div class="projbar">
+    <label class="lbl inline" for="themeSelect">Theme</label>
+    <select id="themeSelect"></select>
     <label class="lbl inline" for="projectSelect">Project</label>
     <select id="projectSelect"></select>
     <button class="btn ghost" type="button" id="newProjectBtn">New project</button>
@@ -29,6 +35,12 @@
     <div class="screen">
       <canvas id="office" role="img" aria-label="Pixel office where the team carries task files between desks. The team panel below describes what each agent is doing."></canvas>
       <p class="hint" id="queueLine">The team is idle.</p>
+    </div>
+    <div class="stopbar">
+      <button type="button" class="stop" id="stopBtn" disabled>
+        <span class="cap" aria-hidden="true"></span>
+        <span class="txt">Stop task <small>Nothing running</small></span>
+      </button>
     </div>
     <div class="roster" id="roster"></div>
     <div class="detail" id="detail"></div>
@@ -61,6 +73,8 @@
       <h2 id="h-appr">Needs you <small>human approval</small></h2>
       <div id="approvals"></div>
     </section>
+
+    <section class="card game" id="game"></section>
 
     <section class="card" aria-labelledby="h-tasks">
       <h2 id="h-tasks">Tasks <small id="tasksFor"></small></h2>
@@ -127,6 +141,24 @@
   </form>
 </dialog>
 
+<dialog id="stopDlg" aria-labelledby="stopTitle">
+  <form id="stopForm" class="dform" novalidate>
+    <div class="dhead"><h3 id="stopTitle">Stop the current task?</h3></div>
+    <div class="dbody">
+      <p><b id="stopWhat"></b></p>
+      <p>The agent working on it is interrupted straight away, including any command it is running. The task is marked <b>stopped</b> and the work so far is committed to its task branch (when git is on). Anything queued after it still runs.</p>
+      <p class="fine">You can run it again from Tasks, or send it back with direction from "Needs you".</p>
+      <p class="err" id="stopErr" role="alert"></p>
+    </div>
+    <div class="dfoot">
+      <button class="btn ghost" type="button" data-close>Keep going</button>
+      <button class="btn danger-fill" type="submit">Stop task</button>
+    </div>
+  </form>
+</dialog>
+
+<script src="/themes.js"></script>
+<script src="/game.js"></script>
 <script src="/office.js"></script>
 </body>
 </html>

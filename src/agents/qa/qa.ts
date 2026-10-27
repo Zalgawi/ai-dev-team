@@ -119,7 +119,7 @@ You must not modify the project.
       },
       10,
       qaTools,
-      { model: this.model, onActivity: context.onActivity }
+      { model: this.model, onActivity: context.onActivity, signal: context.signal }
     );
 
     console.log("\n🤖 QA final response:");

@@ -6,6 +6,7 @@ import type {
   AgentContext,
   AgentResult
 } from "../agents/types.js";
+import { AgentStoppedError } from "../llm/client.js";
 import type { TaskPlan } from "../manager/planner.js";
 
 // Stand-in agents for demo mode. They follow the same steps and write the
@@ -18,7 +19,20 @@ export interface DemoOptions {
   random?: () => number;
 }
 
-const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+// Rejects as soon as the stop button is pressed, like a real agent would.
+const sleep = (ms: number, signal?: AbortSignal) =>
+  new Promise<void>((resolve, reject) => {
+    if (signal?.aborted) return reject(new AgentStoppedError());
+    const timer = setTimeout(() => {
+      signal?.removeEventListener("abort", onAbort);
+      resolve();
+    }, ms);
+    const onAbort = () => {
+      clearTimeout(timer);
+      reject(new AgentStoppedError());
+    };
+    signal?.addEventListener("abort", onAbort, { once: true });
+  });
 
 const ISSUES = [
   "The new control has no accessible name.",
@@ -35,13 +49,13 @@ async function act(
 ): Promise<void> {
   for (const step of steps) {
     context.onActivity?.(step);
-    await sleep(stepMs);
+    await sleep(stepMs, context.signal);
   }
 }
 
 export async function demoPlan(
   request: string,
-  context: Pick<AgentContext, "onActivity">,
+  context: Pick<AgentContext, "onActivity" | "signal">,
   { stepMs = 2500 }: DemoOptions = {}
 ): Promise<TaskPlan> {
   await act(context as AgentContext, ["read_file PRD.md", "read_file AGENTS.md", "list_files"], stepMs);

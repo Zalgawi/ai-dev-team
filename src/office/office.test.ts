@@ -4,9 +4,10 @@ import * as http from "node:http";
 import { tmpdir } from "node:os";
 import * as path from "node:path";
 import { after, before, describe, it } from "node:test";
+import * as vm from "node:vm";
 
 import { parseTaskPlan } from "../manager/planner.js";
-import { DEFAULT_TEAM, type TeamConfig } from "../team.js";
+import { DEFAULT_TEAM, REPO_ROOT, type TeamConfig } from "../team.js";
 import { ProjectError, ProjectStore, toProjectName } from "./projects.js";
 import { TeamRunner, type OfficeEvent } from "./runner.js";
 import { startOfficeServer } from "./server.js";
@@ -147,6 +148,122 @@ describe("TeamRunner (demo agents)", () => {
     await again.done;
     const task = await store.readTask("site", "TASK-001");
     assert.equal(task?.humanFeedback?.[0]?.notes, "Keep it simple");
+  });
+});
+
+describe("TeamRunner stop button", () => {
+  it("stops the running task, marks it stopped and runs the next queued job", async () => {
+    const store = new ProjectStore(path.join(root, "runner3"));
+    await store.create("site", "");
+    const runner = new TeamRunner(store, team(5), { demo: { stepMs: 40, random: () => 0.99 } });
+
+    assert.throws(() => runner.stop(), (e: ProjectError) => e.status === 409);
+
+    const events: OfficeEvent[] = [];
+    const ends: string[] = [];
+    const bothDone = new Promise<void>((resolve) => {
+      runner.on("event", (event: OfficeEvent) => {
+        events.push(event);
+        if (event.type === "agent-start" && event.agent === "senior" && event.taskId === "TASK-001") runner.stop();
+        if (event.type === "job-end") {
+          ends.push(event.status);
+          if (ends.length === 2) resolve();
+        }
+      });
+    });
+
+    await runner.enqueueRequest("site", "Big data refactor", "large");
+    await runner.enqueueRequest("site", "Small tweak", "small");
+    await bothDone;
+
+    assert.equal(ends[0], "stopped");
+    assert.ok(events.some((e) => e.type === "stop-requested"));
+    assert.ok(events.some((e) => e.type === "run-end" && e.status === "stopped"));
+    // The stopped developer never handed anything to QA.
+    assert.ok(!events.some((e) => e.type === "agent-start" && e.agent === "qa" && e.taskId === "TASK-001"));
+    assert.equal((await store.readTask("site", "TASK-001"))?.status, "stopped");
+
+    // The queued request still ran afterwards.
+    assert.ok(events.some((e) => e.type === "agent-start" && e.agent === "junior" && e.taskId === "TASK-002"));
+  });
+
+  it("stops a request while the Manager is still planning", async () => {
+    const store = new ProjectStore(path.join(root, "runner4"));
+    await store.create("site", "");
+    const runner = new TeamRunner(store, team(5), { demo: { stepMs: 40 } });
+    const { events, done } = collect(runner);
+
+    runner.on("event", (event: OfficeEvent) => {
+      if (event.type === "agent-activity" && event.agent === "manager") runner.stop();
+    });
+    await runner.enqueueRequest("site", "Anything", "auto");
+    await done;
+
+    const end = events.at(-1);
+    assert.equal(end?.type === "job-end" ? end.status : end?.type, "stopped");
+    assert.equal(await store.readTask("site", "TASK-001"), null);
+  });
+});
+
+describe("office browser scripts", () => {
+  // themes.js and game.js are plain browser scripts; run them with a stub window.
+  async function load(file: string): Promise<Record<string, any>> {
+    const window: Record<string, any> = {};
+    const code = await readFile(path.join(REPO_ROOT, "office", file), "utf-8");
+    vm.runInNewContext(code, { window });
+    return window;
+  }
+
+  it("defines complete themes and falls back to the default", async () => {
+    const { OfficeThemes: themes } = await load("themes.js");
+    const ids = [...themes.list.map((t: { id: string }) => t.id)];
+    assert.deepEqual(ids, ["classic", "daylight", "osrs"]);
+    for (const t of themes.list) {
+      assert.equal(t.zones.length, 7, t.id);
+      assert.equal(t.game.upgrades.length, 6, t.id);
+    }
+    assert.equal(themes.get("nonsense").id, "classic");
+    assert.equal(themes.isValid("osrs"), true);
+    assert.equal(themes.isValid("__proto__"), false);
+  });
+
+  it("runs the clicker's economy", async () => {
+    const { OfficeGame: { rules } } = await load("game.js");
+    const s = rules.fresh();
+
+    assert.equal(rules.buyTier(s, 0), false);
+    rules.earn(s, 20);
+    assert.equal(rules.buyTier(s, 0), true);
+    assert.equal(s.coins, 5);
+    assert.equal(rules.tierCost(s, 0), Math.ceil(15 * 1.15));
+    assert.equal(rules.rate(s, false), 0.1);
+    assert.equal(rules.rate(s, true), 0.2);
+
+    rules.earn(s, 100);
+    assert.equal(rules.buyClick(s), true);
+    assert.equal(rules.clickValue(s), 2);
+
+    // An hour's cap on earnings while away.
+    s.savedAt = 1000;
+    assert.equal(Math.round(rules.awayEarnings(s, 1000 + 10 * 3600 * 1000)), 360);
+
+    assert.equal(rules.level(0), 1);
+    assert.equal(rules.level(83), 2);
+    assert.equal(rules.level(13_034_431), 99);
+    assert.equal(rules.fmt(123_456), "123K");
+    assert.equal(rules.fmt(2_450_000), "2.5M");
+    assert.equal(rules.stackClass(10_000_000), "stack-g");
+  });
+
+  it("repairs corrupt saved progress", async () => {
+    const { OfficeGame: { rules } } = await load("game.js");
+    for (const bad of [null, "x", 5, { coins: -3, owned: "no" }, { coins: Number.NaN, click: 1e9 }]) {
+      const s = rules.normalise(bad);
+      assert.ok(s.coins >= 0 && Number.isFinite(s.coins));
+      assert.equal(s.owned.length, 6);
+      assert.ok(s.click <= 30);
+    }
+    assert.deepEqual([...rules.normalise({ coins: 5, total: 2, owned: [1, 2] }).owned], [1, 2, 0, 0, 0, 0]);
   });
 });
 

@@ -36,6 +36,7 @@ type OfficeOnlyEvent =
   | { type: "git"; message: string }
   | { type: "job-error"; error: string }
   | { type: "job-end"; status: string }
+  | { type: "stop-requested" }
   | { type: "projects-changed" };
 
 export type OfficeEvent = (TeamEvent | OfficeOnlyEvent) & {
@@ -74,6 +75,8 @@ export class TeamRunner extends EventEmitter {
   private activeAgent: string | null = null;
   private activity: string | null = null;
   private iteration = 0;
+  // Aborts the current job when the human presses the stop button.
+  private abort: AbortController | null = null;
 
   constructor(
     private store: ProjectStore,
@@ -155,16 +158,49 @@ export class TeamRunner extends EventEmitter {
     return this.enqueue({ id: this.nextJobId++, kind: "run", project, taskId });
   }
 
+  // Ends the current job: the running agent's Claude session and any command
+  // it started are aborted, the task is marked "stopped", and the work so far
+  // is committed to the task branch. Queued jobs still run afterwards.
+  stop(): Job {
+    const job = this.current;
+
+    if (!job || !this.abort) {
+      throw new ProjectError("The team isn't working on anything right now.", 409);
+    }
+    if (this.abort.signal.aborted) return job;
+
+    this.abort.abort();
+    this.publish({ type: "stop-requested" }, job);
+
+    return job;
+  }
+
   async approve(project: string, taskId: string): Promise<TaskFile> {
     const task = await this.store.updateTask(project, taskId, { status: "approved" });
     const job: Job = { id: 0, kind: "run", project, taskId };
 
     this.publish({ type: "task-updated", task }, job);
     if (this.options.git && !this.demo) {
+      await this.commitApproval(job, taskId);
       this.publish({ type: "git", message: `Approved. Merge task/${project}-${taskId} into main when you're ready.` }, job);
     }
 
     return task;
+  }
+
+  // Commits the approved task file to its own branch. Left uncommitted, it
+  // would stop the next task from getting a branch of its own.
+  private async commitApproval(job: Job, taskId: string): Promise<void> {
+    const projectPath = this.store.projectPath(job.project);
+    const branch = `task/${job.project}-${taskId}`;
+
+    if (this.current || !(await isGitRepo(projectPath)) || (await currentBranch(projectPath)) !== branch) return;
+
+    try {
+      await commitPath(projectPath, `.ai/tasks/${taskId}.json`, `chore(${job.project}): approve ${taskId}`);
+    } catch (error) {
+      this.publish({ type: "git", message: `Could not commit the approval: ${error instanceof Error ? error.message : String(error)}` }, job);
+    }
   }
 
   async requestChanges(
@@ -205,11 +241,13 @@ export class TeamRunner extends EventEmitter {
     if (!job) return;
 
     this.current = job;
+    this.abort = new AbortController();
 
     try {
-      await this.runJob(job);
+      await this.runJob(job, this.abort.signal);
     } finally {
       this.current = null;
+      this.abort = null;
       this.activeAgent = null;
       this.activity = null;
       this.iteration = 0;
@@ -232,21 +270,22 @@ export class TeamRunner extends EventEmitter {
     return { senior, junior, qa };
   }
 
-  private async plan(job: Job, projectPath: string, taskId: string): Promise<TaskPlan> {
+  private async plan(job: Job, projectPath: string, taskId: string, signal: AbortSignal): Promise<TaskPlan> {
     const onActivity = (activity: string) =>
       this.publish({ type: "agent-activity", agent: "manager", activity }, job);
 
     if (this.options.demo) {
-      return demoPlan(job.request ?? "", { onActivity }, this.options.demo);
+      return demoPlan(job.request ?? "", { onActivity, signal }, this.options.demo);
     }
 
     return planTask(projectPath, taskId, job.request ?? "", {
       model: this.team.members.manager.model,
-      onActivity
+      onActivity,
+      signal
     });
   }
 
-  private async runJob(job: Job): Promise<void> {
+  private async runJob(job: Job, signal: AbortSignal): Promise<void> {
     let status = "failed";
 
     this.publish({ type: "job-start", kind: job.kind }, job);
@@ -266,7 +305,7 @@ export class TeamRunner extends EventEmitter {
       if (job.kind === "request") {
         this.publish({ type: "agent-start", agent: "manager", iteration: 0 }, job);
 
-        const plan = await this.plan(job, projectPath, taskId);
+        const plan = await this.plan(job, projectPath, taskId, signal);
         const size = job.size && job.size !== "auto" ? job.size : plan.size;
 
         task = {
@@ -306,27 +345,30 @@ export class TeamRunner extends EventEmitter {
       });
 
       await orchestrator.run(
-        { projectPath, taskId, iteration: 1 },
+        { projectPath, taskId, iteration: 1, signal },
         this.team.maxIterations
       );
 
       status = runEnd;
 
       const finalStatus =
-        runEnd === "completed" ? "awaiting_approval" : runEnd === "blocked" ? "blocked" : "failed";
+        runEnd === "completed" ? "awaiting_approval" : runEnd === "blocked" || runEnd === "stopped" ? runEnd : "failed";
 
       task = await this.store.updateTask(job.project, taskId, { status: finalStatus });
       this.publish({ type: "task-updated", task }, job);
 
       await this.finishBranch(job, projectPath, task, runEnd);
     } catch (error) {
-      const message = error instanceof Error ? error.message : String(error);
-      console.error(`❌ Job ${job.id} failed:`, error);
+      // Stopped while the Manager was still planning.
+      const stopped = signal.aborted;
+      const message = stopped ? "Stopped by you." : error instanceof Error ? error.message : String(error);
+      if (stopped) status = "stopped";
+      else console.error(`❌ Job ${job.id} failed:`, error);
       this.publish({ type: "job-error", error: message }, job);
 
       if (job.taskId) {
         try {
-          const task = await this.store.updateTask(job.project, job.taskId, { status: "failed" });
+          const task = await this.store.updateTask(job.project, job.taskId, { status: stopped ? "stopped" : "failed" });
           this.publish({ type: "task-updated", task }, job);
         } catch {
           // The task file was never written (planning failed).

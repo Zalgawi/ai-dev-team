@@ -26,6 +26,25 @@ export interface AgentPrompt {
 export interface RunOptions {
   model?: string | undefined;
   onActivity?: ((activity: string) => void) | undefined;
+  // Stops the Claude session (and any running command) when aborted.
+  signal?: AbortSignal | undefined;
+}
+
+export class AgentStoppedError extends Error {
+  constructor() {
+    super("Stopped by the human.");
+    this.name = "AgentStoppedError";
+  }
+}
+
+// The SDK takes an AbortController, so link one to the caller's signal.
+function controllerFor(signal: AbortSignal | undefined): AbortController {
+  const controller = new AbortController();
+
+  if (signal?.aborted) controller.abort();
+  else signal?.addEventListener("abort", () => controller.abort(), { once: true });
+
+  return controller;
 }
 
 function baseOptions(
@@ -96,7 +115,26 @@ export async function runAgent(
   { system, prompt }: AgentPrompt,
   maxIterations = 12,
   tools: ToolName[] = llmTools,
-  { model = defaultModel, onActivity }: RunOptions = {}
+  { model = defaultModel, onActivity, signal }: RunOptions = {}
+): Promise<string> {
+  if (signal?.aborted) throw new AgentStoppedError();
+
+  try {
+    return await runAgentSession(projectPath, { system, prompt }, maxIterations, tools, model, onActivity, signal);
+  } catch (error) {
+    if (signal?.aborted) throw new AgentStoppedError();
+    throw error;
+  }
+}
+
+async function runAgentSession(
+  projectPath: string,
+  { system, prompt }: AgentPrompt,
+  maxIterations: number,
+  tools: ToolName[],
+  model: string | undefined,
+  onActivity: RunOptions["onActivity"],
+  signal: AbortSignal | undefined
 ): Promise<string> {
   const { result, sessionId } = await collectResult(
     query({
@@ -106,10 +144,11 @@ export async function runAgent(
         // Disable Claude Code's built-in tools; only the project tools are available.
         tools: [],
         mcpServers: {
-          [TOOL_SERVER_NAME]: createToolServer(projectPath, tools)
+          [TOOL_SERVER_NAME]: createToolServer(projectPath, tools, signal)
         },
         allowedTools: tools.map(qualifiedToolName),
-        maxTurns: maxIterations
+        maxTurns: maxIterations,
+        abortController: controllerFor(signal)
       }
     }),
     onActivity
@@ -142,7 +181,8 @@ export async function runAgent(
         ...baseOptions(projectPath, system, model),
         resume: sessionId,
         tools: [],
-        maxTurns: 1
+        maxTurns: 1,
+        abortController: controllerFor(signal)
       }
     })
   );

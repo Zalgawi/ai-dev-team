@@ -126,7 +126,7 @@ Actually make the necessary changes to the project.
       },
       30,
       undefined,
-      { model: this.model, onActivity: context.onActivity }
+      { model: this.model, onActivity: context.onActivity, signal: context.signal }
     );
 
     console.log(

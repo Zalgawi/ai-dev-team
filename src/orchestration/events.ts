@@ -29,7 +29,7 @@ export type TeamEvent =
     }
   | {
       type: "run-end";
-      status: "completed" | "failed" | "blocked";
+      status: "completed" | "failed" | "blocked" | "stopped";
       iteration: number;
     };
 

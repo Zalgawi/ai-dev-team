@@ -18,7 +18,9 @@ import type { TaskSize } from "../manager/planner.js";
 const STATIC_FILES: Record<string, string> = {
   "/": "index.html",
   "/office.css": "office.css",
-  "/office.js": "office.js"
+  "/office.js": "office.js",
+  "/themes.js": "themes.js",
+  "/game.js": "game.js"
 };
 
 const CONTENT_TYPES: Record<string, string> = {
@@ -130,6 +132,11 @@ export async function startOfficeServer(options: OfficeServerOptions): Promise<{
 
       if (resource === "office" && method === "GET") {
         return sendJson(res, 200, { team: options.team, demo: options.demo, git: options.git && !options.demo, snapshot: runner.snapshot() });
+      }
+
+      // The big red button: end the task the team is working on right now.
+      if (resource === "stop" && method === "POST") {
+        return sendJson(res, 202, runner.stop());
       }
 
       if (resource !== "projects") return sendJson(res, 404, { error: "Not found." });

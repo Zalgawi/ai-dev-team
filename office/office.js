@@ -25,6 +25,14 @@
                about: "Verifies every change independently: runs npm test and the browser tests, checks each acceptance criterion and writes qa-report.json. Read-only: never fixes or approves its own work." }
   };
 
+  // ---------- themes ----------
+  // See themes.js. The page sets data-theme on <html> before first paint.
+  const Themes = window.OfficeThemes;
+  const savedTheme = (() => { try { return localStorage.getItem("office.theme"); } catch { return null; } })();
+  let THEME = Themes.get(Themes.isValid(savedTheme) ? savedTheme : Themes.DEFAULT);
+  const col = c => THEME.map[c] || c;
+  const LOOK_KEYS = ["color", "shirt", "pants", "hair", "skin", "style", "tie", "phones", "glasses", "hat", "hatColor"];
+
   // ---------- map ----------
   const wall = [...Array(H)].map((_, y) => [...Array(W)].map((_, x) => x === 0 || y === 0 || x === W - 1 || y === H - 1));
   for (let x = 0; x < W; x++) if (![5, 15, 25].includes(x)) wall[7][x] = true;
@@ -275,7 +283,7 @@
         const dev = jobDev.get(j) || assigneeOf(e);
         const doc = docFor(e, "qa-report.json", e.reportPath || ".ai/qa-report.json");
         if (e.outcome === "passed") {
-          A.qa.queue(say("PASS. Everything checks out."), carry(doc), go(VISIT.manager, "Taking qa-report.json to the Manager"),
+          A.qa.queue(say("PASS. Everything checks out."), doIt(() => effect(A[dev], "level", "Level up!")), carry(doc), go(VISIT.manager, "Taking qa-report.json to the Manager"),
             handoff("manager", `pass-${j}`), go(A.qa.seat, "Back to the QA desk"));
         } else if (e.iteration >= app.maxIterations) {
           A.qa.queue(say(`Failed round ${e.iteration}. That's the limit.`), carry(doc), go(VISIT.manager, "Reporting to the Manager"),
@@ -283,13 +291,13 @@
         } else {
           A.qa.queue(say(`FAIL: ${e.issues.length || "some"} issue${e.issues.length === 1 ? "" : "s"}.`), carry(doc),
             go(VISIT[dev], `Returning qa-report.json to ${name(dev)}`), say(e.issues[0] ? e.issues[0].slice(0, 90) : "Details are in the report.", 4),
-            handoff(dev, `qa-${j}-${e.iteration}`), go(A.qa.seat, "Back to the QA desk"));
+            handoff(dev, `qa-${j}-${e.iteration}`), doIt(() => effect(A[dev], "hit", String(e.issues.length || 1))), go(A.qa.seat, "Back to the QA desk"));
         }
         break;
       }
       case "run-end": {
         const passed = e.status === "completed";
-        if (e.status === "failed") break;
+        if (e.status === "failed" || e.status === "stopped") break;
         const doc = docFor(e, passed ? `${e.taskId}.json` : "qa-report.json", passed ? `.ai/tasks/${e.taskId}.json` : ".ai/qa-report.json");
         A.manager.queue(waitFor(`pass-${j}`, "Waiting for QA"), go(A.manager.seat, "Back to desk"),
           work(2, passed ? "Checking QA's report against the criteria" : "Writing up the blocker", passed ? "Verifying QA, not just the dev report." : "Time to escalate."),
@@ -299,7 +307,16 @@
         A.you.queue(waitFor(`done-${j}`, "At desk", 60), say(passed ? "Let me look." : "Hmm, stuck?"));
         break;
       }
+      case "stop-requested":
+        A.you.say("STOP! End this task.", 3);
+        for (const a of Object.values(A)) {
+          if (a.id === "you") continue;
+          a.script = []; a.step = null; a.carry = null; a.path = []; a.wandering = false;
+          a.queue(say("Stopping.", 2), go(a.seat, "Back to desk"));
+        }
+        break;
       case "job-error":
+        if (/^Stopped by you/.test(e.error)) break;
         A.manager.say(`That run stopped: ${e.error.slice(0, 80)}`, 5);
         break;
       case "git":
@@ -323,7 +340,8 @@
       case "agent-start": if (e.agent !== "manager") text = `${who(e.agent)} started ${t}${e.iteration ? `, round ${e.iteration}` : ""}`; break;
       case "agent-done": if (e.reportPath) { text = `${who(e.agent)} finished round ${e.iteration}`; doc = { name: "dev-report.md", path: e.reportPath }; } break;
       case "qa-result": text = `${who("qa")} ${e.outcome === "passed" ? "passed" : "failed"} ${t} in round ${e.iteration}${e.issues.length && e.outcome !== "passed" ? `: ${esc(e.issues.slice(0, 2).join("; "))}` : ""}`; doc = { name: "qa-report.json", path: e.reportPath || ".ai/qa-report.json" }; bad = e.outcome !== "passed"; break;
-      case "run-end": text = e.status === "completed" ? `${t} passed QA and is waiting for your approval` : `${t} ${e.status} after ${e.iteration} rounds`; bad = e.status !== "completed"; break;
+      case "run-end": text = e.status === "completed" ? `${t} passed QA and is waiting for your approval` : e.status === "stopped" ? `${t} stopped in round ${e.iteration}` : `${t} ${e.status} after ${e.iteration} rounds`; bad = e.status !== "completed"; break;
+      case "stop-requested": text = `${who("you")} pressed the stop button${t ? ` on ${t}` : ""}`; bad = true; break;
       case "task-updated": if (e.task.status === "approved") text = `${who("you")} approved ${t}`; else if (e.task.status === "changes_requested") text = `${who("you")} requested changes on ${t}`; break;
       case "git": text = `git: ${esc(e.message)}`; break;
       case "job-error": text = `Run stopped: ${esc(e.error)}`; bad = true; break;
@@ -336,10 +354,11 @@
   }
 
   // ---------- drawing ----------
-  function r(x, y, w, h, c) { ctx.fillStyle = c; ctx.fillRect(x, y, w, h); }
+  function r(x, y, w, h, c) { ctx.fillStyle = col(c); ctx.fillRect(x, y, w, h); }
   function drawFloor() {
     for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) {
       if (wall[y][x]) continue;
+      if (THEME.floor) { THEME.floor(x, y, zone(x, y), r, T); continue; }
       const px = x * T, py = y * T, z = zone(x, y);
       if (z === "wood" || z === "wood2") {
         const base = z === "wood" ? "#b78657" : "#c49a6c", line = z === "wood" ? "#a3764a" : "#b0875b";
@@ -355,6 +374,7 @@
     r(13 * T + 6, 9 * T + 8, 4 * T - 12, 4 * T - 8, "#48445f");
   }
   function drawWall(x, y) {
+    if (THEME.wall) return THEME.wall(x, y, r, T, H, wall);
     const px = x * T, py = y * T;
     r(px, py, T, T, "#2c283d"); r(px, py, T, 1, "#3a354f");
     if (y + 1 < H && !wall[y + 1][x]) { r(px, py + 7, T, 9, "#7d72a6"); r(px, py + 7, T, 1, "#968bc0"); r(px, py + 14, T, 2, "#5c527f"); }
@@ -462,9 +482,25 @@
       else { r(cx - 2 + ex, by - 16, 1, 1, "#1d1b26"); r(cx + 1 + ex, by - 16, 1, 1, "#1d1b26"); }
       if (a.status === "working" && Math.floor(t * 3) % 4 === 0) r(cx - 1 + ex, by - 14, 2, 1, "#9b5a4a");
     }
+    if (a.hat) drawHat(a, cx, by);
     if (a.phones) { r(cx - 5, by - 18, 1, 3, "#1d1b26"); r(cx + 4, by - 18, 1, 3, "#1d1b26"); r(cx - 4, by - 21, 8, 1, "#1d1b26"); }
     if (a.carry) { r(cx + 3, by - 11, 5, 6, "#f4ecd8"); r(cx + 4, by - 9, 3, 1, "#9a95a8"); r(cx + 4, by - 7, 3, 1, "#9a95a8"); }
     if (a.progress > 0) { r(cx - 8, by - 25, 16, 3, "#1d1b26"); r(cx - 7, by - 24, Math.max(1, Math.round(14 * a.progress)), 1, a.color); }
+  }
+  function drawHat(a, cx, by) {
+    const c = a.hatColor, dark = "#1d1b26";
+    if (a.hat === "party") {
+      r(cx - 4, by - 22, 8, 2, c); r(cx - 4, by - 24, 2, 2, c); r(cx - 1, by - 25, 2, 3, c); r(cx + 2, by - 24, 2, 2, c);
+    } else if (a.hat === "wizard") {
+      r(cx - 5, by - 21, 10, 2, c); r(cx - 3, by - 23, 6, 2, c); r(cx - 2, by - 25, 4, 2, c); r(cx - 1, by - 27, 2, 2, c); r(cx, by - 24, 1, 1, "#ffe14d");
+    } else if (a.hat === "full") {
+      r(cx - 5, by - 21, 10, 9, c); r(cx - 5, by - 21, 10, 1, "#5b8fa0");
+      if (a.dir !== "up") r(cx - 3, by - 16, 6, 1, dark);
+    } else if (a.hat === "med") {
+      r(cx - 5, by - 21, 10, 4, c); r(cx - 5, by - 17, 1, 3, c); r(cx + 4, by - 17, 1, 3, c);
+    } else if (a.hat === "coif") {
+      r(cx - 5, by - 21, 10, 3, c); r(cx - 5, by - 18, 2, 5, c); r(cx + 3, by - 18, 2, 5, c);
+    }
   }
   function wrapText(text, maxW) {
     const lines = []; let line = "";
@@ -475,14 +511,31 @@
     if (line) lines.push(line);
     return lines.slice(0, 4);
   }
-  function roundRect(x, y, w, h, rad, fill) { ctx.beginPath(); ctx.roundRect(x, y, w, h, rad); ctx.fillStyle = fill; ctx.fill(); }
+  function roundRect(x, y, w, h, rad, fill) { ctx.beginPath(); ctx.roundRect(x, y, w, h, rad); ctx.fillStyle = col(fill); ctx.fill(); }
   function drawLabels(a) {
     const cx = (a.x * T + 8) * S, top = (Math.round(a.y * T + 15) + (a.seated ? 7 : 0) - 26) * S;
     ctx.font = `700 19px ${PX}`; ctx.textAlign = "center"; ctx.textBaseline = "middle";
-    const nw = ctx.measureText(a.name).width + 14;
-    roundRect(cx - nw / 2, top - 22, nw, 24, 5, a.color);
-    ctx.fillStyle = "#17151f"; ctx.fillText(a.name, cx, top - 9);
+    const overhead = THEME.speech === "overhead";
+    if (overhead) shadowText(a.name, cx, top - 9, a.color);
+    else {
+      const nw = ctx.measureText(a.name).width + 14;
+      roundRect(cx - nw / 2, top - 22, nw, 24, 5, a.color);
+      ctx.fillStyle = "#17151f"; ctx.fillText(a.name, cx, top - 9);
+    }
     const y = top - 28;
+    if (overhead) {
+      // RuneScape-style: yellow overhead chat, items in orange, no bubbles.
+      if (a.bubble) {
+        ctx.font = `700 19px ${PX}`;
+        const lines = wrapText(a.bubble.text, 300);
+        const x = Math.max(160, Math.min(cv.width - 160, cx));
+        lines.forEach((l, i) => shadowText(l, x, y - 10 - (lines.length - 1 - i) * 22, "#ffff00"));
+      } else if (a.carry) {
+        ctx.font = `700 17px ${PX}`;
+        shadowText(a.carry.name, cx, y - 10, "#ff981f");
+      }
+      return;
+    }
     if (a.carry && !a.bubble) {
       ctx.font = `500 17px ${PX}`;
       const tw = ctx.measureText(a.carry.name).width + 16;
@@ -500,22 +553,28 @@
       lines.forEach((l, i) => ctx.fillText(l, bx + bw / 2, y - bh - 8 + 18 + i * 22));
     }
   }
+  function shadowText(text, x, y, color) {
+    ctx.fillStyle = "#000"; ctx.fillText(text, x + 2, y + 2);
+    ctx.fillStyle = color; ctx.fillText(text, x, y);
+  }
   function drawZoneLabels() {
     ctx.font = `700 20px ${PX}`; ctx.textAlign = "left"; ctx.textBaseline = "alphabetic";
-    for (const [t, x, y] of [["YOUR OFFICE", 1.3, 6.7], ["MANAGER", 11.3, 6.7], ["LOUNGE", 21.3, 6.7], ["DEV POD", 1.3, 17.7], ["GITHUB", 13.2, 8.6], ["QA LAB", 18.3, 17.7], ["OPEN SEAT", 7.4, 13.1]]) {
-      ctx.fillStyle = "rgba(23,21,31,0.45)"; ctx.fillText(t, x * T * S, y * T * S);
-    }
-    ctx.font = `700 14px ${PX}`; ctx.fillStyle = "#3a354f"; ctx.textAlign = "center";
+    const spots = [[1.3, 6.7], [11.3, 6.7], [21.3, 6.7], [1.3, 17.7], [13.2, 8.6], [18.3, 17.7], [7.4, 13.1]];
+    THEME.zones.forEach((t, i) => {
+      ctx.fillStyle = THEME.zoneColor; ctx.fillText(t, spots[i][0] * T * S, spots[i][1] * T * S);
+    });
+    ctx.font = `700 14px ${PX}`; ctx.fillStyle = THEME.boardText; ctx.textAlign = "center";
     ctx.fillText("TODO   DEV    YOU   DONE", 24 * T * S, 0.86 * T * S);
   }
   function frame(t) {
     ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.imageSmoothingEnabled = false;
-    ctx.fillStyle = "#0f0e15"; ctx.fillRect(0, 0, cv.width, cv.height);
+    ctx.fillStyle = col("#0f0e15"); ctx.fillRect(0, 0, cv.width, cv.height);
     ctx.setTransform(S, 0, 0, S, 0, 0);
     drawFloor();
     const list = [];
     for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) if (wall[y][x]) list.push({ y: (y + 1) * T - 0.5, d: () => drawWall(x, y) });
     for (const f of furniture) list.push({ y: (f.y + f.h) * T, d: () => drawFurniture(f, t) });
+    for (const d of THEME.decor || []) list.push({ y: (d.y + 1) * T - 0.4, d: () => d.draw(r, T, t, d.x, d.y) });
     for (const a of Object.values(agents)) list.push({ y: Math.round(a.y * T + 15) + (a.seated ? 7 : 0), d: () => drawChar(a, t) });
     list.sort((p, q) => p.y - q.y).forEach(o => o.d());
     for (const p of particles) {
@@ -525,6 +584,34 @@
     ctx.setTransform(1, 0, 0, 1, 0, 0);
     drawZoneLabels();
     Object.values(agents).sort((p, q) => p.y - q.y).forEach(drawLabels);
+    drawEffects();
+  }
+
+  // ---------- RuneScape-style hitsplats and level-ups (themes with effects) ----------
+  const effects = [];
+  function effect(a, kind, text) {
+    if (!THEME.effects || !a) return;
+    effects.push({ a, kind, text, t: 0, dur: kind === "hit" ? 1.6 : 2.4 });
+  }
+  function drawEffects() {
+    ctx.textAlign = "center"; ctx.textBaseline = "middle";
+    for (const e of effects) {
+      const cx = (e.a.x * T + 8) * S, cy = (e.a.y * T + 4) * S;
+      if (e.kind === "hit") {
+        // A red splat showing how many issues QA found.
+        const w = 18 * Math.min(1, e.t / 0.15);
+        ctx.fillStyle = "#8b0000"; ctx.fillRect(cx - w - 2, cy - w + 2, (w + 2) * 2, Math.max(0, (w - 2) * 2));
+        ctx.fillStyle = "#c81e1e"; ctx.fillRect(cx - w, cy - w, w * 2, w * 2);
+        ctx.font = `700 22px ${PX}`; shadowText(e.text, cx, cy, "#ffffff");
+      } else {
+        ctx.font = `700 24px ${PX}`; shadowText(e.text, cx, cy - 70 - e.t * 40, "#ff981f");
+        if (Math.floor(e.t * 10) % 2 === 0) for (let i = 0; i < 6; i++) {
+          const ang = i / 6 * Math.PI * 2 + e.t, rad = 30 + e.t * 30;
+          ctx.fillStyle = i % 2 ? "#ffff00" : "#ff981f";
+          ctx.fillRect(cx + Math.cos(ang) * rad - 3, cy - 30 + Math.sin(ang) * rad - 3, 6, 6);
+        }
+      }
+    }
   }
   let last = performance.now(), simT = 0;
   function tick(now) {
@@ -532,6 +619,7 @@
     rackFlash = Math.max(0, rackFlash - dt);
     for (const a of Object.values(agents)) a.update(dt);
     for (let i = particles.length - 1; i >= 0; i--) if ((particles[i].t += dt) > particles[i].dur) particles.splice(i, 1);
+    for (let i = effects.length - 1; i >= 0; i--) if ((effects[i].t += dt) > effects[i].dur) effects.splice(i, 1);
     frame(simT);
     requestAnimationFrame(tick);
   }
@@ -620,13 +708,21 @@
     const a = agents[app.selected];
     $("detail").innerHTML = `<h3 style="color:${a.color}">${esc(a.name)} · ${esc(a.model)}</h3><p>${esc(a.about)}</p>`;
   }
+  function renderStop() {
+    const c = app.snapshot && app.snapshot.current;
+    const btn = $("stopBtn");
+    if (!c) app.stopping = false;
+    btn.disabled = !c || app.stopping;
+    btn.querySelector("small").textContent = app.stopping ? "Stopping…" : c ? `End ${c.taskId || "the new request"}` : "Nothing running";
+  }
   function renderQueue() {
+    renderStop();
     const s = app.snapshot;
     if (!s || !s.current) { $("queueLine").textContent = "The team is idle. Send a request to get them working."; return; }
     const c = s.current;
     $("queueLine").textContent = `Working on ${c.project} · ${c.taskId || "new request"}${s.queue.length ? ` · ${s.queue.length} more queued` : ""}. Click a character to see their role.`;
   }
-  const STATUS_LABEL = { in_progress: "in progress", awaiting_approval: "awaiting you", approved: "approved", completed: "completed", blocked: "blocked", failed: "failed", changes_requested: "changes requested" };
+  const STATUS_LABEL = { in_progress: "in progress", awaiting_approval: "awaiting you", approved: "approved", completed: "completed", blocked: "blocked", failed: "failed", changes_requested: "changes requested", stopped: "stopped by you", cancelled: "cancelled" };
   const isRunning = id => app.snapshot && ((app.snapshot.current && app.snapshot.current.project === app.project && app.snapshot.current.taskId === id) || (app.snapshot.queue || []).some(j => j.project === app.project && j.taskId === id));
   function renderProject() {
     const d = app.detail;
@@ -634,7 +730,7 @@
     $("tasks").innerHTML = !d ? `<li><span class="empty">Create a project to get started.</span></li>`
       : !tasks.length ? `<li><span class="empty">No tasks yet. Send the team a request.</span></li>`
       : tasks.map(t => {
-        const runnable = !["approved", "completed", "awaiting_approval"].includes(t.status) && !isRunning(t.id);
+        const runnable = !["approved", "completed", "awaiting_approval", "cancelled"].includes(t.status) && !isRunning(t.id);
         return `<li>
           <span class="tid">${esc(t.id)}</span>
           <button type="button" class="ttl" data-task="${esc(t.id)}">${esc(t.title)}</button>
@@ -642,13 +738,13 @@
           <span class="tmeta">${esc(t.assignedTo || "")}${runnable ? ` <button class="btn ghost small" type="button" data-run="${esc(t.id)}">${t.status === "in_progress" ? "Resume" : "Run"}</button>` : ""}</span>
         </li>`;
       }).join("");
-    const waiting = (d ? d.tasks : []).filter(t => ["awaiting_approval", "blocked", "failed"].includes(t.status) && !isRunning(t.id));
+    const waiting = (d ? d.tasks : []).filter(t => ["awaiting_approval", "blocked", "failed", "stopped"].includes(t.status) && !isRunning(t.id));
     $("approvals").innerHTML = !waiting.length ? `<p class="empty">Nothing waiting. When QA passes a task, the Manager brings it here for your approval.</p>`
       : waiting.map(t => {
         const ok = t.status === "awaiting_approval";
         return `<div class="approval ${ok ? "" : "blocked"}">
           <p><b>${esc(t.id)}</b> · ${esc(t.title)}</p>
-          <p class="fine">${ok ? `Passed QA.${app.git ? ` Branch task/${esc(app.project)}-${esc(t.id)}.` : ""}` : t.status === "blocked" ? `Blocked after ${app.maxIterations} QA rounds.` : "The last run stopped with an error."}</p>
+          <p class="fine">${ok ? `Passed QA.${app.git ? ` Branch task/${esc(app.project)}-${esc(t.id)}.` : ""}` : t.status === "blocked" ? `Blocked after ${app.maxIterations} QA rounds.` : t.status === "stopped" ? "You stopped this task. Send it back with direction, or run it again from Tasks." : "The last run stopped with an error."}</p>
           <label class="lbl" for="notes-${esc(t.id)}">${ok ? "Notes if you request changes" : "Direction for the team"}</label>
           <input type="text" id="notes-${esc(t.id)}" placeholder="${ok ? "e.g. Make the empty state friendlier" : "e.g. Keep it simpler, skip the animation"}">
           <div class="acts">
@@ -771,7 +867,49 @@
     } catch (err) { $("delErr").textContent = err.message; }
   });
 
+  // ---------- theme ----------
+  const themeSelect = $("themeSelect");
+  themeSelect.innerHTML = Themes.list.map(t => `<option value="${t.id}">${esc(t.label)}</option>`).join("");
+  let game = null;
+  function applyTheme(id) {
+    THEME = Themes.get(id);
+    document.documentElement.dataset.theme = THEME.id;
+    themeSelect.value = THEME.id;
+    for (const a of Object.values(agents)) {
+      const look = { hat: null, hatColor: null, ...LOOKS[a.id], ...(THEME.looks && THEME.looks[a.id]) };
+      for (const k of LOOK_KEYS) a[k] = look[k];
+    }
+    if (game) game.setSkin(THEME.game);
+    renderRoster();
+  }
+  themeSelect.addEventListener("change", e => {
+    applyTheme(e.target.value);
+    try { localStorage.setItem("office.theme", THEME.id); } catch { /* not available */ }
+  });
+
+  // ---------- stop button ----------
+  $("stopBtn").addEventListener("click", () => {
+    const c = app.snapshot && app.snapshot.current;
+    if (!c) return;
+    $("stopWhat").textContent = `${c.project} · ${c.taskId || "the new request"}`;
+    $("stopErr").textContent = "";
+    $("stopDlg").showModal();
+  });
+  $("stopForm").addEventListener("submit", async e => {
+    e.preventDefault();
+    try {
+      await api("/api/stop", { method: "POST" });
+      app.stopping = true; renderStop();
+      $("stopDlg").close();
+      setStatus("Stopping the current task. The work so far is kept.");
+    } catch (err) { $("stopErr").textContent = err.message; }
+  });
+
+  // ---------- side game ----------
+  game = window.OfficeGame.mount($("game"), { skin: THEME.game, isTeamWorking: () => !!(app.snapshot && app.snapshot.current) });
+
   // ---------- start ----------
+  applyTheme(THEME.id);
   renderRoster(); renderLog();
   requestAnimationFrame(t => { last = t; requestAnimationFrame(tick); });
   (async () => {
