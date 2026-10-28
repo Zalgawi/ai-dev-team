@@ -7,7 +7,7 @@ export const REPO_ROOT = path.resolve(
   ".."
 );
 
-export type MemberId = "manager" | "senior" | "junior" | "designer" | "editor" | "qa";
+export type MemberId = "manager" | "senior" | "junior" | "designer" | "editor" | "quant" | "qa";
 
 export interface TeamMember {
   name: string;
@@ -27,6 +27,7 @@ export const ASSIGNEE_TO_MEMBER: Record<string, MemberId> = {
   "junior-developer": "junior",
   designer: "designer",
   "video-editor": "editor",
+  "quant-advisor": "quant",
   developer: "senior"
 };
 
@@ -38,6 +39,7 @@ export const DEFAULT_TEAM: TeamConfig = {
     junior: { name: "Jr Dev", model: "sonnet" },
     designer: { name: "Designer", model: "opus" },
     editor: { name: "Video Editor", model: "opus" },
+    quant: { name: "Quant Advisor", model: "opus" },
     qa: { name: "QA", model: "sonnet" }
   }
 };
@@ -56,6 +58,7 @@ export async function loadTeam(
         junior: { ...DEFAULT_TEAM.members.junior, ...parsed.members?.junior },
         designer: { ...DEFAULT_TEAM.members.designer, ...parsed.members?.designer },
         editor: { ...DEFAULT_TEAM.members.editor, ...parsed.members?.editor },
+        quant: { ...DEFAULT_TEAM.members.quant, ...parsed.members?.quant },
         qa: { ...DEFAULT_TEAM.members.qa, ...parsed.members?.qa }
       }
     };

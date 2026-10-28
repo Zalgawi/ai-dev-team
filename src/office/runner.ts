@@ -4,6 +4,7 @@ import type { Agent } from "../agents/types.js";
 import { DesignerAgent } from "../agents/designer/designer.js";
 import { DeveloperAgent } from "../agents/developer/developer.js";
 import { VideoEditorAgent } from "../agents/video/video-editor.js";
+import { QuantAdvisorAgent } from "../agents/quant/quant-advisor.js";
 import { QAAgent } from "../agents/qa/qa.js";
 import { ManagerAgent } from "../manager/manager.js";
 import { planTask, type TaskPlan, type TaskSize } from "../manager/planner.js";
@@ -283,9 +284,12 @@ export class TeamRunner extends EventEmitter {
     const editor: Agent = demo
       ? new DemoDeveloper(members.editor.name, demo)
       : new VideoEditorAgent(members.editor.name, members.editor.model);
+    const quant: Agent = demo
+      ? new DemoDeveloper(members.quant.name, demo)
+      : new QuantAdvisorAgent(members.quant.name, members.quant.model);
     const qa: Agent = demo ? new DemoQA(demo) : new QAAgent(members.qa.model);
 
-    return { senior, junior, designer, editor, qa };
+    return { senior, junior, designer, editor, quant, qa };
   }
 
   private async plan(job: Job, projectPath: string, taskId: string, signal: AbortSignal): Promise<TaskPlan> {
@@ -333,7 +337,10 @@ export class TeamRunner extends EventEmitter {
         const choice =
           job.size && job.size !== "auto"
             ? job.size
-            : plan.role === "designer" ? "design" : plan.role === "video-editor" ? "video" : plan.size;
+            : plan.role === "designer" ? "design"
+            : plan.role === "video-editor" ? "video"
+            : plan.role === "quant-advisor" ? "quant"
+            : plan.size;
 
         task = {
           id: taskId,
@@ -343,6 +350,7 @@ export class TeamRunner extends EventEmitter {
           assignedTo:
             choice === "design" ? "designer"
             : choice === "video" ? "video-editor"
+            : choice === "quant" ? "quant-advisor"
             : choice === "large" ? "senior-developer"
             : "junior-developer",
           priority: plan.priority,
@@ -363,7 +371,7 @@ export class TeamRunner extends EventEmitter {
         this.publish({ type: "task-updated", task }, job);
       }
 
-      const { senior, junior, designer, editor, qa } = this.buildTeam();
+      const { senior, junior, designer, editor, quant, qa } = this.buildTeam();
       let runEnd = "failed";
 
       const orchestrator = new Orchestrator(new ManagerAgent(), senior, qa, {
@@ -372,6 +380,7 @@ export class TeamRunner extends EventEmitter {
           "junior-developer": junior,
           designer,
           "video-editor": editor,
+          "quant-advisor": quant,
           developer: senior
         },
         onEvent: (event) => {

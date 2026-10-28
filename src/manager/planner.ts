@@ -1,8 +1,9 @@
 import { runAgent, type RunOptions } from "../llm/client.js";
 
-// "design" sends the task to the Designer; small/large go to the Jr/Senior Dev.
-export type TaskSize = "auto" | "small" | "large" | "design" | "video";
-export type TaskRole = "developer" | "designer" | "video-editor";
+// "design", "video" and "quant" send the task to the Designer, Video Editor
+// and Quant Advisor; small/large go to the Jr/Senior Dev.
+export type TaskSize = "auto" | "small" | "large" | "design" | "video" | "quant";
+export type TaskRole = "developer" | "designer" | "video-editor" | "quant-advisor";
 
 export interface TaskPlan {
   title: string;
@@ -39,7 +40,7 @@ export function parseTaskPlan(response: string): TaskPlan {
       ? String(raw.priority)
       : "medium",
     size: raw.size === "large" ? "large" : "small",
-    role: raw.role === "designer" || raw.role === "video-editor" ? raw.role : "developer",
+    role: raw.role === "designer" || raw.role === "video-editor" || raw.role === "quant-advisor" ? raw.role : "developer",
     acceptanceCriteria: criteria
   };
 }
@@ -61,7 +62,10 @@ developers (who write code) and a graphic/UI designer (who makes logos,
 social graphics, thumbnails, posters, banners and UI mockups as HTML/SVG
 rendered to PNG; it cannot generate photos) and a video editor (who
 edits uploaded footage into finished videos with ffmpeg; it can see frames
-but can't hear, so it follows the human's notes for what is said).
+but can't hear, so it follows the human's notes for what is said) and a
+quant advisor (who answers financial and mathematical/logical strategy
+questions with tested code, charts and a written report; research and
+education, not personal financial advice, and it never trades).
 
 You turn a request from the human into one development task with clear,
 testable acceptance criteria. You do not write code.
@@ -96,16 +100,28 @@ Rules:
   clip notes say, any on-screen text spelled exactly, loudness about
   -14 LUFS, and an edit plan in video/<name>-edit.md. Don't ask for npm
   tests unless code changes.
+- role is "quant-advisor" when the deliverable is financial or quantitative
+  analysis: strategy research and backtests, portfolio, risk or position
+  sizing, option/bond pricing, loan, savings or retirement maths, or a
+  probability, game-theory or logic problem (including a tool that computes
+  these). Its criteria: the question answered with numbers and their
+  uncertainty; assumptions and conventions stated; code and passing tests
+  in research/<name>/; results cross-checked by a second method; for
+  backtests, no look-ahead, costs included and an out-of-sample period;
+  a report in research/<name>-report.md with a not-personal-advice note,
+  risks and limitations; charts as media/chart-<name>.png where they help.
+  Don't ask for npm tests unless the project has them.
 - Output locations are fixed by the team's tools; use them exactly and
   never name other paths for media files: final videos are
-  media/video-<name>.mp4, design exports are media/design-<name>.png
-  (media/ stays off git), edit plans are video/<name>-edit.md, design
-  sources are in design/.
+  media/video-<name>.mp4, design exports are media/design-<name>.png,
+  charts are media/chart-<name>.png (media/ stays off git), edit plans are
+  video/<name>-edit.md, design sources are in design/, quant code and
+  reports are in research/.
 - If files are attached to the request, say in the description how each
   should be used, and copy any timestamped instructions from their notes.
 
 Your final response must be ONLY a JSON object with this shape and nothing else:
-{"title": "...", "description": "...", "priority": "low|medium|high", "size": "small|large", "role": "developer|designer|video-editor", "acceptanceCriteria": ["...", "..."]}
+{"title": "...", "description": "...", "priority": "low|medium|high", "size": "small|large", "role": "developer|designer|video-editor|quant-advisor", "acceptanceCriteria": ["...", "..."]}
 `.trim(),
       prompt: `Create task ${taskId} for this request:\n\n${request}`
     },
