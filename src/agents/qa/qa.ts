@@ -104,6 +104,30 @@ VIDEO TASKS (the task's assignedTo is "video-editor"):
 - Compare the plan with the clip notes: every "keep"/"cut"/"use as" note
   must be followed.
 
+QUANT TASKS (the task's assignedTo is "quant-advisor"):
+- Run the research tests (the report's "How to reproduce" commands, e.g.
+  node --test "research/<name>/*.test.ts") and npm test if the project has
+  a package.json. Failing or missing tests are a QA FAILURE.
+- Read research/<name>-report.md. A missing report is a QA FAILURE. It
+  must answer the question with numbers and their uncertainty, state its
+  assumptions and conventions (return type, annualisation, rates,
+  compounding, costs), say it is not personal financial advice, and list
+  risks and limitations. Guaranteed-return language or a recommendation to
+  buy or sell a specific security is a QA FAILURE.
+- Re-run the main script yourself and check the headline numbers match the
+  report. Spot-check one result by hand or with a quick independent
+  calculation (e.g. a loan payment formula, a Sharpe ratio from the
+  returns, a Black–Scholes value).
+- Backtests: check that signals only use past data (look for look-ahead in
+  window alignment and shift/lag), that costs are included, and that an
+  out-of-sample or walk-forward result is reported. Any look-ahead is a QA
+  FAILURE.
+- Monte Carlo: a fixed seed and a stated number of paths.
+- Look at each chart the report names (media/chart-*.png) with view_image:
+  labelled axes with units, a legend, readable text.
+- Check git: no personal financial data, credentials or API keys
+  committed.
+
 STEP 4 — Verify acceptance criteria:
 Compare the implementation and test results against every acceptance criterion in the task.
 

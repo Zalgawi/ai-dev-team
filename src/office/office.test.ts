@@ -223,7 +223,7 @@ describe("office browser scripts", () => {
     const ids = [...themes.list.map((t: { id: string }) => t.id)];
     assert.deepEqual(ids, ["classic", "daylight", "osrs"]);
     for (const t of themes.list) {
-      assert.equal(t.zones.length, 7, t.id);
+      assert.equal(t.zones.length, 8, t.id);
       assert.equal(t.game.upgrades.length, 6, t.id);
     }
     assert.equal(themes.get("nonsense").id, "classic");
@@ -349,6 +349,27 @@ describe("designer", () => {
     } finally {
       await closeImageBrowser();
     }
+  });
+});
+
+describe("quant advisor", () => {
+  it("routes finance and maths requests to the Quant Advisor", async () => {
+    assert.equal(parseTaskPlan('{"title":"Backtest","role":"quant-advisor","acceptanceCriteria":["Sharpe reported"]}').role, "quant-advisor");
+
+    const store = new ProjectStore(path.join(root, "quant1"));
+    await store.create("fund", "");
+    const runner = new TeamRunner(store, team(1), { demo: { stepMs: 1, random: () => 0 } });
+    const { events, done } = collect(runner);
+    await runner.enqueueRequest("fund", "Backtest a 50-day moving average crossover on the S&P 500");
+    await done;
+    assert.equal((await store.readTask("fund", "TASK-001"))?.assignedTo, "quant-advisor");
+    assert.ok(events.some((e) => e.type === "agent-start" && e.agent === "quant"));
+
+    // Picking the Quant Advisor by hand overrides the Manager.
+    const again = collect(runner);
+    await runner.enqueueRequest("fund", "Add a footer", "quant");
+    await again.done;
+    assert.equal((await store.readTask("fund", "TASK-002"))?.assignedTo, "quant-advisor");
   });
 });
 

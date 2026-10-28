@@ -39,6 +39,7 @@ export type ToolName =
   | "run_command"
   | "view_image"
   | "render_design"
+  | "render_chart"
   | "probe_media"
   | "analyze_media"
   | "video_frames"
@@ -66,6 +67,8 @@ export const qaTools: ToolName[] = [
 export const designerTools: ToolName[] = [...llmTools, "render_design"];
 
 export const videoEditorTools: ToolName[] = [...designerTools, ...videoChecks, "run_ffmpeg"];
+
+export const quantTools: ToolName[] = [...llmTools, "render_chart"];
 
 function textResult(text: string, isError = false) {
   return {
@@ -105,6 +108,38 @@ async function safely(
       true
     );
   }
+}
+
+// Renders an HTML/SVG file to PNG: a draft into .ai/renders/, or a final
+// export into media/<prefix>-<name>.png, registered in the media library.
+async function renderExport(
+  projectPath: string,
+  args: { source: string; name: string; width: number; height: number; draft?: boolean | undefined },
+  prefix: string,
+  madeBy: string
+): Promise<string> {
+  const source = insideProject(projectPath, args.source);
+
+  if (args.draft) {
+    const drafts = path.join(projectPath, ".ai", "renders");
+    await mkdir(drafts, { recursive: true });
+    const id = toMediaName(`${args.name}.png`);
+    await renderToPng(source, path.join(drafts, id), { width: args.width, height: args.height });
+    return `Saved draft .ai/renders/${id} (${args.width}×${args.height} px). Check it with view_image.`;
+  }
+
+  const id = toMediaName(`${prefix}-${args.name.replace(new RegExp(`^${prefix}-`), "")}.png`);
+  const media = path.join(projectPath, "media");
+  await mkdir(media, { recursive: true });
+  const out = path.join(media, id);
+  await renderToPng(source, out, { width: args.width, height: args.height });
+  const real = imageSize(await readFile(out));
+  await registerGenerated(projectPath, id, {
+    madeBy,
+    note: `Rendered from ${args.source}`,
+    ...(real ?? {})
+  });
+  return `Saved media/${id} (${real ? `${real.width}×${real.height}` : `${args.width}×${args.height}`} px) and added it to the media library. Check it with view_image.`;
 }
 
 function buildToolDefinitions(projectPath: string, signal?: AbortSignal) {
@@ -245,31 +280,20 @@ function buildToolDefinitions(projectPath: string, signal?: AbortSignal) {
         height: z.number().int().describe("Height in pixels, e.g. 720."),
         draft: z.boolean().optional().describe("true for a check render that isn't a deliverable.")
       },
-      async (args) =>
-        safely("render_design", async () => {
-          const source = insideProject(projectPath, args.source);
+      async (args) => safely("render_design", () => renderExport(projectPath, args, "design", "Designer"))
+    ),
 
-          if (args.draft) {
-            const drafts = path.join(projectPath, ".ai", "renders");
-            await mkdir(drafts, { recursive: true });
-            const id = toMediaName(`${args.name}.png`);
-            await renderToPng(source, path.join(drafts, id), { width: args.width, height: args.height });
-            return `Saved draft .ai/renders/${id} (${args.width}×${args.height} px). Check it with view_image.`;
-          }
-
-          const id = toMediaName(`design-${args.name.replace(/^design-/, "")}.png`);
-          const media = path.join(projectPath, "media");
-          await mkdir(media, { recursive: true });
-          const out = path.join(media, id);
-          await renderToPng(source, out, { width: args.width, height: args.height });
-          const real = imageSize(await readFile(out));
-          await registerGenerated(projectPath, id, {
-            madeBy: "Designer",
-            note: `Rendered from ${args.source}`,
-            ...(real ?? {})
-          });
-          return `Saved media/${id} (${real ? `${real.width}×${real.height}` : `${args.width}×${args.height}`} px) and added it to the media library. Check it with view_image.`;
-        })
+    render_chart: tool(
+      "render_chart",
+      "Render an HTML or SVG chart (e.g. inline SVG drawn from your results) to a PNG at an exact pixel size. Final renders are saved as media/chart-<name>.png and added to the media library so the human sees them in the Office. Set draft to true for check renders: they go to .ai/renders/<name>.png. Look at every result with view_image.",
+      {
+        source: z.string().describe("The .html or .svg chart file, relative to the project root, e.g. research/momentum/equity-curve.html."),
+        name: z.string().describe("Short name for the export, e.g. momentum-equity-curve. Saved as media/chart-<name>.png."),
+        width: z.number().int().describe("Width in pixels, e.g. 1600."),
+        height: z.number().int().describe("Height in pixels, e.g. 900."),
+        draft: z.boolean().optional().describe("true for a check render that isn't a deliverable.")
+      },
+      async (args) => safely("render_chart", () => renderExport(projectPath, args, "chart", "Quant Advisor"))
     ),
 
     read_file: tool(

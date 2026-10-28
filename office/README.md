@@ -51,6 +51,14 @@ The **Video Editor** turns uploaded footage, either one long raw video or severa
 - **QA** checks the export's format, length and loudness, and looks at frames at every cut against the plan and your notes.
 - **Requirements:** ffmpeg and ffprobe come from the `ffmpeg-static` and `ffprobe-static` packages. If `npm ci` skipped the download, run `node node_modules/ffmpeg-static/install.js`. Uploaded videos are measured with ffprobe, so `.mov` and `.mkv` get their real length and size too.
 
+The **Quant Advisor** handles financial and mathematical/logical strategy questions: strategy research and backtests, portfolio construction and risk (drawdowns, VaR/CVaR, position sizing), option and bond pricing, loan, savings and retirement maths, and probability, game-theory and logic problems.
+- **How it works:** it states the question and its assumptions, builds the model as tested TypeScript in `research/<name>/` (run with Node, no extra packages) and cross-checks the numbers a second way, e.g. a formula against a simulation.
+- **Output:** charts are rendered into `media/chart-*.png`, and a report goes to `research/<name>-report.md` with the answer and its uncertainty, the method, the validation, robustness checks, and the risks and limitations.
+- **Backtests** must avoid look-ahead, include trading costs and report an out-of-sample or walk-forward period. It counts how many variants it tried, so you can judge overfitting.
+- **Data:** attach data through the Media panel (CSV exports, statements). Personal financial data stays in `media/` and is never committed, because the repo is public.
+- **Limits:** its work is research and education, not personal financial advice. It never places trades, connects to brokers or banks, or handles API keys. Where the answer depends on your circumstances, it shows labelled scenarios and says what would change the answer.
+- **QA** re-runs the tests and the main script, spot-checks a headline number independently, looks for look-ahead, reads the report for missing assumptions or guaranteed-return language, and checks the charts.
+
 `team.json` sets each member's name and Claude model (`opus`, `sonnet`, or a full model ID), plus the maximum number of dev/QA rounds.
 
 ## Git

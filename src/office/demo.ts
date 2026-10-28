@@ -65,13 +65,15 @@ export async function demoPlan(
   // A thumbnail "for a video" is still a design, so design words win.
   const design = /logo|icon|thumbnail|poster|banner|graphic|mockup|social post|design/i.test(request);
   const video = !design && /video|reel|tiktok|shorts|clip|edit|footage|trailer/i.test(request);
+  const quant = !design && !video &&
+    /backtest|portfolio|invest|trading|stocks?|option pric|mortgage|loan|interest rate|retire|sharpe|kelly|probabilit|expected value|financ|quant/i.test(request);
 
   return {
     title,
     description: request.trim(),
     priority: "medium",
     size: large ? "large" : "small",
-    role: video ? "video-editor" : design ? "designer" : "developer",
+    role: video ? "video-editor" : design ? "designer" : quant ? "quant-advisor" : "developer",
     acceptanceCriteria: [
       `${title} works with mouse, touch and keyboard.`,
       "Layout works at 360px and 1280px.",

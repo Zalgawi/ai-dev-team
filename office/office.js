@@ -25,6 +25,8 @@
                about: "Makes logos, social graphics, thumbnails, posters and UI mockups. Designs in HTML/SVG, renders exact-size PNGs into Media, and looks at every render to fix what's off before handing it to QA." },
     editor:  { color: "#ef9a4a", shirt: "#c4702e", pants: "#2c2c3a", hair: "#3a2416", skin: "#c98d64", style: "short", phones: true, hat: "cap", hatColor: "#2b2533",
                about: "Edits your uploaded footage (one long raw video or many clips) into finished social videos with ffmpeg. Follows your request and the timestamped notes on each clip, writes an edit plan, renders 9:16 MP4s into Media and checks frames and loudness before QA." },
+    quant:   { color: "#7fd36b", shirt: "#3f8f4f", pants: "#2a2f3a", hair: "#2a2320", skin: "#d6a07a", style: "side", tie: true, glasses: true,
+               about: "Answers finance and maths questions: strategy backtests, portfolio and risk, pricing, loans and savings, probability and logic. Builds tested models in research/, cross-checks the numbers, charts results into Media and writes a report with its assumptions and risks. Research, not personal advice; it never trades." },
     qa:      { color: "#f0c254", shirt: "#c99a2e", pants: "#3a3328", hair: "#d8d0c0", skin: "#b9805c", style: "bun", glasses: true,
                about: "Verifies every change independently: runs npm test and the browser tests, checks each acceptance criterion and writes qa-report.json. Read-only: never fixes or approves its own work." }
   };
@@ -49,10 +51,10 @@
     furniture.push({ kind, x, y, w, h, ...extra });
     for (let i = 0; i < w; i++) for (let j = 0; j < h; j++) blocked[y + j][x + i] = true;
   }
-  const SEATS = { you: { x: 5, y: 3 }, manager: { x: 15, y: 3 }, senior: { x: 4, y: 10 }, junior: { x: 4, y: 14 }, designer: { x: 9, y: 10 }, editor: { x: 26, y: 2 }, qa: { x: 24, y: 10 } };
-  const VISIT = { you: { x: 7, y: 3 }, manager: { x: 17, y: 3 }, senior: { x: 6, y: 10 }, junior: { x: 6, y: 14 }, designer: { x: 11, y: 10 }, editor: { x: 24, y: 2 }, qa: { x: 26, y: 10 } };
+  const SEATS = { you: { x: 5, y: 3 }, manager: { x: 15, y: 3 }, senior: { x: 4, y: 10 }, junior: { x: 4, y: 14 }, designer: { x: 9, y: 10 }, editor: { x: 26, y: 2 }, quant: { x: 22, y: 14 }, qa: { x: 24, y: 10 } };
+  const VISIT = { you: { x: 7, y: 3 }, manager: { x: 17, y: 3 }, senior: { x: 6, y: 10 }, junior: { x: 6, y: 14 }, designer: { x: 11, y: 10 }, editor: { x: 24, y: 2 }, quant: { x: 24, y: 14 }, qa: { x: 26, y: 10 } };
   // Team members who build things and hand them to QA.
-  const MAKERS = ["senior", "junior", "designer", "editor"];
+  const MAKERS = ["senior", "junior", "designer", "editor", "quant"];
   const SPOT = { rackDev: { x: 14, y: 12 }, rackQa: { x: 15, y: 12 }, bench: { x: 27, y: 12 }, coffee: { x: 27, y: 2 }, board: { x: 23, y: 2 }, cooler: { x: 13, y: 9 } };
   for (const id in SEATS) place("desk", SEATS[id].x - 1, SEATS[id].y + 1, 3, 1, { owner: id });
   place("rack", 14, 10, 2, 1); place("board", 22, 1, 4, 1); place("coffee", 28, 1); place("sofa", 22, 5, 3, 1); place("bench", 27, 13, 2, 1);
@@ -203,7 +205,7 @@
   const docFor = (e, name, path, content) => ({ name, path, content, project: e.project, taskId: e.taskId });
   const assigneeOf = e => {
     const task = (app.detail?.tasks || []).find(x => x.id === e.taskId);
-    const map = { "senior-developer": "senior", "junior-developer": "junior", designer: "designer", "video-editor": "editor", developer: "senior" };
+    const map = { "senior-developer": "senior", "junior-developer": "junior", designer: "designer", "video-editor": "editor", "quant-advisor": "quant", developer: "senior" };
     return (task && map[task.assignedTo]) || e.member || "senior";
   };
   const jobDev = new Map();
@@ -569,7 +571,7 @@
   }
   function drawZoneLabels() {
     ctx.font = `700 20px ${PX}`; ctx.textAlign = "left"; ctx.textBaseline = "alphabetic";
-    const spots = [[1.3, 6.7], [11.3, 6.7], [21.3, 6.7], [1.3, 17.7], [13.2, 8.6], [18.3, 17.7], [7.4, 13.1]];
+    const spots = [[1.3, 6.7], [11.3, 6.7], [21.3, 6.7], [1.3, 17.7], [13.2, 8.6], [18.3, 17.7], [7.4, 13.1], [20.3, 13.1]];
     THEME.zones.forEach((t, i) => {
       ctx.fillStyle = THEME.zoneColor; ctx.fillText(t, spots[i][0] * T * S, spots[i][1] * T * S);
     });
@@ -654,7 +656,7 @@
     app.maxIterations = o.team.maxIterations;
     app.mediaRules = o.media;
     $("mediaInput").accept = o.media.accept.join(",");
-    for (const id of ["manager", "senior", "junior", "designer", "editor", "qa"]) {
+    for (const id of ["manager", "senior", "junior", "designer", "editor", "quant", "qa"]) {
       const m = o.team.members[id];
       if (!m) continue;
       agents[id].name = m.name; agents[id].model = m.model ? `Claude ${m.model}` : "Claude";

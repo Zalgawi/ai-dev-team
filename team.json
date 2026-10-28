@@ -6,6 +6,7 @@
     "junior": { "name": "Jr Dev", "model": "sonnet" },
     "designer": { "name": "Designer", "model": "opus" },
     "editor": { "name": "Video Editor", "model": "opus" },
+    "quant": { "name": "Quant Advisor", "model": "opus" },
     "qa": { "name": "QA", "model": "sonnet" }
   }
 }
