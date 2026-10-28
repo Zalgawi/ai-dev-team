@@ -1,0 +1,3 @@
+# Runtime + test dependencies for toolkit/ and tests/ (npm test runs pytest).
+# toolkit/pricing uses only the Python standard library (math).
+pytest>=7.0

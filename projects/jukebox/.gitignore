@@ -1,0 +1,12 @@
+# PRIVATE: the book library (PDFs, converted text, source clone) must never be committed.
+library/
+# PRIVATE: uploads (PDFs etc.) stay on this machine.
+media/
+# Local Python environment and caches
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+node_modules/
+# Ingestion scratch output (contains book text)
+research/wilmott-ingest/work/

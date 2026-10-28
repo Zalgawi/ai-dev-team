@@ -1,0 +1,5 @@
+# Only needed to (re)build the private library from the PDF (research/wilmott-ingest/scripts).
+# Not needed for npm test. Install CUDA torch first if you have an NVIDIA GPU:
+#   pip install torch --index-url https://download.pytorch.org/whl/cu124
+marker-pdf
+pymupdf

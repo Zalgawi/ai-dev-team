@@ -1,0 +1,12 @@
+{
+  "name": "jukebox",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Quantitative research and investment assessment toolkit (decision support only, no trading).",
+  "scripts": {
+    "test": "node scripts/run-pytest.mjs"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}
