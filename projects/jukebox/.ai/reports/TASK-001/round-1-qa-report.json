@@ -1,0 +1,18 @@
+{
+  "taskId": "TASK-001",
+  "outcome": "failed",
+  "summary": "Summary:\nTASK-001 is incomplete. Only the ingestion scaffolding exists: package.json, requirements files, a scripts/ folder, a .gitignore with the private-path entries, and a research/wilmott-ingest/ folder holding scratch work. The pricing code, tests, report and the Part B library files are missing. I did not inspect the contents of library/wilmott-pwoqf/ beyond confirming it exists.\n\nIssues:\n- `npm test` fails. pytest collected 0 items and reported \"file or directory not found: tests\", because the tests/ directory does not exist. Zero tests is a QA failure.\n- toolkit/pricing/ does not exist. There is no Black-Scholes pricer with Greeks and no binomial tree pricer.\n- There are no unit tests, so none of the known-answer, put-call parity, finite-difference Greeks, binomial convergence or invalid-input tests exist.\n- research/wilmott-ingest/report.md is missing. The directory contains only work/. The report is a required deliverable, so this is a failure.\n- `git status` shows `?? ./`, meaning all the new work is untracked. The scaffolding also isn't committed.\n- I did not check the remaining library deliverables. These are the chapter files, CONVERSION_LOG.md, INDEX.md, FORMULAS.md and EXAMPLES.md. The task has already failed on the points above.\n\nTests:\n- `npm test`: FAILED. 0 tests collected, exit code 1.\n- `npm run test:e2e`: not run, because package.json has no such script.\n- Git ignore check: .gitignore does list library/ and media/. The git log shows no book content committed.\n\nQA OUTCOME: FAILED",
+  "issues": [
+    "`npm test` fails. pytest collected 0 items and reported \"file or directory not found: tests\", because the tests/ directory does not exist. Zero tests is a QA failure.",
+    "toolkit/pricing/ does not exist. There is no Black-Scholes pricer with Greeks and no binomial tree pricer.",
+    "There are no unit tests, so none of the known-answer, put-call parity, finite-difference Greeks, binomial convergence or invalid-input tests exist.",
+    "research/wilmott-ingest/report.md is missing. The directory contains only work/. The report is a required deliverable, so this is a failure.",
+    "`git status` shows `?? ./`, meaning all the new work is untracked. The scaffolding also isn't committed.",
+    "I did not check the remaining library deliverables. These are the chapter files, CONVERSION_LOG.md, INDEX.md, FORMULAS.md and EXAMPLES.md. The task has already failed on the points above."
+  ],
+  "tests": [
+    "`npm test`: FAILED. 0 tests collected, exit code 1.",
+    "`npm run test:e2e`: not run, because package.json has no such script.",
+    "Git ignore check: .gitignore does list library/ and media/. The git log shows no book content committed."
+  ]
+}
