@@ -3,10 +3,14 @@ library/
 # PRIVATE: uploads (PDFs etc.) stay on this machine.
 media/
 # Local Python environment and caches
-.venv/
+.venv*/
+# Secrets (API keys). Copy .env.example to .env.
+.env
+# Downloaded market data and its cache (vendor terms; reproducible with `npm run data`)
+/data/
 __pycache__/
 *.pyc
 .pytest_cache/
 node_modules/
-# Ingestion scratch output (contains book text)
+# Old ingestion scratch output (contains book text)
 research/wilmott-ingest/work/

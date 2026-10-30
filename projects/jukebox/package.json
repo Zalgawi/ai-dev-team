@@ -2,9 +2,12 @@
   "name": "jukebox",
   "version": "0.1.0",
   "private": true,
-  "description": "Quantitative research and investment assessment toolkit (decision support only, no trading).",
+  "description": "Quantitative research, signals and manual order tickets (decision support only; never places orders).",
   "scripts": {
-    "test": "node scripts/run-pytest.mjs"
+    "test": "node scripts/run-pytest.mjs",
+    "data": "node scripts/py.mjs -m toolkit.pipeline update",
+    "assess": "node scripts/py.mjs -m toolkit.pipeline",
+    "dashboard": "node scripts/py.mjs -m uvicorn app.server:app --host 127.0.0.1 --port 8050"
   },
   "engines": {
     "node": ">=18"

@@ -1,0 +1,126 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Jukebox</title>
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+  <header class="top">
+    <div class="brand">
+      <span class="logo" aria-hidden="true">◉</span>
+      <div>
+        <h1>Jukebox</h1>
+        <p class="sub">Strategy research and signals. You place every trade.</p>
+      </div>
+    </div>
+    <div class="controls">
+      <label class="sr-only" for="strategy">Strategy</label>
+      <select id="strategy"></select>
+      <button id="refresh" class="btn ghost" type="button">Update data</button>
+    </div>
+  </header>
+
+  <div class="notice" role="note">
+    Decision support from your own rules and data. Not personal financial advice. Past results don't predict future returns.
+  </div>
+
+  <main id="main" aria-busy="true">
+    <p class="loading" id="status">Loading…</p>
+
+    <section class="grid hero" hidden>
+      <article class="card signal" id="signalCard" aria-labelledby="signalTitle">
+        <h2 id="signalTitle">Today's signal</h2>
+        <div class="state" id="state"></div>
+        <p class="change" id="change"></p>
+        <dl class="facts" id="signalFacts"></dl>
+        <p class="fine" id="signalNote"></p>
+      </article>
+
+      <article class="card" aria-labelledby="ticketTitle">
+        <h2 id="ticketTitle">Order ticket</h2>
+        <form id="ticketForm" class="ticket-form">
+          <label><span>Account value (<span id="ccy">GBP</span>)</span>
+            <input id="account" type="number" min="1" step="any" inputmode="decimal" required placeholder="e.g. 10000">
+          </label>
+          <label><span>Units of <span id="tradeSym">the ETF</span> you hold now</span>
+            <input id="units" type="number" min="0" step="1" inputmode="numeric" value="0">
+          </label>
+          <label><span>Max % of account for this strategy</span>
+            <input id="alloc" type="number" min="1" max="100" step="1" value="100">
+          </label>
+          <label><span>Commission per order (estimate)</span>
+            <input id="commission" type="number" min="0" step="0.5" value="3">
+          </label>
+          <button class="btn" type="submit">Size the order</button>
+        </form>
+        <div id="ticket" class="ticket" aria-live="polite"></div>
+      </article>
+    </section>
+
+    <section class="card" hidden aria-labelledby="evidenceTitle">
+      <div class="card-head">
+        <h2 id="evidenceTitle">Evidence: out-of-sample, after costs</h2>
+        <span class="pill" id="lookahead"></span>
+      </div>
+      <p class="fine" id="evidenceNote"></p>
+      <div class="table-wrap"><table id="comparison"></table></div>
+    </section>
+
+    <section class="grid two" hidden>
+      <article class="card" aria-labelledby="equityTitle">
+        <h2 id="equityTitle">Growth of 1 (log scale)</h2>
+        <div class="legend" id="equityLegend"></div>
+        <div class="chart" id="equityChart" role="img" aria-label="Equity curves"></div>
+      </article>
+      <article class="card" aria-labelledby="ddTitle">
+        <h2 id="ddTitle">Drawdowns</h2>
+        <div class="legend" id="ddLegend"></div>
+        <div class="chart" id="ddChart" role="img" aria-label="Drawdown curves"></div>
+      </article>
+    </section>
+
+    <section class="grid two" hidden>
+      <article class="card" aria-labelledby="mcTitle">
+        <h2 id="mcTitle">Next 12 months: range of outcomes</h2>
+        <p class="fine" id="mcNote"></p>
+        <div class="chart" id="fanChart" role="img" aria-label="Monte Carlo fan chart"></div>
+        <div class="table-wrap"><table id="mcTable"></table></div>
+      </article>
+      <article class="card" aria-labelledby="sizeTitle">
+        <h2 id="sizeTitle">Sizing and tracking</h2>
+        <dl class="facts" id="sizing"></dl>
+        <p class="fine" id="sizingNote"></p>
+        <h3>Recent trades (backtest)</h3>
+        <div class="table-wrap"><table id="trades"></table></div>
+      </article>
+    </section>
+
+    <section class="grid two" hidden>
+      <article class="card" aria-labelledby="sensTitle">
+        <h2 id="sensTitle">Parameter sensitivity <span class="pill warn">in-sample</span></h2>
+        <p class="fine">Every setting over the full history. This checks robustness, not evidence: a strategy that only works at one setting is noise [Chan QT2e, p. 72].</p>
+        <div class="table-wrap"><table id="sensitivity"></table></div>
+      </article>
+      <article class="card" aria-labelledby="wfTitle">
+        <h2 id="wfTitle">Walk-forward windows</h2>
+        <p class="fine" id="wfNote"></p>
+        <div class="table-wrap tall"><table id="windows"></table></div>
+      </article>
+    </section>
+
+    <section class="card" hidden aria-labelledby="srcTitle">
+      <h2 id="srcTitle">Method, sources and data</h2>
+      <p id="description"></p>
+      <ul class="cites" id="citations"></ul>
+      <div class="table-wrap"><table id="dataTable"></table></div>
+    </section>
+  </main>
+
+  <footer class="foot">
+    Jukebox runs on this PC only and never places orders. Signals use completed daily closes; check live prices before trading.
+  </footer>
+  <script src="/static/app.js"></script>
+</body>
+</html>
