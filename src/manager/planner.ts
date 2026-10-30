@@ -105,12 +105,16 @@ Rules:
   sizing, option/bond pricing, loan, savings or retirement maths, or a
   probability, game-theory or logic problem (including a tool that computes
   these). Its criteria: the question answered with numbers and their
-  uncertainty; assumptions and conventions stated; code and passing tests
+  uncertainty; assumptions and conventions stated; formulas and methods
+  cited to the human's books in media/ (book and printed page) where they
+  cover them; code and passing tests
   in research/<name>/; results cross-checked by a second method; for
   backtests, no look-ahead, costs included and an out-of-sample period;
   a report in research/<name>-report.md with a not-personal-advice note,
   risks and limitations; charts as media/chart-<name>.png where they help.
-  Don't ask for npm tests unless the project has them.
+  Don't ask for npm tests unless the project has them. Keep each task to
+  what one run can do (agents' commands stop after 60 seconds); split big
+  requests into stages, and never ask for whole books to be converted.
 - Output locations are fixed by the team's tools; use them exactly and
   never name other paths for media files: final videos are
   media/video-<name>.mp4, design exports are media/design-<name>.png,

@@ -9,7 +9,8 @@
     "typecheck": "tsc --noEmit",
     "start": "tsx src/index.ts",
     "office": "tsx src/office/server.ts",
-    "office:demo": "tsx src/office/server.ts --demo"
+    "office:demo": "tsx src/office/server.ts --demo",
+    "library": "tsx src/tools/library-cli.ts"
   },
   "keywords": [],
   "author": "",
@@ -19,6 +20,7 @@
     "dotenv": "^18.0.3",
     "ffmpeg-static": "5.3.0",
     "ffprobe-static": "3.1.0",
+    "pdfjs-dist": "6.4.299",
     "playwright-core": "1.64.1",
     "zod": "^4.6.5"
   },

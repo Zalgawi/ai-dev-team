@@ -59,6 +59,23 @@ The **Quant Advisor** handles financial and mathematical/logical strategy questi
 - **Limits:** its work is research and education, not personal financial advice. It never places trades, connects to brokers or banks, or handles API keys. Where the answer depends on your circumstances, it shows labelled scenarios and says what would change the answer.
 - **QA** re-runs the tests and the main script, spot-checks a headline number independently, looks for look-ahead, reads the report for missing assumptions or guaranteed-return language, and checks the charts.
 
+### Books and PDFs as a source
+
+The Quant Advisor and QA can search and read the PDFs in a project's `media/` folder, such as your own copies of textbooks and papers.
+
+- **`search_library`** finds the best-matching pages, giving the book, PDF page, printed page number, section and a snippet.
+- **`read_pdf`** reads up to 20 pages as text, or up to 4 as images (for exact equations, tables and scanned books). Without a page range, it returns the table of contents.
+- **Citations:** agents cite formulas as `[Short title, p. <printed page>]`, and QA checks some of the citations against the pages.
+- **The index** is built from each PDF's text layer and stored in `.ai/library/`, which is git-ignored because it contains the books' text. It takes about 40 seconds for 10,000 pages and updates when a PDF changes. The first search builds it, or you can build it ahead of time with `npm run library -- <project>`, and add search words to try a search.
+- **Scanned books** have no text layer, so they can't be searched. Agents read their pages as images instead.
+- **Privacy:** agents may quote a formula or a sentence with its citation, but never copy pages or convert whole books. Nothing from the books is committed.
+
+### Guard rails on agents' commands
+
+Agents' commands run at below-normal priority, so the PC stays responsive. Each command is stopped after 60 seconds, or when you press Stop, together with every process it started.
+
+Commands that detach a process (`Start-Process`, `start`, WMI, `nohup`, a trailing `&`) are refused. So is installing heavy machine-learning packages (`torch`, `tensorflow`, `marker-pdf`, `docling`, `transformers`...) or downloading models. An agent that needs them has to ask in its report.
+
 `team.json` sets each member's name and Claude model (`opus`, `sonnet`, or a full model ID), plus the maximum number of dev/QA rounds.
 
 ## Git
