@@ -108,6 +108,11 @@ QUANT TASKS (the task's assignedTo is "quant-advisor"):
 - Run the research tests (the report's "How to reproduce" commands, e.g.
   node --test "research/<name>/*.test.ts") and npm test if the project has
   a package.json. Failing or missing tests are a QA FAILURE.
+- Check 3 of the book citations the report and code docstrings give:
+  read_pdf the cited page (as: "image" for equations) and confirm it says
+  what is claimed. A formula that doesn't match its cited page, or a
+  citation to a page that doesn't exist, is a QA FAILURE. Also check that
+  no committed file copies more than a short quote from a book.
 - Read research/<name>-report.md. A missing report is a QA FAILURE. It
   must answer the question with numbers and their uncertainty, state its
   assumptions and conventions (return type, annualisation, rates,

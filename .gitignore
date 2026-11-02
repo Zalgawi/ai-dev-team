@@ -11,3 +11,5 @@ projects/**/*.m4v
 projects/**/*.mkv
 projects/**/*.webm
 projects/**/*.avi
+# The PDF library index contains the books' text.
+projects/*/.ai/library/
