@@ -1,0 +1,159 @@
+{
+  "id": "TASK-001",
+  "title": "Ingest Wilmott's \"Paul Wilmott on Quantitative Finance\" into the private library and implement foundational pricing models",
+  "description": "Turn the Wilmott book into a searchable, citable, private library, and turn its core Volume 1 pricing models into tested code.\n\nSource: use the attached media/paul-wilmott-on-quantitative-finance.pdf. Only the Wilmott book is in scope. Ignore the other attached PDFs. The PRD names the FinMathematics GitHub repo (https://github.com/PlamenStilyianov/FinMathematics). If the Wilmott PDF is also in that repo, check that it is the same edition, and note any difference in the report. Network access is allowed only for cloning that repo and installing Python packages.\n\nPrivacy: the library is private. library/ and media/ must be git-ignored. No PDFs or converted text may be committed or pushed to any public repo.\n\nPart A, whole book (tasks 1-3):\n1. Convert the book to Markdown with marker, using docling as a fallback and OCR for any scanned pages. Write one file per chapter at library/wilmott-pwoqf/<vol>-<chapter-number>-<slug>.md. Keep equations as LaTeX and keep tables. Record figure captions with their page numbers.\n2. QA the conversion. Pick 15 equations at random (fixed seed, recorded) and compare each to the original PDF page. Log every error, garbled page or missing section in library/wilmott-pwoqf/CONVERSION_LOG.md. Fix what can be fixed and flag the rest.\n3. Build library/wilmott-pwoqf/INDEX.md. For each chapter it lists the volume, chapter number, title, page range, topics and key models, prerequisite chapters, and one desk-relevance tag: PRICING / RISK / NUMERICAL METHODS / INTEREST RATES / VOLATILITY / PORTFOLIO / OTHER.\n\nPart B, Volume 1 only (tasks 4-6):\n4. Build library/wilmott-pwoqf/FORMULAS.md. Each key formula has a name, LaTeX, variable definitions, assumptions, and a citation in the form [PWOQF, Vol X, Ch. Y, §Z, p. N].\n5. Build library/wilmott-pwoqf/EXAMPLES.md. It records every numerical example in Volume 1 with its inputs, method and the answer as stated in the book. These become known-answer tests.\n6. Implement the foundational models that INDEX.md marks as foundational, in Python under toolkit/pricing/. At minimum these are the Black-Scholes closed form with Greeks and binomial trees. Write unit tests in tests/ that reproduce the book's worked examples within a stated tolerance. Every function's docstring cites the chapter and formula it implements.\n\nRules:\n- Never write a formula from memory. Every formula comes from the converted text and carries its citation.\n- If the text is ambiguous or the conversion is unreliable for a formula, mark it UNVERIFIED and check it against the PDF page before using it. Do not implement or test it until it is verified.\n- If Volume 1 has no worked numerical example for a model, say so in EXAMPLES.md and the report. Cross-check that model against an independent method (e.g. put-call parity, or binomial convergence to Black-Scholes) and label the test as a consistency test, not a book known-answer test.\n- Per AGENTS.md, the project needs `npm test`. There is no package.json yet, so set one up. `npm test` must run the whole Python test suite (pytest), and it should fail with a clear message if Python or pytest is missing. Add a requirements file for the Python dependencies.\n\nCHECKPOINT: Part A covers the whole book and Part B covers Volume 1 only. After Part B, stop and write the report. Do not start Volumes 2-3.\n\nFinal report: research/wilmott-ingest/report.md summarises what was ingested and the edition, conversion problems, test results, and recommended next tickets (Volumes 2-3, and which chapters matter most for assessing investments). It also carries a note that this is research and education, not personal financial advice.",
+  "status": "stopped",
+  "assignedTo": "quant-advisor",
+  "priority": "high",
+  "request": "TICKET 001: Ingest \"Paul Wilmott on Quantitative Finance\" into the library\n\nGOAL: Make the Wilmott book a fully searchable, citable source of truth for the desk, and turn its core pricing models into tested code.\n\nTASKS\nConvert\nClone the repo. Convert the book to Markdown with marker (docling as fallback; OCR for any scanned pages).\nSave one file per chapter: library/wilmott-pwoqf/<vol>-<chapter-number>-<slug>.md\nKeep equations as LaTeX. Keep tables, and record figure captions with their page numbers.\nQuality-check the conversion\nPick 15 equations at random and compare each against the original PDF page.\nLog every error, garbled page, or missing section in library/wilmott-pwoqf/CONVERSION_LOG.md.\nFix what you can. Flag what you can't.\nBuild the index: library/wilmott-pwoqf/INDEX.md. For each chapter, list:\nvolume, chapter number, title, page range\ntopics covered and key models introduced\nprerequisite chapters\ndesk relevance tag: PRICING / RISK / NUMERICAL METHODS / INTEREST RATES / VOLATILITY / PORTFOLIO / OTHER\nBuild the formula catalogue: library/wilmott-pwoqf/FORMULAS.md. For every key formula, record:\nname and LaTeX\nvariable definitions\nassumptions\ncitation as [PWOQF, Vol X, Ch. Y, §Z, p. N]\nBuild the worked-examples register: library/wilmott-pwoqf/EXAMPLES.md\nRecord every numerical example in the book: inputs, method, and the answer as stated.\nThese become known-answer tests.\nImplement the foundations\nCode the core pricing models the index marks as foundational (for example, Black-Scholes closed form and Greeks, binomial trees) in toolkit/pricing/.\nWrite unit tests in tests/ that reproduce the book's worked examples within a stated tolerance.\nEvery function's docstring cites the chapter and formula it implements.\n\nRULES\nNever write a formula from memory. Every formula comes from the converted text and carries its citation.\nIf the text is ambiguous, or the conversion is unreliable for a formula, mark it UNVERIFIED and check it against the PDF page before using it.\nThe library stays private. Do not push the PDFs or converted text to any public repo.\nNetwork access is only for cloning this repo and installing Python packages.\n\nCHECKPOINT\nComplete tasks 1–3 for the whole book.\nComplete tasks 4–6 for Volume 1 only. Then stop and report before continuing.\n\nDONE WHEN\nAll chapters are converted and indexed, and CONVERSION_LOG.md is written.\nFORMULAS.md and EXAMPLES.md are complete for Volume 1.\nThe foundational models pass all known-answer tests.\nresearch/wilmott-ingest/report.md summarises:\nwhat was ingested, and the edition\nconversion problems\ntest results\nrecommended next tickets (Volumes 2–3, and which chapters matter most for assessing investments)",
+  "media": [
+    {
+      "file": "media/basics-of-financial-mathematics.pdf",
+      "kind": "pdf"
+    },
+    {
+      "file": "media/binomial-models-in-finance.pdf",
+      "kind": "pdf"
+    },
+    {
+      "file": "media/bayesian-methods-in-finance.pdf",
+      "kind": "pdf"
+    },
+    {
+      "file": "media/applied-quantitative-finance.pdf",
+      "kind": "pdf"
+    },
+    {
+      "file": "media/computational-finance-numerical-methods.pdf",
+      "kind": "pdf"
+    },
+    {
+      "file": "media/copula-methods-in-finance.pdf",
+      "kind": "pdf"
+    },
+    {
+      "file": "media/financial-econometrics-modeling-derivatives-pricing.pdf",
+      "kind": "pdf"
+    },
+    {
+      "file": "media/financial-mathematics.pdf",
+      "kind": "pdf"
+    },
+    {
+      "file": "media/arbitrage-theory-in-continuous-time-bjoerk.pdf",
+      "kind": "pdf"
+    },
+    {
+      "file": "media/financial-calculus-an-introduction-to-derivative-pricing-bax.pdf",
+      "kind": "pdf"
+    },
+    {
+      "file": "media/from-stochastic-calculus-to-mathematical-finance-kabanov.pdf",
+      "kind": "pdf"
+    },
+    {
+      "file": "media/mathematical-economics-and-finance-harrison-waldron.pdf",
+      "kind": "pdf"
+    },
+    {
+      "file": "media/financial-enginneering-computation-principles-mathematics-al.pdf",
+      "kind": "pdf"
+    },
+    {
+      "file": "media/introduction-to-computational-finance-without-agonizing-pain.pdf",
+      "kind": "pdf"
+    },
+    {
+      "file": "media/inside-volatility-arbitrage-javaheri.pdf",
+      "kind": "pdf"
+    },
+    {
+      "file": "media/mathematics-for-finance-an-introduction-to-financial-enginee.pdf",
+      "kind": "pdf"
+    },
+    {
+      "file": "media/introduction-to-quantitative-finance.pdf",
+      "kind": "pdf"
+    },
+    {
+      "file": "media/mathematics-of-financial-markets-elliot.pdf",
+      "kind": "pdf"
+    },
+    {
+      "file": "media/mathematical-finance-fries.pdf",
+      "kind": "pdf"
+    },
+    {
+      "file": "media/nonlinear-optimization-with-financial-applications.pdf",
+      "kind": "pdf"
+    },
+    {
+      "file": "media/neural-networks-in-finance-gaining-predictive-edge-in-the-ma.pdf",
+      "kind": "pdf"
+    },
+    {
+      "file": "media/introduction-to-mathematical-finance-ross.pdf",
+      "kind": "pdf"
+    },
+    {
+      "file": "media/martingale-methods-in-financial-modelling-musiela.pdf",
+      "kind": "pdf"
+    },
+    {
+      "file": "media/optimal-control-models-in-finance-a-new-computational-approa.pdf",
+      "kind": "pdf"
+    },
+    {
+      "file": "media/monte-carlo-methods-in-finance-jackel.pdf",
+      "kind": "pdf"
+    },
+    {
+      "file": "media/structured-finance-the-object-oriented-approach.pdf",
+      "kind": "pdf"
+    },
+    {
+      "file": "media/quantitative-finance-for-physicists-an-introduction.pdf",
+      "kind": "pdf"
+    },
+    {
+      "file": "media/paul-wilmott-on-quantitative-finance.pdf",
+      "kind": "pdf"
+    },
+    {
+      "file": "media/the-mathematics-of-financial-derivatives.pdf",
+      "kind": "pdf"
+    },
+    {
+      "file": "media/the-mathematics-of-financial-modelling-fabozzi.pdf",
+      "kind": "pdf"
+    },
+    {
+      "file": "media/numerical-methods-in-finance-and-economics-a-matlab-based-in.pdf",
+      "kind": "pdf"
+    },
+    {
+      "file": "media/quantitative-trading.pdf",
+      "kind": "pdf"
+    },
+    {
+      "file": "media/methods-of-mathematical-finance-karatzas-shreve.pdf",
+      "kind": "pdf"
+    }
+  ],
+  "acceptanceCriteria": [
+    "The converted book is in library/wilmott-pwoqf/, one Markdown file per chapter named <vol>-<chapter-number>-<slug>.md. Every chapter of all volumes is present, and no chapter in the PDF's table of contents is missing.",
+    "Equations in the chapter files are LaTeX. Tables are kept as Markdown tables. Figure captions are recorded with their page numbers. The conversion tool used (marker, or docling as fallback) and any OCR use are stated in CONVERSION_LOG.md.",
+    "library/wilmott-pwoqf/CONVERSION_LOG.md exists. It lists the 15 randomly chosen equations (with the seed), each with chapter, PDF page, the converted LaTeX, and a match / mismatch verdict. It also lists every error, garbled page and missing section found, each marked fixed or flagged (unfixable), and gives a mismatch count and error rate for the sample.",
+    "Every error in the log marked 'fixed' is actually fixed in the chapter files. Anything unfixable is flagged, and the affected formulas are marked UNVERIFIED.",
+    "library/wilmott-pwoqf/INDEX.md has an entry for every chapter in all volumes. Each entry has volume, chapter number, title, page range, topics and key models, prerequisite chapters, and exactly one desk-relevance tag from PRICING / RISK / NUMERICAL METHODS / INTEREST RATES / VOLATILITY / PORTFOLIO / OTHER. Page ranges match the PDF. QA spot-checks at least 5 chapters.",
+    "library/wilmott-pwoqf/FORMULAS.md covers the key formulas of every Volume 1 chapter. Each entry has a name, LaTeX, variable definitions, assumptions, and a citation in the exact form [PWOQF, Vol X, Ch. Y, §Z, p. N]. QA spot-checks 10 entries against the PDF page numbers cited. Any formula whose conversion is doubtful is marked UNVERIFIED, then verified against the PDF and updated.",
+    "library/wilmott-pwoqf/EXAMPLES.md records every numerical example in Volume 1 with its inputs, method, the answer as stated in the book, and a page citation. Each example is marked as covered by a test, or gives a reason it is not.",
+    "The foundational models are implemented in toolkit/pricing/. At minimum: Black-Scholes closed-form price for calls and puts with Delta, Gamma, Vega, Theta and Rho, and a binomial tree pricer. Which other models count as foundational is decided from INDEX.md. Anything added beyond the minimum is cited in the report.",
+    "Every public function in toolkit/pricing/ has a docstring with its chapter and formula citation in the [PWOQF, Vol X, Ch. Y, §Z, p. N] format. It also states the assumptions and units. No implemented formula is marked UNVERIFIED.",
+    "Unit tests in tests/ reproduce the book's worked examples within a stated tolerance, with the tolerance written in each test. Tests also include sanity checks: put-call parity, Greeks against finite differences, and binomial convergence to Black-Scholes. Tests cover invalid inputs (negative volatility or time, zero price).",
+    "`npm test` exists (package.json added) and runs the full test suite. It passes, with all known-answer tests green. Python dependencies are listed in a requirements file.",
+    "library/ and media/ are git-ignored. `git status` and the git history show no PDFs or converted book text committed, and nothing is pushed to any remote.",
+    "research/wilmott-ingest/report.md exists and covers: what was ingested and the edition (title, authors, edition or year, volume and chapter counts); conversion problems and their status; test results (number of tests and known-answer tests, and their pass or fail status); recommended next tickets (Volumes 2-3, and which chapters matter most for assessing investments, with reasons). It also has a not-personal-advice note and a limitations section. It states that work stopped at the checkpoint with Volume 1 only done for tasks 4-6.",
+    "No work is done on Volumes 2-3 formulas, examples or code, and nothing outside the stated scope is added. Existing project files (PRD.md, AGENTS.md) are not broken."
+  ]
+}

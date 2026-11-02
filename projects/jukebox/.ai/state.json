@@ -1,0 +1,27 @@
+{
+  "project": "jukebox",
+  "phase": "stopped",
+  "iteration": 3,
+  "status": "stopped",
+  "currentTask": "TASK-001",
+  "agents": {
+    "manager": "idle",
+    "developer": "idle",
+    "qa": "idle"
+  },
+  "qa": {
+    "status": "failed",
+    "issues": [
+      "No chapter files exist, so the criterion that every chapter is converted into `library/wilmott-pwoqf/<vol>-<ch>-<slug>.md` is not met.",
+      "`CONVERSION_LOG.md` is missing. That means there is no 15-equation sample, seed, error rate, or statement of the tool and OCR used.",
+      "`INDEX.md` is missing, so there are no page ranges, topics, prerequisites or desk tags to spot-check.",
+      "`FORMULAS.md` and `EXAMPLES.md` are missing. The code cannot be traced to cited formulas, and the \"no formula from memory\" rule can't be checked.",
+      "`research/wilmott-ingest/report.md` is missing. It was meant to cover the edition, conversion problems, test results, next tickets, the not-advice note, limitations, and the stop at the checkpoint.",
+      "`npm test` exited with code 1 and printed no pytest summary through `node scripts/run-pytest.mjs`. Running that script directly printed only progress dots and also exited 1, so at least one test failed. The failure can't be diagnosed without a summary, and the known-answer tests can't tie back to `EXAMPLES.md`.",
+      "`tests/` has no known-answer test file tied to book examples, and the `EXAMPLES.md` they would come from doesn't exist.",
+      "Only `Black-Scholes` and `binomial` were found. I did not review their docstrings for the required `[PWOQF, Vol X, Ch. Y, §Z, p. N]` citations.",
+      "Nothing is committed (`git status` shows `?? ./`), though the `.gitignore` entries for `library/` and `media/` are in place.",
+      "Note: `npm` warns that Node v24.18.0 is unsupported by the installed npm. This is an environment warning only."
+    ]
+  }
+}

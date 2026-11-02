@@ -1,0 +1,10 @@
+# Runtime and test dependencies (all lightweight; no machine-learning packages).
+# Install into the project's venv:  .venv\Scripts\python.exe -m pip install -r requirements.txt
+numpy>=1.26
+pandas>=2.2
+scipy>=1.11
+httpx>=0.27
+yfinance>=0.2.50
+fastapi>=0.110
+uvicorn>=0.29
+pytest>=7.0
